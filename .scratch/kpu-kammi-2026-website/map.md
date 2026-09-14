@@ -21,6 +21,7 @@ Spesifikasi implementasi minimum yang telah disetujui untuk website KPU KAMMI 20
 - [Model Operasi dan Kebijakan Pendaftaran](issues/02-model-operasi-dan-kebijakan-pendaftaran.md): operasi mengikuti jendela pendaftaran dan perbaikan WIB; aplikasi mengelola akun, sepuluh kelompok unggahan, serta kelengkapan berbasis keberadaan saja.
 - [Identitas Keamanan dan Siklus Data](issues/03-identitas-keamanan-dan-siklus-data.md): registrasi email/kata sandi terbuka di atas Better Auth dengan D1 native dan Turnstile; satu kredensial Admin bersama, reset kata sandi oleh Admin, R2 privat dengan unduhan attachment, persetujuan eksplisit PP KAMMI, audit `Admin bersama`, dan retensi 90 hari setelah penutupan proses.
 - [Blueprint Pengalaman Tiga Peran](issues/04-blueprint-tiga-peran.md): verdict manusia memilih Varian A, blueprint berbasis halaman, dengan sitemap tetap untuk Publik, Bakal Calon Ketua Umum, dan Admin, batas implementasi, serta acceptance checklist 25 butir.
+- [Skema Data dan Kontrak Penyimpanan](issues/05-skema-data-dan-kontrak-penyimpanan.md): DDL D1 satu migrasi (tabel Better Auth + `profil`, `berkas`, `audit`, `percobaanLogin`, view `vKelengkapan`); tahap dari jam server, kelengkapan dihitung, berkas dihapus keras, kunci R2 `berkas/<UUIDv4>`, SHA-256 saat unggah.
 
 ## Not yet specified
 
