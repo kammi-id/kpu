@@ -69,5 +69,33 @@ Permintaan Bakal Calon Ketua Umum untuk menghentikan pemrosesan datanya. Akun la
 _Avoid_: mengundurkan diri, gugur, hapus akun instan
 
 **Masa Retensi**:
-Jangka 90 hari sejak penutupan resmi proses penjaringan, ketika data masih disimpan untuk serah-terima dan penyelesaian sengketa. Setelahnya data pribadi di D1 dan objek R2 dihapus, dan penghapusan dinyatakan tuntas setelah jendela pemulihan otomatis D1 berakhir.
+Jangka 90 hari sejak penutupan resmi proses penjaringan pada 27 Oktober 2026, ketika data masih disimpan dan dapat diekspor. Masa ini berakhir dengan Penghapusan Akhir pada 25 Januari 2027.
 _Avoid_: arsip permanen, backup jangka panjang
+
+**Penghapusan Akhir**:
+Penghapusan otomatis seluruh data dan berkas aplikasi pada 25 Januari 2027 pukul 00.00 WIB, tanpa konfirmasi serah-terima atau sengketa. Satu-satunya yang tersisa adalah catatan non-pribadi berisi jumlah yang dihapus; penghapusan dinyatakan tuntas setelah jendela pemulihan otomatis platform berakhir pada 24 Februari 2027.
+_Avoid_: arsip, penghapusan manual, penutupan akun
+
+**Tahap Selesai**:
+Keadaan aplikasi sejak Penghapusan Akhir, ketika situs hanya menyatakan bahwa proses penjaringan telah selesai dan datanya telah dihapus.
+_Avoid_: Terkunci, masa tenang
+
+**Ekspor Harian**:
+Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pukul 00.00 WIB dan menggantikan paket hari sebelumnya. Admin mengunduh paket terakhir; tidak ada pembuatan paket sesuai permintaan.
+_Avoid_: backup, arsip serah-terima terenkripsi
+
+**Snapshot Pemeriksaan**:
+Salinan Ekspor Harian 5 Oktober 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi.
+_Avoid_: hasil verifikasi, berkas sah
+
+**Peraturan**:
+Satu dokumen ringkasan PKPU yang ditulis dan diperbarui Admin untuk halaman publik, beserta Berkas Publik kategori peraturan. Dokumen ini bukan kanal pengumuman resmi dan tidak mengubah jadwal resmi.
+_Avoid_: pengumuman, berita, jadwal
+
+**Berkas Publik**:
+Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKPU dan Formulir A.1 sampai A.6. Berkas ini tidak pernah memuat data Bakal Calon Ketua Umum.
+_Avoid_: berkas Bakal Calon, lampiran pendaftaran
+
+**Onboarding Admin**:
+Pembuatan satu-satunya akun Admin bersama melalui halaman bertoken rahasia yang hanya terbuka selama akun Admin belum ada. Onboarding ulang adalah satu-satunya jalan pemulihan akses Admin.
+_Avoid_: registrasi Admin, reset kata sandi Admin
