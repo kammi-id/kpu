@@ -15,14 +15,20 @@ Rujukan: [spec](../spec.md) bagian Autentikasi dan sesi, Onboarding Admin, dan A
 
 **Blocked by:** 07
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `/onboard` menolak token salah, menolak bila `ONBOARD_TOKEN` tidak terpasang, dan menjawab 404 bila Admin sudah ada. Dua onboarding bersamaan hanya menghasilkan satu Admin, dan pelanggaran indeks tidak menjadi 500 (acceptance 26).
-- [ ] Token dibandingkan secara aman terhadap timing.
-- [ ] Tanpa `BETTER_AUTH_SECRET`, `HMAC_SECRET`, atau `TURNSTILE_SECRET_KEY`, endpoint autentikasi dan onboarding menjawab galat tertutup (checklist tiket 06 C12).
-- [ ] Endpoint HTTP Better Auth di luar registrasi, login, keluar, dan sesi menjawab 404, termasuk pembuatan user, set-role, impersonasi, `update-user`, `change-email`, dan `change-password`.
-- [ ] Sesi Admin ditolak setelah 30 menit tidak aktif atau 8 jam absolut. Login keenam mencabut sesi tertua.
-- [ ] Tanpa sesi, API Admin menolak dan klien `/admin` mengarahkan ke `/masuk`.
-- [ ] Audit mencatat `onboarding_admin` dan login berhasil/gagal dengan aktor `Admin bersama` atau `Anonim`, beserta `sesiId` dan waktu, tanpa email atau nama (acceptance 25, sebagian).
-- [ ] `/admin/audit` menampilkan waktu, aktor, tindakan, sasaran, dan hasil, terbaru lebih dulu dengan halaman sederhana.
-- [ ] Seluruh butir di atas diuji lewat seam Worker.
+- [x] `/onboard` menolak token salah, menolak bila `ONBOARD_TOKEN` tidak terpasang, dan menjawab 404 bila Admin sudah ada. Dua onboarding bersamaan hanya menghasilkan satu Admin, dan pelanggaran indeks tidak menjadi 500 (acceptance 26).
+- [x] Token dibandingkan secara aman terhadap timing.
+- [x] Tanpa `BETTER_AUTH_SECRET`, `HMAC_SECRET`, atau `TURNSTILE_SECRET_KEY`, endpoint autentikasi dan onboarding menjawab galat tertutup (checklist tiket 06 C12).
+- [x] Endpoint HTTP Better Auth di luar registrasi, login, keluar, dan sesi menjawab 404, termasuk pembuatan user, set-role, impersonasi, `update-user`, `change-email`, dan `change-password`.
+- [x] Sesi Admin ditolak setelah 30 menit tidak aktif atau 8 jam absolut. Login keenam mencabut sesi tertua.
+- [x] Tanpa sesi, API Admin menolak dan klien `/admin` mengarahkan ke `/masuk`.
+- [x] Audit mencatat `onboarding_admin` dan login berhasil/gagal dengan aktor `Admin bersama` atau `Anonim`, beserta `sesiId` dan waktu, tanpa email atau nama (acceptance 25, sebagian).
+- [x] `/admin/audit` menampilkan waktu, aktor, tindakan, sasaran, dan hasil, terbaru lebih dulu dengan halaman sederhana.
+- [x] Seluruh butir di atas diuji lewat seam Worker.
+
+## Comments
+
+- Better Auth 1.7.4 uses native D1 with only the required HTTP endpoints exposed; the Worker serves `/onboard` before an Admin exists and returns 404 afterwards.
+- Verification: `npm run cf-typegen`, `npm test`, `npm run lint`, `npm run build`, and `npm run check` pass. Lint retains five pre-existing fast-refresh/generated-file warnings.
+- Review follow-up: session expiration now applies to `/api/auth/get-session`; login and Admin API close at tahap `Selesai`; Admin uses its dedicated white shell with footer; audit columns follow the documented label treatment.
