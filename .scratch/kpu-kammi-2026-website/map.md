@@ -20,11 +20,11 @@ Spesifikasi implementasi minimum yang telah disetujui untuk website KPU KAMMI 20
 - [Baseline Regulasi dan Batas Platform](issues/01-baseline-regulasi-dan-platform.md): DOCX normatif, konflik kalender dan jalur rekomendasi wajib diputuskan KPU; D1 untuk data/metadata dan R2 privat untuk berkas adalah baseline teknis.
 - [Model Operasi dan Kebijakan Pendaftaran](issues/02-model-operasi-dan-kebijakan-pendaftaran.md): operasi mengikuti jendela pendaftaran dan perbaikan WIB; aplikasi mengelola akun, sepuluh kelompok unggahan, serta kelengkapan berbasis keberadaan saja.
 - [Identitas Keamanan dan Siklus Data](issues/03-identitas-keamanan-dan-siklus-data.md): registrasi email/kata sandi terbuka di atas Better Auth dengan D1 native dan Turnstile; satu kredensial Admin bersama, reset kata sandi oleh Admin, R2 privat dengan unduhan attachment, persetujuan eksplisit PP KAMMI, audit `Admin bersama`, dan retensi 90 hari setelah penutupan proses.
+- [Blueprint Pengalaman Tiga Peran](issues/04-blueprint-tiga-peran.md): verdict manusia memilih Varian A, blueprint berbasis halaman, dengan sitemap tetap untuk Publik, Bakal Calon Ketua Umum, dan Admin, batas implementasi, serta acceptance checklist 25 butir.
 
 ## Not yet specified
 
-- Skema field D1, metadata objek R2, dan transisi status rinci setelah kebijakan operasional serta perlindungan data diputuskan.
-- Checklist serah-terima, deployment, ekspor, dan penghentian layanan setelah blueprint tiga peran tervalidasi.
+<!-- kosong: kedua kabut sebelumnya sudah menjadi tiket 05 dan 06 -->
 
 ## Out of scope
 
