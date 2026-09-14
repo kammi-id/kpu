@@ -5,8 +5,8 @@ Konteks ini menjelaskan bahasa resmi proses penjaringan Calon Ketua Umum PP KAMM
 ## Language
 
 **Komisi Penjaringan Umum Muktamar (KPU)**:
-Badan penyelenggara teknis yang mengelola tahapan penjaringan, verifikasi, dan penetapan Calon Ketua Umum PP KAMMI.
-_Avoid_: panitia pemilu, KPU nasional
+Badan internal Muktamar KAMMI yang mengelola tahapan penjaringan, verifikasi, dan penetapan Calon Ketua Umum PP KAMMI. Tidak memiliki hubungan atau afiliasi dengan KPU RI dan tidak menyelenggarakan pemilihan umum nasional.
+_Avoid_: panitia pemilu, KPU RI, KPU nasional, pemilihan umum nasional
 
 **Bakal Calon Ketua Umum (Bacalon)**:
 Anggota Biasa III KAMMI yang telah membuat akun aplikasi KPU tetapi belum dinyatakan memenuhi seluruh persyaratan administrasi dan kualifikasi. Status operasional ini tidak berarti identitas, keanggotaan, atau berkasnya telah dinyatakan sah oleh KPU.
@@ -51,3 +51,23 @@ _Avoid_: DM 3, anggota senior
 **Muktamar**:
 Permusyawaratan tertinggi KAMMI yang antara lain berwenang memilih dan menetapkan Ketua Umum PP KAMMI.
 _Avoid_: pemilu daring, rapat KPU
+
+**Admin bersama**:
+Satu akun Admin tunggal yang kredensialnya dipakai bersama oleh beberapa anggota KPU. Audit mencatat aktor sebagai `Admin bersama` beserta sesi dan waktu, dan tidak pernah mengklaim atribusi kepada individu tertentu.
+_Avoid_: akun operator, multi-admin, role matrix
+
+**Pengendali Data Pribadi**:
+PP KAMMI melalui Komisi Penjaringan Umum Muktamar XIV KAMMI 2026, sebagai pihak yang menentukan tujuan dan mengendalikan pemrosesan data Bakal Calon Ketua Umum. Cloudflare hanya penyedia infrastruktur dan bukan pengendali.
+_Avoid_: admin sistem, Cloudflare, penyelenggara negara
+
+**Persetujuan Pemrosesan Data**:
+Persetujuan eksplisit yang diberikan saat registrasi melalui checkbox yang tidak tercentang otomatis. Sistem merekam versi pemberitahuan, waktu, dan akun pemberi persetujuan.
+_Avoid_: syarat dan ketentuan, persetujuan implisit
+
+**Permintaan Penutupan Akun dan Penarikan Persetujuan**:
+Permintaan Bakal Calon Ketua Umum untuk menghentikan pemrosesan datanya. Akun langsung dikunci dan Admin memproses penghentian atau penghapusan paling lambat 3×24 jam. Permintaan ini tidak menetapkan status hukum pencalonan apa pun.
+_Avoid_: mengundurkan diri, gugur, hapus akun instan
+
+**Masa Retensi**:
+Jangka 90 hari sejak penutupan resmi proses penjaringan, ketika data masih disimpan untuk serah-terima dan penyelesaian sengketa. Setelahnya data pribadi di D1 dan objek R2 dihapus, dan penghapusan dinyatakan tuntas setelah jendela pemulihan otomatis D1 berakhir.
+_Avoid_: arsip permanen, backup jangka panjang

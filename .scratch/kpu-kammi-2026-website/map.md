@@ -11,6 +11,7 @@ Spesifikasi implementasi minimum yang telah disetujui untuk website KPU KAMMI 20
 - Ini peta perencanaan. Jangan menulis fitur produksi sampai seluruh tiket keputusan selesai.
 - Peraturan dalam `PKPU Muktamar KAMMI 2026.docx` adalah sumber normatif utama. `PKPU Muktamar KAMMI 2026.pptx` hanya sumber penjelas. Setiap perbedaan wajib dicatat dan diputuskan KPU, bukan diselesaikan dengan asumsi teknis.
 - Preferensi tetap: jumlah tiket minimum, solusi paling sederhana yang aman untuk masa operasi singkat, satu akun Admin, registrasi Bakal Calon, Cloudflare Workers dengan D1 dan R2.
+- `KPU` hanya berarti Komisi Penjaringan Umum Muktamar KAMMI. Produk tidak memiliki hubungan dengan KPU RI dan tidak boleh memuat referensi, identitas, fungsi, atau istilah pemilihan umum nasional.
 - Repo saat ini memakai React 19, Vite 7, Hono, Workers Static Assets, dan Wrangler 4. Bindings D1 dan R2 belum dikonfigurasi.
 - Setiap sesi keputusan memakai `grilling` dan `domain-modeling`. Sesi Cloudflare juga memakai `cloudflare`, `workers-best-practices`, dan `wrangler` serta dokumentasi resmi terkini. Sesi prototipe memakai `prototype`, `impeccable`, dan `shadcn`.
 
@@ -18,6 +19,7 @@ Spesifikasi implementasi minimum yang telah disetujui untuk website KPU KAMMI 20
 
 - [Baseline Regulasi dan Batas Platform](issues/01-baseline-regulasi-dan-platform.md): DOCX normatif, konflik kalender dan jalur rekomendasi wajib diputuskan KPU; D1 untuk data/metadata dan R2 privat untuk berkas adalah baseline teknis.
 - [Model Operasi dan Kebijakan Pendaftaran](issues/02-model-operasi-dan-kebijakan-pendaftaran.md): operasi mengikuti jendela pendaftaran dan perbaikan WIB; aplikasi mengelola akun, sepuluh kelompok unggahan, serta kelengkapan berbasis keberadaan saja.
+- [Identitas Keamanan dan Siklus Data](issues/03-identitas-keamanan-dan-siklus-data.md): registrasi email/kata sandi terbuka di atas Better Auth dengan D1 native dan Turnstile; satu kredensial Admin bersama, reset kata sandi oleh Admin, R2 privat dengan unduhan attachment, persetujuan eksplisit PP KAMMI, audit `Admin bersama`, dan retensi 90 hari setelah penutupan proses.
 
 ## Not yet specified
 
