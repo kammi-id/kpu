@@ -22,10 +22,11 @@ Spesifikasi implementasi minimum yang telah disetujui untuk website KPU KAMMI 20
 - [Identitas Keamanan dan Siklus Data](issues/03-identitas-keamanan-dan-siklus-data.md): registrasi email/kata sandi terbuka di atas Better Auth dengan D1 native dan Turnstile; satu kredensial Admin bersama, reset kata sandi oleh Admin, R2 privat dengan unduhan attachment, persetujuan eksplisit PP KAMMI, audit `Admin bersama`, dan retensi 90 hari setelah penutupan proses.
 - [Blueprint Pengalaman Tiga Peran](issues/04-blueprint-tiga-peran.md): verdict manusia memilih Varian A, blueprint berbasis halaman, dengan sitemap tetap untuk Publik, Bakal Calon Ketua Umum, dan Admin, batas implementasi, serta acceptance checklist 25 butir.
 - [Skema Data dan Kontrak Penyimpanan](issues/05-skema-data-dan-kontrak-penyimpanan.md): DDL D1 satu migrasi (tabel Better Auth + `profil`, `berkas`, `audit`, `percobaanLogin`, view `vKelengkapan`); tahap dari jam server, kelengkapan dihitung, berkas dihapus keras, kunci R2 `berkas/<UUIDv4>`, SHA-256 saat unggah.
+- [Batas Operasional: Peluncuran, Serah-Terima, dan Penghentian](issues/06-batas-operasional-peluncuran-dan-penghentian.md): akun Cloudflare pemegang zona `kammi.id` dengan Workers Paid dan Custom Domain `kpu.kammi.id`; seluruh fitur hidup 17 September 00.00 WIB; Peraturan Markdown dan Berkas Publik dikelola Admin, `/tentang` statik; onboarding Admin bertoken; ekspor harian dan Snapshot Pemeriksaan di R2; Penghapusan Akhir otomatis 25 Januari 2027 lalu pembongkaran setelah 24 Februari 2027. Mengamandemen tiket 02–05.
 
 ## Not yet specified
 
-<!-- kosong: kedua kabut sebelumnya sudah menjadi tiket 05 dan 06 -->
+<!-- kosong: seluruh tiket keputusan telah selesai -->
 
 ## Out of scope
 

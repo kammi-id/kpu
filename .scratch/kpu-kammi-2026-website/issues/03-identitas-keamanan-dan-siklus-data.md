@@ -136,3 +136,7 @@ Model identitas memakai **Better Auth** di atas Hono dan binding D1 native, tanp
 ### Catatan putaran 3 — 15 September 2026
 
 - Better Auth diadopsi sebagai inti autentikasi dengan native D1, plugin Admin, dan plugin Captcha; penyimpanan token sesi bawaannya diterima.
+
+### Amandemen — 15 September 2026
+
+Sebagian keputusan tiket ini diamandemen oleh [Batas Operasional: Peluncuran, Serah-Terima, dan Penghentian](06-batas-operasional-peluncuran-dan-penghentian.md), bagian "Amandemen tiket sebelumnya". Bila bertentangan, tiket tersebut yang berlaku.

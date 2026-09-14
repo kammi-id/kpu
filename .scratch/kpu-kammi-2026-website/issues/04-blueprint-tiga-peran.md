@@ -142,3 +142,7 @@ Admin
     mitigasi penyalahgunaan.
 25. Audit mencatat aktor `Admin bersama` beserta sesi dan waktu untuk setiap
     tindakan Admin, dan tidak mengklaim atribusi individu.
+
+### Amandemen — 15 September 2026
+
+Sebagian keputusan tiket ini diamandemen oleh [Batas Operasional: Peluncuran, Serah-Terima, dan Penghentian](06-batas-operasional-peluncuran-dan-penghentian.md), bagian "Amandemen tiket sebelumnya". Bila bertentangan, tiket tersebut yang berlaku.

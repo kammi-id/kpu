@@ -205,3 +205,7 @@ FROM (
 - Secret HMAC untuk `percobaanLogin` perlu disediakan bersama secret Better Auth dan kunci Turnstile.
 - Karena berkas dihapus keras, bukti keadaan saat Pemeriksaan hanya tersedia bila KPU mengambil ekspor pada 5–7 Oktober.
 - Pembuatan baris Admin (peran `admin`, tanpa WhatsApp) termasuk prosedur penyediaan.
+
+### Amandemen — 15 September 2026
+
+Sebagian keputusan tiket ini diamandemen oleh [Batas Operasional: Peluncuran, Serah-Terima, dan Penghentian](06-batas-operasional-peluncuran-dan-penghentian.md), bagian "Amandemen tiket sebelumnya". Bila bertentangan, tiket tersebut yang berlaku.
