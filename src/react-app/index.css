@@ -1,40 +1,59 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/roboto";
-@import "@fontsource-variable/merriweather";
+@import "@fontsource/lilita-one/latin-400.css";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tiga tinta Muktamar XIV: merah sebagai bidang, hijau untuk status terbuka, putih enamel untuk panel.
+   Navy hanya untuk teks; marun untuk footer dan tepi display. Nilai merah, hijau, dan navy diambil dari logo Muktamar XIV. */
 :root {
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	--background: oklch(0.975 0.007 160);
-	--foreground: oklch(0.25 0.06 265);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.25 0.06 265);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.25 0.06 265);
-	--primary: oklch(0.46 0.16 265);
-	--primary-foreground: oklch(0.98 0.01 100);
-	--secondary: oklch(0.92 0.09 95);
-	--secondary-foreground: oklch(0.27 0.05 265);
-	--muted: oklch(0.95 0.015 250);
-	--muted-foreground: oklch(0.5 0.04 260);
-	--accent: oklch(0.93 0.06 100);
-	--accent-foreground: oklch(0.25 0.06 265);
-	--destructive: oklch(0.58 0.22 28);
-	--border: oklch(0.79 0.025 250);
-	--input: oklch(0.92 0.02 250);
-	--ring: oklch(0.46 0.16 265);
-	--radius: 0.75rem;
+
+	--merah: #dc0a0a;
+	--merah-tua: #b00606;
+	--marun: #8a0b10;
+	--hijau: #056035;
+	--hijau-muda: #e6f2eb;
+	--navy: #06244c;
+
+	--background: #ffffff;
+	--foreground: var(--navy);
+	--card: #ffffff;
+	--card-foreground: var(--navy);
+	--popover: #ffffff;
+	--popover-foreground: var(--navy);
+	--primary: var(--merah);
+	--primary-foreground: #ffffff;
+	--secondary: var(--hijau);
+	--secondary-foreground: #ffffff;
+	--muted: #fbf3f2;
+	--muted-foreground: #4a5872;
+	--accent: #f8e7e6;
+	--accent-foreground: var(--marun);
+	--destructive: var(--merah-tua);
+	--border: #eedada;
+	--input: #e3c9c9;
+	--ring: var(--navy);
+	--radius: 0.875rem;
 }
 
 @theme inline {
-	--font-sans: 'Roboto Variable', sans-serif;
-	--font-heading: 'Merriweather Variable', serif;
+	--font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+	--font-display: "Lilita One", "Poppins", ui-sans-serif, sans-serif;
+	--color-merah: var(--merah);
+	--color-merah-tua: var(--merah-tua);
+	--color-marun: var(--marun);
+	--color-hijau: var(--hijau);
+	--color-hijau-muda: var(--hijau-muda);
+	--color-navy: var(--navy);
 	--color-ring: var(--ring);
 	--color-input: var(--input);
 	--color-border: var(--border);
@@ -53,41 +72,36 @@
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
-	--radius-sm: calc(var(--radius) * 0.6);
-	--radius-md: calc(var(--radius) * 0.8);
+	--radius-sm: calc(var(--radius) * 0.4);
+	--radius-md: calc(var(--radius) * 0.7);
 	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) * 1.4);
-	--radius-2xl: calc(var(--radius) * 1.8);
-	--radius-3xl: calc(var(--radius) * 2.2);
-	--radius-4xl: calc(var(--radius) * 2.6);
+	--radius-xl: calc(var(--radius) * 1.15);
+	--radius-2xl: calc(var(--radius) * 1.4);
+	--radius-3xl: calc(var(--radius) * 1.8);
+	--radius-4xl: calc(var(--radius) * 2.2);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+	* {
+		@apply border-border outline-ring/50;
 	}
-  body {
-    @apply bg-background text-foreground;
+	html {
+		@apply bg-marun font-sans [scrollbar-color:var(--merah)_var(--muted)];
 	}
-  button:not(:disabled), [role="button"]:not(:disabled) {
-    cursor: pointer;
+	body {
+		@apply min-h-svh min-w-[320px] bg-background text-foreground antialiased;
 	}
-  html {
-    @apply font-sans;
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		cursor: pointer;
 	}
-}
-
-html {
-	background: var(--background);
-}
-
-body {
-	min-width: 320px;
-	min-height: 100vh;
-	margin: 0;
-}
-
-::selection {
-	background: #e9bd18;
-	color: #142243;
+	::selection {
+		@apply bg-hijau text-white;
+	}
+	:where(a) {
+		@apply underline-offset-[0.2em];
+	}
+	:where(input, textarea) {
+		@apply caret-merah;
+	}
 }
