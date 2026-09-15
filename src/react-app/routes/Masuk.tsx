@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Turnstile } from "~/react-app/components/Turnstile";
 
 export function Masuk() {
 	const navigate = useNavigate();
 	const [pesan, setPesan] = useState("");
 	const [mengirim, setMengirim] = useState(false);
+	const [perluTurnstile, setPerluTurnstile] = useState(false);
+	const [tokenTurnstile, setTokenTurnstile] = useState<string | null>(null);
 
 	async function kirim(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -16,11 +19,16 @@ export function Masuk() {
 		const data = Object.fromEntries(new FormData(event.currentTarget));
 		const response = await fetch("/api/auth/sign-in/email", {
 			method: "POST",
-			headers: { "content-type": "application/json" },
+			headers: { "content-type": "application/json", "x-captcha-response": tokenTurnstile ?? "" },
 			body: JSON.stringify(data),
 		});
 		setMengirim(false);
-		if (response.ok) return navigate("/admin", { replace: true });
+		if (response.ok) {
+			const body = await response.json() as { user?: { role?: string } };
+			return navigate(body.user?.role === "admin" ? "/admin" : "/akun", { replace: true });
+		}
+		const body = await response.json().catch(() => null) as { turnstileDiperlukan?: boolean } | null;
+		if (body?.turnstileDiperlukan) setPerluTurnstile(true);
 		setPesan("Email atau kata sandi tidak sesuai.");
 	}
 
@@ -29,7 +37,7 @@ export function Masuk() {
 			<Card className="w-full">
 				<CardHeader>
 					<CardTitle className="font-display text-2xl text-navy">Masuk</CardTitle>
-					<CardDescription>Gunakan kredensial akun KPU Anda.</CardDescription>
+					<CardDescription>Gunakan kredensial akun Anda.</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<form action="/api/auth/sign-in/email" method="post" className="flex flex-col gap-5" onSubmit={kirim}>
@@ -41,9 +49,11 @@ export function Masuk() {
 							<label htmlFor="password" className="font-semibold">Kata sandi</label>
 							<Input id="password" name="password" type="password" autoComplete="current-password" required />
 						</fieldset>
+						{perluTurnstile ? <Turnstile onToken={setTokenTurnstile} /> : null}
 						{pesan ? <p className="text-sm text-destructive" aria-live="polite">{pesan}</p> : null}
 						<Button type="submit" disabled={mengirim}>{mengirim ? "Memeriksa…" : "Masuk"}</Button>
 					</form>
+					<p className="mt-5 text-sm text-muted-foreground">Lupa kata sandi? Hubungi kanal resmi KPU di <a className="font-semibold text-merah underline" href="/tentang">/tentang</a>.</p>
 				</CardContent>
 			</Card>
 		</section>

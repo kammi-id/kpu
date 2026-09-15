@@ -21,6 +21,6 @@ export default defineConfig({
 		}),
 	],
 	test: {
-		setupFiles: ["./src/worker/test/apply-migrations.ts"],
+		setupFiles: ["./src/worker/test/apply-migrations.ts", "./src/worker/test/mock-network.ts"],
 	},
 });

@@ -4,11 +4,14 @@ import {
 	ambilSesi,
 	batasiLimaSesi,
 	buatAuth,
+	emailTernormalisasi,
+	hmacHex,
 	tokenSama,
 	rahasiaTersedia,
 	type EnvDenganRahasia,
+	whatsappTernormalisasi,
 } from "./lib/auth";
-import { layananAktif, tahapPada } from "./lib/tahap";
+import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
 import { buatRuteTahap } from "./routes/tahap";
 
 const JALUR_AUTH = new Set([
@@ -27,6 +30,16 @@ type BarisAudit = {
 	sasaranBerkasId: string | null;
 	hasil: string;
 };
+
+type PayloadRegistrasi = {
+	name: string;
+	email: string;
+	whatsapp: string;
+	password: string;
+	persetujuan: boolean | string;
+};
+
+type PayloadLogin = { email: string; password: string };
 
 let onboardingSebelumnya: Promise<void> = Promise.resolve();
 
@@ -50,6 +63,19 @@ function payloadOnboarding(data: unknown): data is PayloadOnboarding {
 	return ["token", "name", "email", "password"].every((kunci) => typeof payload[kunci] === "string");
 }
 
+function payloadRegistrasi(data: unknown): data is PayloadRegistrasi {
+	if (!data || typeof data !== "object") return false;
+	const payload = data as Record<string, unknown>;
+	return ["name", "email", "whatsapp", "password"].every((kunci) => typeof payload[kunci] === "string") &&
+		(typeof payload.persetujuan === "boolean" || typeof payload.persetujuan === "string");
+}
+
+function payloadLogin(data: unknown): data is PayloadLogin {
+	if (!data || typeof data !== "object") return false;
+	const payload = data as Record<string, unknown>;
+	return typeof payload.email === "string" && typeof payload.password === "string";
+}
+
 function gagalTertutup() {
 	return new Response(JSON.stringify({ error: "layanan_tidak_tersedia" }), {
 		status: 503,
@@ -63,6 +89,91 @@ async function tokenDariRespons(response: Response) {
 	return typeof body.token === "string" ? body.token : undefined;
 }
 
+async function penggunaDariRespons(response: Response) {
+	const body: unknown = await response.clone().json().catch(() => null);
+	if (!body || typeof body !== "object" || !("user" in body)) return undefined;
+	const pengguna = body.user;
+	return pengguna && typeof pengguna === "object" && "id" in pengguna && typeof pengguna.id === "string"
+		? pengguna.id
+		: undefined;
+}
+
+function requestJson(request: Request, body: Record<string, unknown>) {
+	const headers = new Headers(request.headers);
+	headers.set("content-type", "application/json");
+	return new Request(request.url, { method: request.method, headers, body: JSON.stringify(body) });
+}
+
+function ipDari(request: Request) {
+	return request.headers.get("cf-connecting-ip") ?? "tidak-diketahui";
+}
+
+async function kunciPercobaanLogin(env: EnvDenganRahasia, email: string, request: Request) {
+	return Promise.all([
+		hmacHex(`email:${email}`, env.HMAC_SECRET as string),
+		hmacHex(`ip:${ipDari(request)}`, env.HMAC_SECRET as string),
+	]).then(([emailHash, ipHash]) => [`email:${emailHash}`, `ip:${ipHash}`] as const);
+}
+
+async function perluTurnstile(env: EnvDenganRahasia, kunci: readonly string[], sekarang: Date) {
+	await env.DB.prepare('DELETE FROM "percobaanLogin" WHERE "kedaluwarsa" <= ?').bind(sekarang.toISOString()).run();
+	const hasil = await env.DB.prepare(
+		`SELECT MAX("gagal") AS "gagal" FROM "percobaanLogin" WHERE "kunci" IN (?, ?)`,
+	)
+		.bind(kunci[0], kunci[1])
+		.first<{ gagal: number | null }>();
+	return (hasil?.gagal ?? 0) >= 3;
+}
+
+async function tambahKegagalanLogin(env: EnvDenganRahasia, kunci: readonly string[], sekarang: Date) {
+	const kedaluwarsa = new Date(sekarang.getTime() + 24 * 60 * 60_000).toISOString();
+	await env.DB.batch(
+		kunci.map((item) =>
+			env.DB
+				.prepare(
+					`INSERT INTO "percobaanLogin" ("kunci", "gagal", "kedaluwarsa") VALUES (?, 1, ?)
+					 ON CONFLICT("kunci") DO UPDATE SET "gagal" = "gagal" + 1, "kedaluwarsa" = excluded."kedaluwarsa"`,
+				)
+				.bind(item, kedaluwarsa),
+		),
+	);
+}
+
+async function resetKegagalanLogin(env: EnvDenganRahasia, kunci: readonly string[]) {
+	await env.DB.prepare('DELETE FROM "percobaanLogin" WHERE "kunci" IN (?, ?)').bind(kunci[0], kunci[1]).run();
+}
+
+async function verifikasiTurnstile(token: string | null | undefined, env: EnvDenganRahasia, request: Request) {
+	if (!token || token.length > 2048) return false;
+	try {
+		const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({
+				secret: env.TURNSTILE_SECRET_KEY,
+				response: token,
+				remoteip: ipDari(request),
+			}),
+			signal: AbortSignal.timeout(10_000),
+		});
+		const hasil: unknown = await response.json();
+		return response.ok && Boolean(hasil && typeof hasil === "object" && "success" in hasil && hasil.success);
+	} catch {
+		return false;
+	}
+}
+
+async function responsDenganPenandaTurnstile(response: Response, wajib: boolean) {
+	if (!wajib) return response;
+	const body: unknown = await response.clone().json().catch(() => ({}));
+	const headers = new Headers(response.headers);
+	headers.set("content-type", "application/json");
+	return new Response(JSON.stringify({ ...(body && typeof body === "object" ? body : {}), turnstileDiperlukan: true }), {
+		status: response.status,
+		headers,
+	});
+}
+
 /**
  * Fungsi pembuat Worker: seluruh penolakan server, spanduk, dan status tombol
  * bersumber dari `sekarang`. Ekspor default memakai jam nyata; uji menyuntikkan
@@ -72,13 +183,57 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
+	app.get("/api/konfigurasi-publik", (c) => c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }));
 
 	app.all("/api/auth/*", async (c) => {
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
 		if (!JALUR_AUTH.has(new URL(c.req.url).pathname)) return c.notFound();
 
-		const auth = buatAuth(c.env);
 		const path = new URL(c.req.url).pathname;
+		const waktu = sekarang();
+		if (path === "/api/auth/sign-up/email") {
+			const body: unknown = await c.req.json().catch(() => null);
+			if (!payloadRegistrasi(body)) {
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
+				return c.json({ error: "permintaan_tidak_valid" }, 400);
+			}
+			const tahap = tahapPada(waktu);
+			if (!bolehRegistrasi(tahap)) {
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
+				return c.json({ error: "registrasi_tidak_diizinkan", tahap }, 403);
+			}
+			const whatsapp = whatsappTernormalisasi(body.whatsapp);
+			if (!whatsapp || body.persetujuan !== true && body.persetujuan !== "true") {
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
+				return c.json({ error: "registrasi_tidak_valid" }, 400);
+			}
+			let response: Response;
+			try {
+				response = await buatAuth(c.env).handler(
+					requestJson(c.req.raw, {
+						name: body.name,
+						email: emailTernormalisasi(body.email),
+						whatsapp,
+						password: body.password,
+					}),
+				);
+			} catch {
+				// Mis. WhatsApp ganda menabrak UNIQUE di D1: Better Auth tidak
+				// mengenal keunikan kolom aplikasi ini dan bisa melempar, bukan
+				// menjawab JSON. Ditangkap di sini supaya tidak pernah 500.
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "gagal" }, waktu);
+				return c.json({ error: "registrasi_gagal" }, 400);
+			}
+			const userId = await penggunaDariRespons(response);
+			await catatAudit(
+				c.env.DB,
+				{ aktor: response.ok ? "Bakal Calon Ketua Umum" : "Anonim", tindakan: "registrasi", hasil: response.ok ? "berhasil" : "gagal", aktorUserId: userId },
+				waktu,
+			);
+			return response;
+		}
+
+		const auth = buatAuth(c.env);
 		if (!layananAktif(tahapPada(sekarang())) && path === "/api/auth/sign-in/email") {
 			await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "login", hasil: "gagal" }, sekarang());
 			return c.json({ error: "layanan_selesai" }, 403);
@@ -87,9 +242,29 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 			const sesi = await ambilSesi(auth, c.env, c.req.raw.headers, sekarang());
 			if (!sesi) return c.json(null);
 		}
+		let request = c.req.raw;
+		let kunciLogin: readonly string[] | undefined;
+		if (path === "/api/auth/sign-in/email") {
+			const body: unknown = await c.req.json().catch(() => null);
+			if (!payloadLogin(body)) {
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "login", hasil: "gagal" }, waktu);
+				return c.json({ error: "kredensial_tidak_valid" }, 401);
+			}
+			const email = emailTernormalisasi(body.email);
+			kunciLogin = await kunciPercobaanLogin(c.env, email, c.req.raw);
+			if (await perluTurnstile(c.env, kunciLogin, waktu)) {
+				const valid = await verifikasiTurnstile(c.req.header("x-captcha-response"), c.env, c.req.raw);
+				if (!valid) {
+					await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "login", hasil: "ditolak" }, waktu);
+					return c.json({ error: "turnstile_tidak_valid", turnstileDiperlukan: true }, 403);
+				}
+			}
+			request = requestJson(c.req.raw, { email, password: body.password });
+		}
+
 		let response: Response;
 		try {
-			response = await auth.handler(c.req.raw);
+			response = await auth.handler(request);
 		} catch {
 			if (path === "/api/auth/sign-in/email") {
 				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "login", hasil: "gagal" }, sekarang());
@@ -109,6 +284,7 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 					.bind(sesi.userId)
 					.first<{ role: string }>();
 				await batasiLimaSesi(c.env, sesi.userId);
+				if (kunciLogin) await resetKegagalanLogin(c.env, kunciLogin);
 				await catatAudit(
 					c.env.DB,
 					{
@@ -121,10 +297,35 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 					sekarang(),
 				);
 			} else if (!response.ok) {
+				if (kunciLogin) await tambahKegagalanLogin(c.env, kunciLogin, waktu);
 				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "login", hasil: "gagal" }, sekarang());
+				response = await responsDenganPenandaTurnstile(response, Boolean(kunciLogin && await perluTurnstile(c.env, kunciLogin, waktu)));
 			}
 		}
 		return response;
+	});
+
+	// Sekadar gerbang sesi untuk shell /akun (tiket 10). `vKelengkapan` yang
+	// sesungguhnya dan sidebar `x/10` dinamis adalah tiket 13; di sini sidebar
+	// tetap statis "0/10" / "Belum lengkap" seperti kata tiket.
+	app.get("/api/akun", async (c) => {
+		if (!rahasiaTersedia(c.env)) return gagalTertutup();
+		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
+		if (!sesi || sesi.user.role !== "bacalon") return c.json({ error: "tidak_berwenang" }, 401);
+		// Tahap × kemampuan: "baca data sendiri" ditolak pada Selesai walau sesi masih hidup.
+		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
+		return c.json({ ok: true });
+	});
+
+	app.get("/api/akun/pengaturan", async (c) => {
+		if (!rahasiaTersedia(c.env)) return gagalTertutup();
+		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
+		if (!sesi || sesi.user.role !== "bacalon") return c.json({ error: "tidak_berwenang" }, 401);
+		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
+		const pengguna = await c.env.DB.prepare(
+			`SELECT "email", "whatsapp", "persetujuanVersi", "persetujuanPada" FROM "user" WHERE "id" = ?`,
+		).bind(sesi.user.id).first();
+		return c.json(pengguna);
 	});
 
 	app.post("/onboard", async (c) => serialkanOnboarding(async () => {

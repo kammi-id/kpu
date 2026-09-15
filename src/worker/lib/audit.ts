@@ -1,5 +1,5 @@
 type AktorAudit = "Admin bersama" | "Bakal Calon Ketua Umum" | "Anonim" | "Sistem";
-type TindakanAudit = "login" | "onboarding_admin";
+type TindakanAudit = "login" | "registrasi" | "onboarding_admin";
 type HasilAudit = "berhasil" | "gagal" | "ditolak";
 
 export async function catatAudit(
