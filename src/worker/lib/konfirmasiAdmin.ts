@@ -2,6 +2,11 @@ import { buatAuth, hmacHex, type EnvDenganRahasia, type SesiAutentikasi } from "
 
 const MASA_BERLAKU_KONFIRMASI_MS = 24 * 60 * 60_000;
 
+/** Bentuk payload bersama tiap rute yang meminta konfirmasi kata sandi (Admin atau Bakal Calon sendiri). */
+export function payloadKataSandi(data: unknown): data is { password: string } {
+	return Boolean(data && typeof data === "object" && typeof (data as Record<string, unknown>).password === "string");
+}
+
 /**
  * Mengonfirmasi kata sandi Admin bersama untuk aksi yang mengubah data secara
  * permanen. Tiket 17 memakai batas yang sama agar sebuah sesi tidak dapat

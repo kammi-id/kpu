@@ -7,6 +7,7 @@ export type RingkasanBacalonAdmin = {
 	dibuatPada: string;
 	jumlahHadir: number;
 	lengkap: boolean;
+	mintaDitutup: boolean;
 };
 
 export type DetailBacalonAdmin = RingkasanBacalonAdmin & {
@@ -72,4 +73,16 @@ export async function resetPasswordAdmin(userId: string, password: string) {
 		throw new Error(body?.error === "konfirmasi_kata_sandi_gagal" ? "Kata sandi Admin salah." : "Reset kata sandi gagal.");
 	}
 	return (await response.json() as { password: string }).password;
+}
+
+export async function hapusDataAkunAdmin(userId: string, password: string) {
+	const response = await fetch(`/api/admin/${encodeURIComponent(userId)}/hapus-data`, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ password }),
+	});
+	if (!response.ok) {
+		const body = await response.json().catch(() => null) as { error?: string } | null;
+		throw new Error(body?.error === "konfirmasi_kata_sandi_gagal" ? "Kata sandi Admin salah." : "Hapus data akun gagal.");
+	}
 }

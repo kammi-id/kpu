@@ -89,6 +89,8 @@ async function simpanBerkas(userId: string, kelompok: number, namaAsli: string) 
 
 beforeEach(async () => {
 	whatsappBerikutnya = 0;
+	const objek = await env.BERKAS.list();
+	if (objek.objects.length) await env.BERKAS.delete(objek.objects.map((satu) => satu.key));
 	await env.DB.batch([
 		env.DB.prepare('DELETE FROM "audit"'),
 		env.DB.prepare('DELETE FROM "account"'),
@@ -223,8 +225,8 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 
 		const response = await kirim(MASA_PENDAFTARAN, "/api/admin?q=nabila", { headers: { cookie: admin } });
 		expect(response.status).toBe(200);
-		const body = await response.json<{ data: Array<{ name: string; whatsapp: string; jumlahHadir: number; lengkap: boolean }> }>();
-		expect(body.data).toEqual([{ name: "Nabila Putri", whatsapp: expect.stringMatching(/^62/), jumlahHadir: 1, lengkap: false, dibuatPada: expect.any(String), id: nabila?.id }]);
+		const body = await response.json<{ data: Array<{ name: string; whatsapp: string; jumlahHadir: number; lengkap: boolean; mintaDitutup: boolean }> }>();
+		expect(body.data).toEqual([{ name: "Nabila Putri", whatsapp: expect.stringMatching(/^62/), jumlahHadir: 1, lengkap: false, mintaDitutup: false, dibuatPada: expect.any(String), id: nabila?.id }]);
 	});
 
 	it("menolak sesi Bakal Calon, memberi detail 404 bila tidak ada, dan mengalirkan unduhan Admin sebagai attachment", async () => {
@@ -281,6 +283,110 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		const selesai = await kirim(SELESAI, "/api/admin", { headers: { cookie: admin } });
 		expect(selesai.status).toBe(403);
 		expect(await selesai.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
+	});
+});
+
+describe("Hapus data akun (tiket 17, acceptance 30)", () => {
+	async function jadikanMintaDitutup(userId: string) {
+		await env.DB.prepare(`UPDATE "user" SET "banned" = 1, "banReason" = 'penutupan_akun' WHERE "id" = ?`).bind(userId).run();
+	}
+
+	it("menolak untuk akun tanpa penanda Minta ditutup", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("tanpa-penanda@example.test", "Tanpa Penanda");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("tanpa-penanda@example.test").first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/hapus-data`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+		expect(response.status).toBe(404);
+		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(nabila?.id).first()).not.toBeNull();
+	});
+
+	it("menolak sesi Bakal Calon", async () => {
+		const bacalon = await sesiBacalon("nabila@example.test", "Nabila Putri");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+		await jadikanMintaDitutup(nabila?.id as string);
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/hapus-data`, {
+			...json({ password: "kata-sandi-aman" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: bacalon },
+		});
+		expect(response.status).toBe(401);
+	});
+
+	it("membagi penghitung kegagalan konfirmasi dengan Reset Password, mencabut sesi Admin pada kegagalan kelima gabungan", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("bersama-penghitung@example.test", "Bersama Penghitung");
+		const target = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("bersama-penghitung@example.test").first<{ id: string }>();
+		await jadikanMintaDitutup(target?.id as string);
+
+		for (let percobaan = 0; percobaan < 4; percobaan += 1) {
+			const gagal = await kirim(MASA_PENDAFTARAN, `/api/admin/${target?.id}/reset-password`, {
+				...json({ password: "kata-sandi-salah" }),
+				headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+			});
+			expect(gagal.status).toBe(401);
+		}
+
+		const kelima = await kirim(MASA_PENDAFTARAN, `/api/admin/${target?.id}/hapus-data`, {
+			...json({ password: "kata-sandi-salah" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+		expect(kelima.status).toBe(401);
+		expect((await kirim(MASA_PENDAFTARAN, "/api/admin", { headers: { cookie: admin } })).status).toBe(401);
+	});
+
+	it("menghapus D1, objek R2, kedua ZIP, dan baris CSV, lalu mencatat tepat satu audit hapus_data", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("hapus-data@example.test", "Hapus Data");
+		const target = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("hapus-data@example.test").first<{ id: string }>();
+		const targetId = target?.id as string;
+		const berkas = await simpanBerkas(targetId, 1, "identitas.pdf");
+		const barisBerkas = await env.DB.prepare('SELECT "r2Key" FROM "berkas" WHERE "id" = ?').bind(berkas.id).first<{ r2Key: string }>();
+		await jadikanMintaDitutup(targetId);
+
+		await env.BERKAS.put(
+			"ekspor/terkini/bacalon.csv",
+			`id,nama\r\n${targetId},Hapus Data\r\nid-lain,Bertahan\r\n`,
+			{ httpMetadata: { contentType: "text/csv; charset=utf-8" } },
+		);
+		await env.BERKAS.put(
+			"ekspor/pemeriksaan/bacalon.csv",
+			`id,nama\r\n${targetId},Hapus Data\r\nid-lain,Bertahan\r\n`,
+			{ httpMetadata: { contentType: "text/csv; charset=utf-8" } },
+		);
+		await env.BERKAS.put(`ekspor/terkini/${targetId}.zip`, new Uint8Array([1, 2, 3]));
+		await env.BERKAS.put(`ekspor/pemeriksaan/${targetId}.zip`, new Uint8Array([4, 5, 6]));
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${targetId}/hapus-data`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ status: "terhapus" });
+
+		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(targetId).first()).toBeNull();
+		expect(await env.DB.prepare('SELECT 1 FROM "berkas" WHERE "userId" = ?').bind(targetId).first()).toBeNull();
+		expect(await env.DB.prepare('SELECT 1 FROM "session" WHERE "userId" = ?').bind(targetId).first()).toBeNull();
+
+		expect(await env.BERKAS.head(barisBerkas?.r2Key as string)).toBeNull();
+		expect(await env.BERKAS.head(`ekspor/terkini/${targetId}.zip`)).toBeNull();
+		expect(await env.BERKAS.head(`ekspor/pemeriksaan/${targetId}.zip`)).toBeNull();
+
+		const terkiniCsv = await (await env.BERKAS.get("ekspor/terkini/bacalon.csv"))?.text();
+		expect(terkiniCsv).not.toContain(targetId);
+		expect(terkiniCsv).toContain("id-lain");
+		const pemeriksaanCsv = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
+		expect(pemeriksaanCsv).not.toContain(targetId);
+		expect(pemeriksaanCsv).toContain("id-lain");
+
+		// Audit lama yang menyebut akun ini (mis. registrasi) hilang, kecuali satu hapus_data baru.
+		const audit = await env.DB.prepare(
+			'SELECT "aktor", "tindakan", "hasil", "sasaranUserId" FROM "audit" WHERE "sasaranUserId" = ? OR "aktorUserId" = ?',
+		).bind(targetId, targetId).all();
+		expect(audit.results).toEqual([{ aktor: "Admin bersama", tindakan: "hapus_data", hasil: "berhasil", sasaranUserId: targetId }]);
 	});
 });
 

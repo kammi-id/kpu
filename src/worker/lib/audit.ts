@@ -11,26 +11,29 @@ type TindakanAudit =
 	| "hapus_berkas"
 	| "reset_kata_sandi"
 	| "ekspor_harian"
-	| "ekspor";
+	| "ekspor"
+	| "penutupan_akun"
+	| "hapus_data";
 type HasilAudit = "berhasil" | "gagal" | "ditolak";
 
-export async function catatAudit(
-	db: D1Database,
-	data: {
-		aktor: AktorAudit;
-		tindakan: TindakanAudit;
-		hasil: HasilAudit;
-		sesiId?: string | null;
-		aktorUserId?: string | null;
-		sasaranUserId?: string | null;
-		sasaranBerkasId?: string | null;
-	},
-	waktu: Date,
-) {
-	await db
+type DataAudit = {
+	aktor: AktorAudit;
+	tindakan: TindakanAudit;
+	hasil: HasilAudit;
+	sesiId?: string | null;
+	aktorUserId?: string | null;
+	sasaranUserId?: string | null;
+	sasaranBerkasId?: string | null;
+	/** CHECK migrasi: hanya boleh terisi bila `aktor` = 'Sistem' (tiket 18). */
+	keterangan?: string | null;
+};
+
+/** Bentuk pernyataan tanpa mengeksekusinya, supaya dapat digabung ke `DB.batch` lain (mis. tiket 17). */
+export function pernyataanAudit(db: D1Database, data: DataAudit, waktu: Date) {
+	return db
 		.prepare(
-			`INSERT INTO "audit" ("id", "waktu", "sesiId", "aktor", "aktorUserId", "tindakan", "sasaranUserId", "sasaranBerkasId", "hasil")
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			`INSERT INTO "audit" ("id", "waktu", "sesiId", "aktor", "aktorUserId", "tindakan", "sasaranUserId", "sasaranBerkasId", "hasil", "keterangan")
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		)
 		.bind(
 			crypto.randomUUID(),
@@ -42,6 +45,10 @@ export async function catatAudit(
 			data.sasaranUserId ?? null,
 			data.sasaranBerkasId ?? null,
 			data.hasil,
-		)
-		.run();
+			data.keterangan ?? null,
+		);
+}
+
+export async function catatAudit(db: D1Database, data: DataAudit, waktu: Date) {
+	await pernyataanAudit(db, data, waktu).run();
 }

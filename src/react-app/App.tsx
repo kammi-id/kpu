@@ -1,5 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "~/react-app/components/Layout";
+import { useTahap } from "~/react-app/lib/useTahap";
+import { SelesaiPage } from "~/react-app/routes/SelesaiPage";
 import { Beranda } from "~/react-app/routes/Beranda";
 import { Jadwal } from "~/react-app/routes/Jadwal";
 import { Tentang } from "~/react-app/routes/Tentang";
@@ -23,6 +25,19 @@ import { AkunBerkasKelompok } from "~/react-app/routes/AkunBerkasKelompok";
 import { AkunPengaturan } from "~/react-app/routes/AkunPengaturan";
 
 function App() {
+	// Tahap Selesai (tiket 18): satu-satunya isi seluruh situs, tanpa memandang
+	// rute — Beranda dkk. tetap dirender sampai /api/tahap menjawab, karena
+	// menunggu tahap sebelum render pertama akan menunda seluruh situs demi
+	// jendela yang hanya berlaku setelah 25 Januari 2027.
+	const { data: tahap } = useTahap();
+	if (tahap?.tahap === "Selesai") {
+		return (
+			<BrowserRouter>
+				<SelesaiPage />
+			</BrowserRouter>
+		);
+	}
+
 	return (
 		<BrowserRouter>
 			<Routes>

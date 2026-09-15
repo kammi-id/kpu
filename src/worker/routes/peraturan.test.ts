@@ -159,6 +159,17 @@ describe("GET /api/peraturan dan /api/unduhan (publik, seam Worker)", () => {
 		const body = await (await kirim(WAKTU_UJI, "/api/unduhan")).json<{ berkasPublik: Array<{ judul: string }> }>();
 		expect(body.berkasPublik.map((item) => item.judul)).toEqual(["Formulir A.1", "Formulir A.2"]);
 	});
+
+	it("tiket 18: ditolak dengan kode tahap pada Selesai", async () => {
+		const selesai = new Date("2027-01-24T17:00:00.000Z");
+		const peraturan = await kirim(selesai, "/api/peraturan");
+		expect(peraturan.status).toBe(403);
+		expect(await peraturan.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
+
+		const unduhan = await kirim(selesai, "/api/unduhan");
+		expect(unduhan.status).toBe(403);
+		expect(await unduhan.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
+	});
 });
 
 describe("PUT /api/admin/peraturan (seam Worker)", () => {
@@ -299,6 +310,11 @@ describe("Berkas Publik (seam Worker)", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-disposition")).toContain("attachment");
 		expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+
+		const selesai = new Date("2027-01-24T17:00:00.000Z");
+		const ditolak = await kirim(selesai, `/api/berkas-publik/${id}`);
+		expect(ditolak.status).toBe(403);
+		expect(await ditolak.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
 	});
 
 	it("menghapus baris D1 dan objek R2 lalu mencatat hapus_berkas_publik", async () => {

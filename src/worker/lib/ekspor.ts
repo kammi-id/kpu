@@ -206,12 +206,16 @@ class ZipStore {
 	}
 }
 
+// Minta ditutup = spec "Permintaan Penutupan Akun": banned=1 DAN banReason='penutupan_akun'
+// bersamaan (tiket 17). Dipakai di sini dan di routes/adminBacalon.ts (tabel dan detail Admin) —
+// satu sumber supaya definisinya tidak diam-diam menyimpang antara CSV dan API Admin.
+export const KOLOM_MINTA_DITUTUP = `CASE WHEN u."banned" = 1 AND u."banReason" = 'penutupan_akun' THEN 1 ELSE 0 END AS "mintaDitutup"`;
+
 async function daftarBacalon(db: D1Database) {
 	return (await db.prepare(
 		`SELECT u."id", u."name", u."email", u."whatsapp", u."createdAt" AS "dibuatPada", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
 		        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap",
-		        -- Minta ditutup = spec "Permintaan Penutupan Akun": banned=1 DAN banReason='penutupan_akun' bersamaan (tiket 17).
-		        CASE WHEN u."banned" = 1 AND u."banReason" = 'penutupan_akun' THEN 1 ELSE 0 END AS "mintaDitutup"
+		        ${KOLOM_MINTA_DITUTUP}
 		 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 		 WHERE u."role" = 'bacalon' ORDER BY u."createdAt", u."id"`,
 	).all<BacalonEkspor>()).results;
@@ -263,6 +267,22 @@ async function tulisZip(bucket: R2Bucket, bacalon: BacalonEkspor, berkas: Berkas
 		await multipart.batalkan().catch(() => undefined);
 		throw error;
 	}
+}
+
+/**
+ * Menghapus baris satu akun dari CSV Bacalon yang sudah ada tanpa menyusun ulang
+ * seluruh isi (tiket 17: Hapus data akun) — CSV Pemeriksaan adalah snapshot yang
+ * tak bisa dibangun ulang dari D1 terkini. Aman memakai kecocokan prefix baris
+ * karena kolom pertama selalu UUID `id`, yang tidak pernah butuh dikutip oleh `csv()`.
+ */
+export async function hapusBarisCsvBacalon(bucket: R2Bucket, kategori: KategoriEkspor, userId: string) {
+	const kunci = kunciCsvBacalon(kategori);
+	const objek = await bucket.get(kunci);
+	if (!objek) return;
+	const baris = (await objek.text()).split("\r\n");
+	const disaring = baris.filter((satu) => !satu.startsWith(`${userId},`));
+	if (disaring.length === baris.length) return;
+	await bucket.put(kunci, disaring.join("\r\n"), { httpMetadata: objek.httpMetadata });
 }
 
 async function hapusTerkiniUsang(bucket: R2Bucket, dipertahankan: Set<string>) {

@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { catatAudit } from "../lib/audit";
+import { catatAudit, pernyataanAudit } from "../lib/audit";
 import { headerUnduh } from "./akunBerkas";
 import { ambilSesi, buatAuth, rahasiaTersedia, type EnvDenganRahasia } from "../lib/auth";
-import { kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
-import { konfirmasiKataSandiAdmin } from "../lib/konfirmasiAdmin";
+import { hapusBarisCsvBacalon, KOLOM_MINTA_DITUTUP, kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
+import { konfirmasiKataSandiAdmin, payloadKataSandi } from "../lib/konfirmasiAdmin";
 import { layananAktif, tahapPada } from "../lib/tahap";
 
 const ALFABET_KATA_SANDI_SEMENTARA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -16,6 +16,7 @@ type BarisTabel = {
 	dibuatPada: string;
 	jumlahHadir: number;
 	lengkap: number;
+	mintaDitutup: number;
 };
 
 type BarisDetail = {
@@ -35,6 +36,7 @@ type BarisDetail = {
 	bahasaAsing: string | null;
 	jumlahHadir: number;
 	lengkap: number;
+	mintaDitutup: number;
 };
 
 type BarisBerkas = {
@@ -48,10 +50,6 @@ type BarisBerkas = {
 	jenisRekomendasi: string | null;
 	diunggahPada: string;
 };
-
-function payloadKonfirmasiKataSandi(data: unknown): data is { password: string } {
-	return Boolean(data && typeof data === "object" && typeof (data as Record<string, unknown>).password === "string");
-}
 
 function kataSandiSementara() {
 	let hasil = "";
@@ -129,14 +127,16 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		if ("response" in akses) return akses.response;
 		const query = c.req.query("q")?.trim() ?? "";
 		const daftar = await c.env.DB.prepare(
-			`SELECT u."id", u."name", u."whatsapp", u."createdAt" AS "dibuatPada", v."jumlahHadir", v."lengkap"
+			`SELECT u."id", u."name", u."whatsapp", u."createdAt" AS "dibuatPada", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
 			 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id"
 			 WHERE u."role" = 'bacalon' AND u."name" LIKE '%' || ? || '%' COLLATE NOCASE
 			 ORDER BY u."createdAt" DESC`,
 		)
 			.bind(query)
 			.all<BarisTabel>();
-		return c.json({ data: daftar.results.map((baris) => ({ ...baris, lengkap: Boolean(baris.lengkap) })) });
+		return c.json({
+			data: daftar.results.map((baris) => ({ ...baris, lengkap: Boolean(baris.lengkap), mintaDitutup: Boolean(baris.mintaDitutup) })),
+		});
 	});
 
 	route.get("/:id", async (c) => {
@@ -145,7 +145,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		const id = c.req.param("id");
 		const detail = await c.env.DB.prepare(
 			`SELECT u."id", u."name", u."email", u."whatsapp", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
-			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap"
+			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
 			 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ? AND u."role" = 'bacalon'`,
 		)
@@ -162,6 +162,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			...detail,
 			instruktur: detail.instruktur === null ? null : Boolean(detail.instruktur),
 			lengkap: Boolean(detail.lengkap),
+			mintaDitutup: Boolean(detail.mintaDitutup),
 			berkas: berkas.results.map(({ r2Key: _r2Key, userId: _userId, ...item }) => item),
 		});
 	});
@@ -176,7 +177,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		if (!sasaran) return c.json({ error: "tidak_ditemukan" }, 404);
 
 		const body: unknown = await c.req.json().catch(() => null);
-		if (!payloadKonfirmasiKataSandi(body)) {
+		if (!payloadKataSandi(body)) {
 			await catatAudit(
 				c.env.DB,
 				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "reset_kata_sandi", sasaranUserId, hasil: "gagal" },
@@ -215,6 +216,68 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			waktu,
 		);
 		return c.json({ password });
+	});
+
+	// Hapus data akun (tiket 17): hanya untuk akun berpenanda Minta ditutup, dengan
+	// konfirmasi kata sandi Admin yang sama (dan penghitung kegagalan yang sama)
+	// dengan Reset Password di atas.
+	route.post("/:id/hapus-data", async (c) => {
+		const akses = await adminAtauTolak(c, sekarang);
+		if ("response" in akses) return akses.response;
+		const sasaranUserId = c.req.param("id");
+		const sasaran = await c.env.DB.prepare(
+			`SELECT "id" FROM "user" WHERE "id" = ? AND "role" = 'bacalon' AND "banned" = 1 AND "banReason" = 'penutupan_akun'`,
+		)
+			.bind(sasaranUserId)
+			.first<{ id: string }>();
+		if (!sasaran) return c.json({ error: "tidak_ditemukan" }, 404);
+
+		const body: unknown = await c.req.json().catch(() => null);
+		if (!payloadKataSandi(body)) {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "hapus_data", sasaranUserId, hasil: "gagal" },
+				sekarang(),
+			);
+			return c.json({ error: "permintaan_tidak_valid" }, 400);
+		}
+
+		const auth = buatAuth(c.env);
+		const waktu = sekarang();
+		if (!(await konfirmasiKataSandiAdmin(auth, c.env, akses.sesi, c.req.raw.headers, body.password, waktu))) {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "hapus_data", sasaranUserId, hasil: "gagal" },
+				waktu,
+			);
+			return c.json({ error: "konfirmasi_kata_sandi_gagal" }, 401);
+		}
+
+		// r2Key dikumpulkan sebelum baris D1-nya hilang lewat DELETE "user" berantai di bawah.
+		const berkas = await c.env.DB.prepare('SELECT "r2Key" FROM "berkas" WHERE "userId" = ?')
+			.bind(sasaranUserId)
+			.all<{ r2Key: string }>();
+
+		await c.env.DB.batch([
+			c.env.DB.prepare('DELETE FROM "user" WHERE "id" = ?').bind(sasaranUserId),
+			c.env.DB.prepare(`DELETE FROM "audit" WHERE ("sasaranUserId" = ? OR "aktorUserId" = ?) AND "tindakan" != 'hapus_data'`)
+				.bind(sasaranUserId, sasaranUserId),
+			pernyataanAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "hapus_data", sasaranUserId, hasil: "berhasil" },
+				waktu,
+			),
+		]);
+
+		await c.env.BERKAS.delete([
+			...berkas.results.map((item) => item.r2Key),
+			kunciZipAkun("terkini", sasaranUserId),
+			kunciZipAkun("pemeriksaan", sasaranUserId),
+		]);
+		await hapusBarisCsvBacalon(c.env.BERKAS, "terkini", sasaranUserId);
+		await hapusBarisCsvBacalon(c.env.BERKAS, "pemeriksaan", sasaranUserId);
+
+		return c.json({ status: "terhapus" });
 	});
 
 	route.get("/:id/ekspor/:kategori", async (c) => {

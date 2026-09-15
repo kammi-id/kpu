@@ -1,6 +1,8 @@
 import { Hono } from "hono";
-import { catatAudit } from "./lib/audit";
+import { catatAudit, pernyataanAudit } from "./lib/audit";
 import { buatEksporHarian } from "./lib/ekspor";
+import { payloadKataSandi } from "./lib/konfirmasiAdmin";
+import { jalankanPenghapusanAkhir } from "./lib/penghapusanAkhir";
 import {
 	ambilSesi,
 	batasiLimaSesi,
@@ -190,9 +192,9 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
-	app.route("/api/peraturan", buatRutePeraturanPublik());
-	app.route("/api/unduhan", buatRuteUnduhan());
-	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik());
+	app.route("/api/peraturan", buatRutePeraturanPublik(sekarang));
+	app.route("/api/unduhan", buatRuteUnduhan(sekarang));
+	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik(sekarang));
 	app.route("/api/akun/data", buatRuteAkunData(sekarang));
 	app.route("/api/admin/peraturan", buatRuteAdminPeraturan(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
@@ -344,6 +346,43 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 		return c.json(pengguna);
 	});
 
+	// Permintaan Penutupan Akun (tiket 17): tidak memakai konfirmasiKataSandiAdmin
+	// (itu khusus aksi Admin dengan penghitung bersama) — di sini kata sandi milik
+	// Bakal Calon sendiri diverifikasi langsung, tanpa penghitung kegagalan.
+	app.post("/api/akun/pengaturan/penutupan", async (c) => {
+		if (!rahasiaTersedia(c.env)) return gagalTertutup();
+		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
+		if (!sesi || sesi.user.role !== "bacalon") return c.json({ error: "tidak_berwenang" }, 401);
+		const waktu = sekarang();
+		if (!layananAktif(tahapPada(waktu))) return c.json({ error: "layanan_selesai" }, 403);
+
+		const body: unknown = await c.req.json().catch(() => null);
+		if (!payloadKataSandi(body)) return c.json({ error: "permintaan_tidak_valid" }, 400);
+
+		try {
+			await buatAuth(c.env).api.verifyPassword({ headers: c.req.raw.headers, body: { password: body.password } });
+		} catch {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Bakal Calon Ketua Umum", tindakan: "penutupan_akun", hasil: "gagal", sesiId: sesi.session.id, aktorUserId: sesi.user.id },
+				waktu,
+			);
+			return c.json({ error: "kata_sandi_salah" }, 401);
+		}
+
+		await c.env.DB.batch([
+			c.env.DB.prepare(`UPDATE "user" SET "banned" = 1, "banReason" = 'penutupan_akun' WHERE "id" = ?`).bind(sesi.user.id),
+			c.env.DB.prepare('DELETE FROM "session" WHERE "userId" = ?').bind(sesi.user.id),
+			pernyataanAudit(
+				c.env.DB,
+				{ aktor: "Bakal Calon Ketua Umum", tindakan: "penutupan_akun", hasil: "berhasil", sesiId: sesi.session.id, aktorUserId: sesi.user.id },
+				waktu,
+			),
+		]);
+
+		return c.json({ status: "diajukan" });
+	});
+
 	app.post("/onboard", async (c) => serialkanOnboarding(async () => {
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
 		if (!layananAktif(tahapPada(sekarang()))) return c.notFound();
@@ -407,7 +446,12 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 		// disuntikkan di atas untuk fetch/uji — spec mewajibkan waktu cron sendiri supaya
 		// uji dapat memilih `scheduledTime` lewat seam Worker tanpa memengaruhi jam fetch.
 		async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
-			await buatEksporHarian(env, new Date(controller.scheduledTime));
+			const waktu = new Date(controller.scheduledTime);
+			if (tahapPada(waktu) === "Selesai") {
+				await jalankanPenghapusanAkhir(env, waktu);
+			} else {
+				await buatEksporHarian(env, waktu);
+			}
 		},
 	};
 }

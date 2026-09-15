@@ -54,11 +54,12 @@ export function AdminBeranda() {
 							<th className="px-3 py-2 font-sans text-xs font-bold tracking-[0.08em] uppercase">Terdaftar</th>
 							<th className="px-3 py-2 font-sans text-xs font-bold tracking-[0.08em] uppercase">Berkas</th>
 							<th className="px-3 py-2 font-sans text-xs font-bold tracking-[0.08em] uppercase">Status</th>
+							<th className="px-3 py-2"><span className="sr-only">Minta ditutup</span></th>
 							<th className="px-3 py-2"><span className="sr-only">Buka detail</span></th>
 						</tr>
 					</thead>
 					<tbody>
-						{pesan ? <tr><td colSpan={6} className="px-3 py-6 text-muted-foreground" aria-live="polite">{pesan}</td></tr> : null}
+						{pesan ? <tr><td colSpan={7} className="px-3 py-6 text-muted-foreground" aria-live="polite">{pesan}</td></tr> : null}
 						{daftar.map((item) => (
 							<tr key={item.id} className="border-b border-border/70 last:border-0">
 								<td className="px-3 py-3 font-medium text-navy">{item.name}</td>
@@ -66,6 +67,7 @@ export function AdminBeranda() {
 								<td className="px-3 py-3">{waktuTerformat(item.dibuatPada)}</td>
 								<td className="px-3 py-3">{item.jumlahHadir}/10</td>
 								<td className="px-3 py-3"><StatusBadge terbuka={item.lengkap}>{item.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge></td>
+								<td className="px-3 py-3">{item.mintaDitutup ? <StatusBadge terbuka={false}>Minta ditutup</StatusBadge> : null}</td>
 								<td className="px-3 py-3 text-right"><Link to={`/admin/${item.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>Detail</Link></td>
 							</tr>
 						))}

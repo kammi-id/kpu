@@ -275,20 +275,20 @@ describe("Ekspor Harian (acceptance 24, 31)", () => {
 		expect(teksZipASetelah).not.toContain("isi awal A");
 	});
 
-	it("tahap Selesai tidak menulis atau menimpa ekspor/terkini", async () => {
+	it("tahap Selesai menjalankan Penghapusan Akhir alih-alih Ekspor Harian (tiket 18), bukan sekadar tidak menulis", async () => {
 		const userId = await buatBacalon("Nabila Putri", "nabila@example.test", WAKTU_EKSPOR);
 		await buatBerkas(userId, WAKTU_EKSPOR, "identitas.pdf", encoder.encode("isi awal"));
 		await jalankanTerjadwal(WAKTU_EKSPOR);
-		const csvSebelum = await (await env.BERKAS.get("ekspor/terkini/bacalon.csv"))?.text();
-
-		await buatBacalon("Siti Aminah", "siti@example.test", WAKTU_SELESAI);
+		expect(await env.BERKAS.head("ekspor/terkini/bacalon.csv")).not.toBeNull();
 
 		await jalankanTerjadwal(WAKTU_SELESAI);
 
-		const csvSesudah = await (await env.BERKAS.get("ekspor/terkini/bacalon.csv"))?.text();
-		expect(csvSesudah).toBe(csvSebelum);
-		expect(csvSesudah).not.toContain("Siti Aminah");
-		const audit = await env.DB.prepare('SELECT COUNT(*) AS n FROM "audit" WHERE "tindakan" = ?').bind("ekspor_harian").first<{ n: number }>();
-		expect(audit?.n).toBe(1);
+		// Bukan hanya "tidak menulis lagi": Penghapusan Akhir mengosongkan objek lama juga.
+		expect(await env.BERKAS.head("ekspor/terkini/bacalon.csv")).toBeNull();
+		expect(await env.BERKAS.head(`ekspor/terkini/${userId}.zip`)).toBeNull();
+		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(userId).first()).toBeNull();
+
+		const audit = await env.DB.prepare('SELECT "aktor", "tindakan", "hasil" FROM "audit"').all();
+		expect(audit.results).toEqual([{ aktor: "Sistem", tindakan: "hapus_data", hasil: "berhasil" }]);
 	});
 });

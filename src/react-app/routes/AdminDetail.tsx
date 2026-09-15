@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { buttonVariants } from "~/components/ui/button";
 import { KELOMPOK_BERKAS } from "~/lib/kelompok";
+import { HapusDataAkunDialog } from "~/react-app/components/HapusDataAkunDialog";
 import { ResetPasswordDialog } from "~/react-app/components/ResetPasswordDialog";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { ambilDetailBacalonAdmin, urlEksporZip, urlUnduhAdmin, type DetailBacalonAdmin } from "~/react-app/lib/adminBacalon";
@@ -49,7 +50,9 @@ export function AdminDetail() {
 				<div><h2 className="font-display text-3xl text-navy">{data.name}</h2><p className="mt-2 text-muted-foreground">Status Kelengkapan Berkas: {data.jumlahHadir}/10</p></div>
 				<div className="flex items-center gap-3">
 					<StatusBadge terbuka={data.lengkap}>{data.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge>
+					{data.mintaDitutup ? <StatusBadge terbuka={false}>Minta ditutup</StatusBadge> : null}
 					<ResetPasswordDialog userId={data.id} nama={data.name} />
+					{data.mintaDitutup ? <HapusDataAkunDialog userId={data.id} nama={data.name} /> : null}
 				</div>
 			</div>
 			<section aria-labelledby="ekspor-akun">

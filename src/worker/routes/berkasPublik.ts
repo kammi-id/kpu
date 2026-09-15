@@ -14,12 +14,17 @@ function headerUnduh(namaAsli: string): string {
 
 /**
  * Publik: unduh satu Berkas Publik tanpa sesi. 404 bila baris D1 atau objek R2
- * tidak ada (mis. objek yatim setelah kegagalan yang tak tertangani).
+ * tidak ada (mis. objek yatim setelah kegagalan yang tak tertangani). Ditolak
+ * pada tahap Selesai (tiket 18): Penghapusan Akhir sudah atau akan mengosongkan
+ * `publik/`, jadi jendela sebelum cron berikutnya tidak boleh tetap melayani unduhan.
  */
-export function buatRuteUnduhBerkasPublik() {
+export function buatRuteUnduhBerkasPublik(sekarang: () => Date) {
 	const route = new Hono<{ Bindings: Env }>();
 
 	route.get("/:id", async (c) => {
+		const tahap = tahapPada(sekarang());
+		if (!layananAktif(tahap)) return c.json({ error: "tahap_tertutup", tahap }, 403);
+
 		const baris = await c.env.DB.prepare('SELECT "r2Key", "namaAsli", "mime" FROM "berkasPublik" WHERE "id" = ?')
 			.bind(c.req.param("id"))
 			.first<BarisUnduh>();
