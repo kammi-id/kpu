@@ -9,6 +9,8 @@ import {
 	type EnvDenganRahasia,
 } from "./lib/auth";
 import { layananAktif, tahapPada } from "./lib/tahap";
+import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
+import { buatRuteAdminPeraturan, buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
 
 const JALUR_AUTH = new Set([
@@ -72,6 +74,11 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
+	app.route("/api/peraturan", buatRutePeraturanPublik());
+	app.route("/api/unduhan", buatRuteUnduhan());
+	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik());
+	app.route("/api/admin/peraturan", buatRuteAdminPeraturan(sekarang));
+	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 
 	app.all("/api/auth/*", async (c) => {
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
