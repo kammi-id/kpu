@@ -1,6 +1,7 @@
 type AktorAudit = "Admin bersama" | "Bakal Calon Ketua Umum" | "Anonim" | "Sistem";
 type TindakanAudit =
 	| "login"
+	| "registrasi"
 	| "onboarding_admin"
 	| "ubah_peraturan"
 	| "unggah_berkas_publik"

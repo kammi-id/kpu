@@ -12,6 +12,10 @@ import { AdminAudit } from "~/react-app/routes/AdminAudit";
 import { AdminPeraturan } from "~/react-app/routes/AdminPeraturan";
 import { Peraturan } from "~/react-app/routes/Peraturan";
 import { Unduhan } from "~/react-app/routes/Unduhan";
+import { Daftar } from "~/react-app/routes/Daftar";
+import { AkunLayout } from "~/react-app/routes/AkunLayout";
+import { AkunBeranda } from "~/react-app/routes/AkunBeranda";
+import { AkunPengaturan } from "~/react-app/routes/AkunPengaturan";
 
 function App() {
 	return (
@@ -25,13 +29,17 @@ function App() {
 					<Route path="unduhan" element={<Unduhan />} />
 					<Route path="onboard" element={<Onboard />} />
 					<Route path="masuk" element={<Masuk />} />
-					<Route path="daftar" element={<SegeraHadir judul="Daftar" />} />
+					<Route path="daftar" element={<Daftar />} />
 					<Route path="*" element={<SegeraHadir judul="Halaman tidak ditemukan" />} />
 				</Route>
 				<Route path="admin" element={<AdminLayout />}>
 					<Route index element={<AdminBeranda />} />
 					<Route path="audit" element={<AdminAudit />} />
 					<Route path="peraturan" element={<AdminPeraturan />} />
+				</Route>
+				<Route path="akun" element={<AkunLayout />}>
+					<Route index element={<AkunBeranda />} />
+					<Route path="pengaturan" element={<AkunPengaturan />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>

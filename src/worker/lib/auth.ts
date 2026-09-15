@@ -1,5 +1,7 @@
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins/admin";
+// Better Auth 1.7.4 does not export a dedicated captcha subpath.
+import { captcha } from "better-auth/plugins";
 
 export type RahasiaEnv = {
 	BETTER_AUTH_SECRET?: string;
@@ -22,7 +24,44 @@ export function buatAuth(env: EnvDenganRahasia) {
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
 		emailAndPassword: { enabled: true, minPasswordLength: 8 },
-		plugins: [admin({ defaultRole: "bacalon" })],
+		user: {
+			additionalFields: {
+				whatsapp: { type: "string", required: false, returned: false },
+				// input: false tanpa defaultValue: mengisi lewat databaseHooks di
+				// bawah, bukan lewat defaultValue, karena defaultValue berlaku untuk
+				// SETIAP pembuatan user (termasuk Admin onboarding via
+				// auth.api.createUser) dan Admin tidak boleh punya data persetujuan.
+				persetujuanVersi: { type: "string", input: false, returned: false },
+				persetujuanPada: { type: "date", input: false, returned: false },
+			},
+		},
+		databaseHooks: {
+			user: {
+				create: {
+					// Berjalan setelah hook peran plugin Admin (plugin didaftar lebih
+					// dulu di array `plugins`, jadi hook-nya lebih dulu dalam rantai),
+					// sehingga `user.role` di sini sudah final: 'bacalon' (default) atau
+					// 'admin' (onboarding). Hanya Bakal Calon yang mendapat persetujuan.
+					// Better Auth belum menginferensi tipe additionalFields plugin lain
+					// (mis. `role` dari plugin Admin) di parameter hook ini, jadi diakses
+					// lewat cast aman alih-alih anotasi tipe yang bentrok dengan bawaan.
+					before: async (user: Record<string, unknown>) => {
+						if (user.role !== "bacalon") return;
+						return {
+							data: { persetujuanVersi: "persetujuan-v1", persetujuanPada: new Date() },
+						};
+					},
+				},
+			},
+		},
+		plugins: [
+			admin({ defaultRole: "bacalon" }),
+			captcha({
+				provider: "cloudflare-turnstile",
+				secretKey: env.TURNSTILE_SECRET_KEY as string,
+				endpoints: ["/sign-up/email"],
+			}),
+		],
 		rateLimit: { enabled: false },
 		session: { expiresIn: 60 * 60 * 24, disableSessionRefresh: true },
 		advanced: {
@@ -31,6 +70,36 @@ export function buatAuth(env: EnvDenganRahasia) {
 			ipAddress: { disableIpTracking: true },
 		},
 	});
+}
+
+export function emailTernormalisasi(email: string) {
+	return email.trim().toLowerCase();
+}
+
+/**
+ * `08…`, `+62…`, dan `62…` diterima; hasil selalu `62` diikuti digit
+ * (menyamai CHECK kolom `whatsapp` di migrasi). Format lain atau panjang
+ * tidak wajar ditolak (null) sebelum sempat memicu galat CHECK di D1.
+ */
+export function whatsappTernormalisasi(whatsapp: string): string | null {
+	const digit = whatsapp.replaceAll(/[^0-9]/g, "");
+	let ternormalisasi: string | null = null;
+	if (digit.startsWith("08")) ternormalisasi = `62${digit.slice(1)}`;
+	else if (digit.startsWith("62")) ternormalisasi = digit;
+	return ternormalisasi && /^62[1-9][0-9]{6,12}$/.test(ternormalisasi) ? ternormalisasi : null;
+}
+
+export async function hmacHex(teks: string, rahasia: string) {
+	const encoder = new TextEncoder();
+	const kunci = await crypto.subtle.importKey(
+		"raw",
+		encoder.encode(rahasia),
+		{ name: "HMAC", hash: "SHA-256" },
+		false,
+		["sign"],
+	);
+	const signature = await crypto.subtle.sign("HMAC", kunci, encoder.encode(teks));
+	return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export async function tokenSama(token: string, rahasia: string) {
