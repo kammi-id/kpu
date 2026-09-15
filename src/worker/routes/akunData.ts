@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { catatAudit } from "../lib/audit";
 import { ambilSesi, buatAuth, rahasiaTersedia, whatsappTernormalisasi, type EnvDenganRahasia } from "../lib/auth";
-import { tanggalLahirValid, tahunLulusDm3Valid } from "../lib/profil";
+import { tanggalLahirValid, tahunLulusDm3Valid, teksSatuBarisValid } from "../lib/profil";
 import { bolehUbahBacalon, layananAktif, tahapPada } from "../lib/tahap";
 
 type BarisAkunData = {
@@ -131,6 +131,7 @@ export function buatRuteAkunData(sekarang: () => Date) {
 
 		const name = body.name.trim();
 		if (name === "") return tolak("nama_wajib", 400);
+		if (!teksSatuBarisValid(name)) return tolak("nama_tidak_valid", 400);
 
 		const whatsapp = whatsappTernormalisasi(body.whatsapp);
 		if (!whatsapp) return tolak("whatsapp_tidak_valid", 400);
@@ -140,6 +141,15 @@ export function buatRuteAkunData(sekarang: () => Date) {
 
 		const tahunLulusDm3 = body.tahunLulusDm3 ?? null;
 		if (tahunLulusDm3 !== null && !tahunLulusDm3Valid(tahunLulusDm3)) return tolak("tahun_lulus_tidak_valid", 400);
+
+		// Kolom teks bebas lain juga berakhir di CSV Ekspor Harian (kecuali
+		// tanggalLahir, sudah dibatasi angka-dan-tanda-hubung oleh POLA_TANGGAL_ISO
+		// di atas) — sama seperti name, tidak boleh memuat karakter kontrol.
+		for (const kolom of KOLOM_TEKS_OPSIONAL) {
+			if (kolom === "tanggalLahir") continue;
+			const nilai = teksAtauNull(body[kolom]);
+			if (nilai !== null && !teksSatuBarisValid(nilai)) return tolak(`${kolom}_tidak_valid`, 400);
+		}
 
 		// Satu `DB.batch` (transaksi implisit D1): user + profil menjadi satu simpan
 		// atomik, bukan dua tulis terpisah yang bisa timpang bila salah satunya gagal.

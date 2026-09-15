@@ -204,6 +204,22 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user"').first<{ jumlah: number }>();
 		expect(jumlah?.jumlah).toBe(1);
 	});
+
+	// Regresi tiket 17: name berakhir sebagai kolom CSV Ekspor Harian
+	// (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah dan merusak
+	// baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
+	it("menolak nama berisi karakter kontrol (CR/LF) tanpa membuat akun (regresi tiket 17)", async () => {
+		turnstileSelaluLolos();
+		const response = await kirimPada(
+			AWAL_PENDAFTARAN,
+			"/api/auth/sign-up/email",
+			jsonDenganTurnstile({ name: "Budi\r\nAdmin", email: "kontrol@example.test", whatsapp: "081234567890", password: "kata-sandi-aman", persetujuan: "true" }),
+		);
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ error: "registrasi_tidak_valid" });
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user"').first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(0);
+	});
 });
 
 describe("login Bakal Calon dan percobaanLogin (seam Worker)", () => {

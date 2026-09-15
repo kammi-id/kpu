@@ -256,6 +256,24 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		expect((await kosong.json<{ error: string }>()).error).toBe("nama_wajib");
 	});
 
+	// Regresi tiket 17: name dan kolom teks bebas berakhir sebagai kolom CSV
+	// Ekspor Harian (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah
+	// dan merusak baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
+	it("menolak karakter kontrol (CR/LF) pada nama dan kolom teks bebas lain, tanpa menyimpan apa pun", async () => {
+		const { cookie, userId } = await daftarBacalon("kontrol@example.test", "081111111121");
+
+		const namaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "Budi\r\nAdmin" }));
+		expect(namaBerisiBaris.status).toBe(400);
+		expect((await namaBerisiBaris.json<{ error: string }>()).error).toBe("nama_tidak_valid");
+
+		const bahasaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ bahasaAsing: "Inggris\r\nArab" }));
+		expect(bahasaBerisiBaris.status).toBe(400);
+		expect((await bahasaBerisiBaris.json<{ error: string }>()).error).toBe("bahasaAsing_tidak_valid");
+
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "profil" WHERE "userId" = ?').bind(userId).first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(0);
+	});
+
 	it("email tidak dapat diubah lewat API ini", async () => {
 		const { cookie, userId } = await daftarBacalon("emailasli@example.test", "081111111119");
 		const response = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ email: "lain@example.test" }));

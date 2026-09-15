@@ -15,6 +15,7 @@ import {
 	whatsappTernormalisasi,
 } from "./lib/auth";
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
+import { teksSatuBarisValid } from "./lib/profil";
 import { ambilKelengkapan } from "./lib/kelengkapan";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
@@ -225,7 +226,9 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 				return c.json({ error: "registrasi_tidak_diizinkan", tahap }, 403);
 			}
 			const whatsapp = whatsappTernormalisasi(body.whatsapp);
-			if (!whatsapp || body.persetujuan !== true && body.persetujuan !== "true") {
+			// name juga berakhir di CSV Ekspor Harian (lib/ekspor.ts): karakter
+			// kontrol (CR/LF) di tengahnya memecah baris CSV — lihat teksSatuBarisValid.
+			if (!whatsapp || !teksSatuBarisValid(body.name) || body.persetujuan !== true && body.persetujuan !== "true") {
 				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
 				return c.json({ error: "registrasi_tidak_valid" }, 400);
 			}

@@ -24,3 +24,18 @@ export function tanggalLahirValid(tanggal: string): boolean {
 export function tahunLulusDm3Valid(tahun: number): boolean {
 	return Number.isInteger(tahun) && tahun >= 1998 && tahun <= 2026;
 }
+
+// eslint-disable-next-line no-control-regex -- karakter kontrol memang yang dicari, bukan kesalahan ketik.
+const POLA_KARAKTER_KONTROL = /[\x00-\x1F\x7F]/;
+
+/**
+ * Field teks bebas (nama, Data pribadi) harus satu baris: tanpa karakter
+ * kontrol (CR, LF, tab, dst). Nilainya berakhir sebagai kolom CSV Ekspor
+ * Harian (lib/ekspor.ts), yang dikutip dengan benar tapi dipecah per baris
+ * mentah oleh `hapusBarisCsvBacalon` — CR/LF di tengah nilai akan memecah
+ * satu baris CSV jadi dua dan merusak baris berikutnya saat Hapus data akun
+ * (tiket 17) menghapus barisnya.
+ */
+export function teksSatuBarisValid(teks: string): boolean {
+	return !POLA_KARAKTER_KONTROL.test(teks);
+}

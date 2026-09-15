@@ -19,7 +19,7 @@ Rujukan: [spec](../spec.md) bagian Ekspor Harian, Snapshot Pemeriksaan, Penghapu
 
 **Blocked by:** 14
 
-**Status:** ready-for-human
+**Status:** done
 
 - [ ] Handler terjadwal pada tahap selain Selesai menulis `ekspor/terkini/bacalon.csv` dan `ekspor/terkini/<userId>.zip` untuk setiap Bakal Calon, lalu audit `ekspor_harian` berhasil beraktor `Sistem` (acceptance 31).
 - [ ] Pengecualian yang tertangkap selama run menghasilkan audit `ekspor_harian` dengan hasil `gagal`.
@@ -38,3 +38,4 @@ Rujukan: [spec](../spec.md) bagian Ekspor Harian, Snapshot Pemeriksaan, Penghapu
 - Sisi klien: halaman `/admin/ekspor` (tautan navigasi baru di `AdminLayout`) untuk CSV Terkini/Pemeriksaan, dan tautan unduh ZIP Terkini/Pemeriksaan pada `/admin/:id`.
 - Uji seam Worker (9 kasus baru) memverifikasi: tak ada data rahasia (`account`/`session`/`verification`/`percobaanLogin`/hash kata sandi) di CSV maupun ZIP; SHA-256 manifest cocok dengan isi ZIP sesungguhnya (pengurai ZIP minimal ditulis khusus untuk uji ini); kolom Minta ditutup hanya "ya" bila `banned` **dan** `banReason = 'penutupan_akun'` bersamaan; kegagalan tertangkap menghasilkan audit gagal; Snapshot 5 Okt tidak pernah ditimpa 6 Okt; run berikutnya menimpa Terkini dan membuang akun yang sudah tidak ada; tahap Selesai tidak menulis; unduhan CSV/ZIP dengan header yang benar, `belum_tersedia`, audit, dan penolakan non-Admin. `npm test`, `npm run lint`, dan `npm run build` lulus.
 - Status tetap `ready-for-human`: walkthrough peramban dengan login sungguhan terhambat oleh isu lokal yang tampaknya tidak berkaitan dengan kode aplikasi — `wrangler dev` lokal menolak setiap origin dengan `INVALID_ORIGIN` pada `sign-in/email` meski `BETTER_AUTH_URL` di `wrangler.json` diubah dan `routes` dilepas sementara (dicoba beberapa kombinasi, semuanya gagal dengan pesan galat yang identik). Kemungkinan terkait resolusi origin spesifik versi Wrangler/Better Auth yang dipakai saat ini dan perlu ditelusuri terpisah dari kedua tiket ini. Rute `/admin/ekspor` sudah diverifikasi terdaftar dan mengarahkan ke `/masuk` tanpa galat konsol saat tanpa sesi; unduhan CSV/ZIP dan seluruh perilaku cron dibuktikan lewat uji seam Worker di atas.
+- Diperiksa dan ditutup 2026-09-16. Selain uji seam Worker (118/118), `buatEksporHarian` dijalankan di luar workerd terhadap R2 tiruan dengan berkas 12 MiB: multipart terkirim sebagai bagian 5 MiB, 5 MiB, 2 MiB; ZIP lolos `unzip -t` dan dapat diekstrak `ditto` (mesin Archive Utility macOS); SHA-256 hasil ekstraksi cocok dengan manifest; run 5 Okt 2026 00.00 WIB menyalin CSV dan ZIP ke `ekspor/pemeriksaan/`; CSV mengutip koma dan tanda kutip dengan benar. Cron `0 17 * * *` = 00.00 WIB. Rute unduh CSV/ZIP hanya Admin, attachment + `nosniff`, `belum_tersedia` bila kosong, audit `ekspor`.

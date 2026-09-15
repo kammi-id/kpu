@@ -17,7 +17,7 @@ Rujukan: [spec](../spec.md) bagian Konfirmasi kata sandi Admin.
 
 **Blocked by:** 14
 
-**Status:** ready-for-human
+**Status:** done
 
 - [ ] Kata sandi Admin yang salah menolak reset dan menambah penghitung `konfirmasi:<HMAC sesiId>`. Kegagalan kelima berturut-turut mencabut sesi Admin tersebut. Keberhasilan mereset penghitung (acceptance 27).
 - [ ] Kata sandi baru panjangnya 16 karakter, hanya dari alfabet tanpa karakter ambigu, dibuat dengan `crypto.getRandomValues` tanpa bias modulo, dan langsung dapat dipakai login (acceptance 27).
@@ -33,3 +33,4 @@ Rujukan: [spec](../spec.md) bagian Konfirmasi kata sandi Admin.
 - Sisi klien: dialog **Reset Password** di `/admin/:id` (`ResetPasswordDialog.tsx`, shadcn Dialog/Base UI) meminta kata sandi Admin, lalu menampilkan kata sandi baru sekali dengan tombol salin.
 - Uji seam Worker (10 kasus di `adminBacalon.test.ts`) mencakup: reset berhasil dan sesi lama ditolak; kata sandi salah ditolak dengan audit gagal; kegagalan kelima mencabut sesi Admin; keberhasilan mereset penghitung (empat kegagalan berikutnya belum mencabut); sesi Bakal Calon ditolak; target selain `bacalon` ditolak. `npm test`, `npm run lint`, dan `npm run build` lulus.
 - Status tetap `ready-for-human`: walkthrough peramban dengan login sungguhan terhambat oleh isu lokal `wrangler dev` yang tidak berkaitan (Better Auth menolak origin lokal meski `BETTER_AUTH_URL`/`routes` diubah — perlu ditelusuri terpisah, lihat catatan di tiket 16). Rute dan komponen sudah diverifikasi merender tanpa galat konsol dan diarahkan ke `/masuk` saat tanpa sesi.
+- Diperiksa dan ditutup 2026-09-16. Kode dicocokkan dengan tiap butir: alfabet 56 karakter tanpa `0 O o 1 l I`, penolakan byte ≥ 224 (tanpa bias modulo), penghitung `konfirmasi:<HMAC sesiId>` direset saat berhasil dan mencabut sesi Admin pada kegagalan kelima, target dibatasi `role = 'bacalon'`, audit `reset_kata_sandi` berhasil/gagal tanpa kata sandi. Dialog klien menampilkan kata sandi sekali dengan tombol salin. `npm test` 118/118 lulus (turun dari 123 karena `e5d510f` sengaja membuang uji `PUT /api/admin/peraturan`; 36 unhandled rejection adalah cacat Better Auth 1.7 yang terdokumentasi di `vitest.config.ts`, exit 0), `npx tsc -b` bersih, `npx eslint .` 0 error. Walkthrough peramban tidak diulang; perilaku server dibuktikan oleh uji seam Worker.
