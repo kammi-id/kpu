@@ -21,7 +21,7 @@ export default defineConfig({
 		}),
 	],
 	test: {
-		setupFiles: ["./src/worker/test/apply-migrations.ts", "./src/worker/test/mock-network.ts"],
+		setupFiles: ["./src/worker/test/apply-migrations.ts", "./src/worker/test/mock-jaringan.ts"],
 		// Better Auth 1.7 (pinned exact per spec) rejects a dangling internal
 		// promise with the same APIError it already turned into a correct HTTP
 		// response, on every expected sign-in/sign-up failure path (wrong

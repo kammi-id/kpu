@@ -88,6 +88,10 @@ export async function validasiUnggahPublik(request: Request): Promise<HasilValid
 		return { ok: false, status: 400, error: "ekstensi_tidak_cocok" };
 	}
 
+	// Dibuffer penuh dengan sengaja: Berkas Publik tidak butuh SHA-256 (tak ada
+	// kolom itu di `berkasPublik`) dan dibatasi 20 MiB, jauh di bawah batas
+	// memori Worker. Tiket 13 (unggahan Bakal Calon) BUTUH digest sambil-jalan
+	// per spec "Kelompok berkas dan unggahan" — jangan salin pola ini untuk itu.
 	const bytes = new Uint8Array(await request.arrayBuffer());
 	if (bytes.byteLength !== contentLength) {
 		return { ok: false, status: 400, error: "ukuran_tidak_cocok" };

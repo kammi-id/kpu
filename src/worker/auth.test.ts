@@ -3,7 +3,7 @@ import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test"
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buatWorker } from "./index";
-import { network } from "./test/network";
+import { jaringan } from "./test/jaringan";
 
 const RAHASIA_UJI = {
 	BETTER_AUTH_SECRET: "s".repeat(32),
@@ -16,13 +16,13 @@ type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
 const AWAL_PENDAFTARAN = new Date("2026-09-16T17:00:00.000Z");
 
 function turnstileSelaluLolos() {
-	network.use(
+	jaringan.use(
 		http.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", () => HttpResponse.json({ success: true })),
 	);
 }
 
 function turnstileSelaluGagal() {
-	network.use(
+	jaringan.use(
 		http.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", () =>
 			HttpResponse.json({ success: false, "error-codes": ["invalid-input-response"] })),
 	);
@@ -123,7 +123,7 @@ beforeEach(async () => {
 
 describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 	it("memverifikasi Turnstile di jaringan, menormalisasi data, dan memaksa peran bacalon (butir 7)", async () => {
-		network.use(
+		jaringan.use(
 			http.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", async ({ request }) => {
 				expect(await request.json()).toMatchObject({
 					secret: RAHASIA_UJI.TURNSTILE_SECRET_KEY,
