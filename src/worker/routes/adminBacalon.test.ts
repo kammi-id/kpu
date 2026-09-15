@@ -100,6 +100,120 @@ beforeEach(async () => {
 });
 
 describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)", () => {
+	it("mereset kata sandi Bakal Calon sekali, mencabut sesi lamanya, dan mencatat audit tanpa kata sandi", async () => {
+		const admin = await sesiAdmin();
+		const sesiLamaBacalon = await sesiBacalon("nabila@example.test", "Nabila Putri");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+
+		expect(response.status).toBe(200);
+		const body = await response.json<{ password: string }>();
+		expect(body.password).toMatch(/^[ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789]{16}$/);
+		expect((await kirim(MASA_PENDAFTARAN, "/api/akun", { headers: { cookie: sesiLamaBacalon } })).status).toBe(401);
+		expect((await kirim(MASA_PENDAFTARAN, "/api/auth/sign-in/email", json({ email: "nabila@example.test", password: body.password }))).status).toBe(200);
+
+		const tersimpan = await env.DB.prepare('SELECT "password" FROM "account" WHERE "userId" = ?').bind(nabila?.id).first<{ password: string }>();
+		expect(tersimpan?.password).not.toBe(body.password);
+		const audit = await env.DB.prepare(
+			'SELECT "aktor", "tindakan", "hasil", "sasaranUserId", "sesiId" FROM "audit" WHERE "tindakan" = ? ORDER BY "waktu" DESC LIMIT 1',
+		).bind("reset_kata_sandi").first();
+		expect(audit).toMatchObject({ aktor: "Admin bersama", tindakan: "reset_kata_sandi", hasil: "berhasil", sasaranUserId: nabila?.id });
+		expect(JSON.stringify(audit)).not.toContain(body.password);
+	});
+
+	it("menolak konfirmasi kata sandi Admin yang salah, mencatat audit gagal, dan tidak mencabut sesi target (acceptance 27)", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("nabila@example.test", "Nabila Putri");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+			...json({ password: "kata-sandi-salah" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+
+		expect(response.status).toBe(401);
+		expect(await response.json()).toEqual({ error: "konfirmasi_kata_sandi_gagal" });
+		const audit = await env.DB.prepare(
+			'SELECT "aktor", "tindakan", "hasil", "sasaranUserId" FROM "audit" WHERE "tindakan" = ? ORDER BY "waktu" DESC LIMIT 1',
+		).bind("reset_kata_sandi").first();
+		expect(audit).toMatchObject({ aktor: "Admin bersama", tindakan: "reset_kata_sandi", hasil: "gagal", sasaranUserId: nabila?.id });
+		expect((await kirim(MASA_PENDAFTARAN, "/api/admin", { headers: { cookie: admin } })).status).toBe(200);
+	});
+
+	it("mencabut sesi Admin yang sedang dipakai setelah lima kegagalan konfirmasi berturut-turut (acceptance 27)", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("nabila@example.test", "Nabila Putri");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+
+		for (let percobaan = 0; percobaan < 5; percobaan += 1) {
+			const gagal = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+				...json({ password: "kata-sandi-salah" }),
+				headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+			});
+			expect(gagal.status).toBe(401);
+		}
+
+		expect((await kirim(MASA_PENDAFTARAN, "/api/admin", { headers: { cookie: admin } })).status).toBe(401);
+	});
+
+	it("mereset penghitung kegagalan Admin setelah konfirmasi berhasil, sehingga empat kegagalan berikutnya belum mencabut sesi (acceptance 27)", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("nabila@example.test", "Nabila Putri");
+		await sesiBacalon("citra@example.test", "Citra Ayu");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+		const citra = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("citra@example.test").first<{ id: string }>();
+
+		for (let percobaan = 0; percobaan < 4; percobaan += 1) {
+			await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+				...json({ password: "kata-sandi-salah" }),
+				headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+			});
+		}
+
+		const berhasil = await kirim(MASA_PENDAFTARAN, `/api/admin/${citra?.id}/reset-password`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+		expect(berhasil.status).toBe(200);
+
+		for (let percobaan = 0; percobaan < 4; percobaan += 1) {
+			await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+				...json({ password: "kata-sandi-salah" }),
+				headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+			});
+		}
+
+		expect((await kirim(MASA_PENDAFTARAN, "/api/admin", { headers: { cookie: admin } })).status).toBe(200);
+	});
+
+	it("menolak reset dari sesi Bakal Calon", async () => {
+		const bacalon = await sesiBacalon("nabila@example.test", "Nabila Putri");
+		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/reset-password`, {
+			...json({ password: "kata-sandi-aman" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: bacalon },
+		});
+
+		expect(response.status).toBe(401);
+	});
+
+	it("menolak reset untuk akun selain Bakal Calon", async () => {
+		const admin = await sesiAdmin();
+		const adminUser = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("admin@example.test").first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${adminUser?.id}/reset-password`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
+
+		expect(response.status).toBe(404);
+	});
+
 	it("menampilkan hanya Bakal Calon yang cocok dengan pencarian dan kelengkapan dari vKelengkapan", async () => {
 		const admin = await sesiAdmin();
 		await sesiBacalon("nabila@example.test", "Nabila Putri");
