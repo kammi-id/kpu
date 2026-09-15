@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { catatAudit } from "../lib/audit";
 import { headerUnduh } from "./akunBerkas";
 import { ambilSesi, buatAuth, rahasiaTersedia, type EnvDenganRahasia } from "../lib/auth";
+import { kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
 import { konfirmasiKataSandiAdmin } from "../lib/konfirmasiAdmin";
 import { layananAktif, tahapPada } from "../lib/tahap";
 
@@ -65,6 +66,10 @@ function kataSandiSementara() {
 	return hasil;
 }
 
+function kategoriEkspor(nilai: string): KategoriEkspor | null {
+	return nilai === "terkini" || nilai === "pemeriksaan" ? nilai : null;
+}
+
 async function adminAtauTolak(c: { env: EnvDenganRahasia; req: { raw: Request }; json: (data: unknown, status?: 401 | 403) => Response }, sekarang: () => Date) {
 	if (!rahasiaTersedia(c.env)) return { response: c.json({ error: "layanan_tidak_tersedia" }, 403) };
 	const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
@@ -74,9 +79,50 @@ async function adminAtauTolak(c: { env: EnvDenganRahasia; req: { raw: Request };
 	return { sesi };
 }
 
+/**
+ * Satu bentuk unduhan dipakai oleh kedua rute /ekspor di bawah (tiket 16): baca
+ * objek R2, 404 "belum_tersedia" bila belum ada, catat audit `ekspor`, lalu alirkan
+ * sebagai attachment + nosniff — sama seperti pola unduhan berkas di bawahnya.
+ */
+async function unduhEkspor(
+	c: { env: EnvDenganRahasia; json: (data: unknown, status?: 404) => Response },
+	sesi: { session: { id: string }; user: { id: string } },
+	sekarang: () => Date,
+	opsi: { kunci: string; namaBerkas: string; tipeBawaan: string; sasaranUserId?: string },
+) {
+	const objek = await c.env.BERKAS.get(opsi.kunci);
+	if (!objek) return c.json({ error: "belum_tersedia" }, 404);
+	await catatAudit(
+		c.env.DB,
+		{ aktor: "Admin bersama", tindakan: "ekspor", hasil: "berhasil", sesiId: sesi.session.id, aktorUserId: sesi.user.id, sasaranUserId: opsi.sasaranUserId },
+		sekarang(),
+	);
+	return new Response(objek.body, {
+		headers: {
+			"content-type": objek.httpMetadata?.contentType ?? opsi.tipeBawaan,
+			"content-disposition": headerUnduh(opsi.namaBerkas),
+			"x-content-type-options": "nosniff",
+		},
+	});
+}
+
 /** Tabel, detail, dan unduh khusus Admin (tiket 14). */
 export function buatRuteAdminBacalon(sekarang: () => Date) {
 	const route = new Hono<{ Bindings: EnvDenganRahasia }>();
+
+	// Rute /ekspor literal harus didaftarkan sebelum /:id di bawah, atau Hono akan
+	// memperlakukan "ekspor" sebagai nilai :id dan menelan permintaan ini (tiket 16).
+	route.get("/ekspor/:kategori", async (c) => {
+		const akses = await adminAtauTolak(c, sekarang);
+		if ("response" in akses) return akses.response;
+		const kategori = kategoriEkspor(c.req.param("kategori"));
+		if (!kategori) return c.notFound();
+		return unduhEkspor(c, akses.sesi, sekarang, {
+			kunci: kunciCsvBacalon(kategori),
+			namaBerkas: `bacalon-${kategori}.csv`,
+			tipeBawaan: "text/csv; charset=utf-8",
+		});
+	});
 
 	route.get("/", async (c) => {
 		const akses = await adminAtauTolak(c, sekarang);
@@ -169,6 +215,20 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			waktu,
 		);
 		return c.json({ password });
+	});
+
+	route.get("/:id/ekspor/:kategori", async (c) => {
+		const akses = await adminAtauTolak(c, sekarang);
+		if ("response" in akses) return akses.response;
+		const kategori = kategoriEkspor(c.req.param("kategori"));
+		if (!kategori) return c.notFound();
+		const id = c.req.param("id");
+		return unduhEkspor(c, akses.sesi, sekarang, {
+			kunci: kunciZipAkun(kategori, id),
+			namaBerkas: `${id}-${kategori}.zip`,
+			tipeBawaan: "application/zip",
+			sasaranUserId: id,
+		});
 	});
 
 	route.get("/:userId/berkas/:id/unduh", async (c) => {

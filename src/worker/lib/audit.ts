@@ -9,7 +9,9 @@ type TindakanAudit =
 	| "hapus_berkas_publik"
 	| "unggah_berkas"
 	| "hapus_berkas"
-	| "reset_kata_sandi";
+	| "reset_kata_sandi"
+	| "ekspor_harian"
+	| "ekspor";
 type HasilAudit = "berhasil" | "gagal" | "ditolak";
 
 export async function catatAudit(
