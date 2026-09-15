@@ -141,51 +141,52 @@ export function buatRuteAkunData(sekarang: () => Date) {
 		const tahunLulusDm3 = body.tahunLulusDm3 ?? null;
 		if (tahunLulusDm3 !== null && !tahunLulusDm3Valid(tahunLulusDm3)) return tolak("tahun_lulus_tidak_valid", 400);
 
+		// Satu `DB.batch` (transaksi implisit D1): user + profil menjadi satu simpan
+		// atomik, bukan dua tulis terpisah yang bisa timpang bila salah satunya gagal.
 		try {
-			await c.env.DB.prepare('UPDATE "user" SET "name" = ?, "whatsapp" = ? WHERE "id" = ?')
-				.bind(name, whatsapp, sesi.user.id)
-				.run();
-		} catch {
-			// Mis. WhatsApp sudah dipakai akun lain menabrak UNIQUE di D1, seperti
-			// registrasi di index.ts: ditangkap supaya tidak pernah 500.
-			return tolak("whatsapp_sudah_dipakai", 400);
-		}
-
-		try {
-			await c.env.DB.prepare(
-				`INSERT INTO "profil"
-				   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-				 ON CONFLICT("userId") DO UPDATE SET
-				   "namaPanggilan" = excluded."namaPanggilan",
-				   "tempatLahir" = excluded."tempatLahir",
-				   "tanggalLahir" = excluded."tanggalLahir",
-				   "asalPw" = excluded."asalPw",
-				   "asalPd" = excluded."asalPd",
-				   "tahunLulusDm3" = excluded."tahunLulusDm3",
-				   "tempatLulusDm3" = excluded."tempatLulusDm3",
-				   "instruktur" = excluded."instruktur",
-				   "capaianHafalan" = excluded."capaianHafalan",
-				   "bahasaAsing" = excluded."bahasaAsing",
-				   "diubahPada" = excluded."diubahPada"`,
-			)
-				.bind(
-					sesi.user.id,
-					teksAtauNull(body.namaPanggilan),
-					teksAtauNull(body.tempatLahir),
-					tanggalLahir,
-					teksAtauNull(body.asalPw),
-					teksAtauNull(body.asalPd),
-					tahunLulusDm3,
-					teksAtauNull(body.tempatLulusDm3),
-					body.instruktur === null || body.instruktur === undefined ? null : Number(body.instruktur),
-					teksAtauNull(body.capaianHafalan),
-					teksAtauNull(body.bahasaAsing),
-					waktu.toISOString(),
+			await c.env.DB.batch([
+				c.env.DB.prepare('UPDATE "user" SET "name" = ?, "whatsapp" = ? WHERE "id" = ?')
+					.bind(name, whatsapp, sesi.user.id),
+				c.env.DB.prepare(
+					`INSERT INTO "profil"
+					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					 ON CONFLICT("userId") DO UPDATE SET
+					   "namaPanggilan" = excluded."namaPanggilan",
+					   "tempatLahir" = excluded."tempatLahir",
+					   "tanggalLahir" = excluded."tanggalLahir",
+					   "asalPw" = excluded."asalPw",
+					   "asalPd" = excluded."asalPd",
+					   "tahunLulusDm3" = excluded."tahunLulusDm3",
+					   "tempatLulusDm3" = excluded."tempatLulusDm3",
+					   "instruktur" = excluded."instruktur",
+					   "capaianHafalan" = excluded."capaianHafalan",
+					   "bahasaAsing" = excluded."bahasaAsing",
+					   "diubahPada" = excluded."diubahPada"`,
 				)
-				.run();
+					.bind(
+						sesi.user.id,
+						teksAtauNull(body.namaPanggilan),
+						teksAtauNull(body.tempatLahir),
+						tanggalLahir,
+						teksAtauNull(body.asalPw),
+						teksAtauNull(body.asalPd),
+						tahunLulusDm3,
+						teksAtauNull(body.tempatLulusDm3),
+						body.instruktur === null || body.instruktur === undefined ? null : Number(body.instruktur),
+						teksAtauNull(body.capaianHafalan),
+						teksAtauNull(body.bahasaAsing),
+						waktu.toISOString(),
+					),
+			]);
 		} catch {
-			return tolak("permintaan_tidak_valid", 400);
+			// WhatsApp sudah dipakai akun lain menabrak UNIQUE di D1, seperti
+			// registrasi di index.ts. Dibedakan dari galat lain lewat query terpisah
+			// supaya pesannya tetap jelas walau batch tidak membawa detail galat.
+			const dipakai = await c.env.DB.prepare('SELECT 1 FROM "user" WHERE "whatsapp" = ? AND "id" != ?')
+				.bind(whatsapp, sesi.user.id)
+				.first();
+			return tolak(dipakai ? "whatsapp_sudah_dipakai" : "permintaan_tidak_valid", 400);
 		}
 
 		await catatAudit(

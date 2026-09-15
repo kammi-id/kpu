@@ -6,6 +6,9 @@ import { ambilKelengkapan } from "../lib/kelengkapan";
 import { bolehUbahBacalon, layananAktif, tahapPada } from "../lib/tahap";
 import { unggahBerkas } from "../lib/unggahBerkas";
 
+/** Spec "Kelompok berkas dan unggahan": paling banyak lima berkas per kelompok. */
+const MAKS_BERKAS_PER_KELOMPOK = 5;
+
 type BarisBerkas = {
 	id: string;
 	userId: string;
@@ -106,7 +109,7 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 			const insert = await c.env.DB.prepare(
 				`INSERT INTO "berkas" ("id", "userId", "kelompok", "jenisRekomendasi", "r2Key", "namaAsli", "mime", "ukuranByte", "sha256", "diunggahPada")
 				 SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-				 WHERE (SELECT COUNT(*) FROM "berkas" WHERE "userId" = ? AND "kelompok" = ?) < 5`,
+				 WHERE (SELECT COUNT(*) FROM "berkas" WHERE "userId" = ? AND "kelompok" = ?) < ${MAKS_BERKAS_PER_KELOMPOK}`,
 			)
 				.bind(
 					id,
@@ -214,7 +217,6 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 		if (!rahasiaTersedia(c.env)) return c.json({ error: "layanan_tidak_tersedia" }, 503);
 		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
 		if (!sesi || (sesi.user.role !== "bacalon" && sesi.user.role !== "admin")) return c.json({ error: "tidak_berwenang" }, 401);
-		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
 
 		const kelompok = kelompokDariParam(c.req.param("kelompok"));
 		if (!kelompok) return c.json({ error: "tidak_ditemukan" }, 404);
@@ -229,6 +231,8 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 		if (!baris || (sesi.user.role !== "admin" && baris.userId !== sesi.user.id)) {
 			return c.json({ error: "tidak_ditemukan" }, 404);
 		}
+		// Urutan tetap sesi → peran → kepemilikan → tahap: kepemilikan sudah diperiksa di atas.
+		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
 
 		const objek = await c.env.BERKAS.get(baris.r2Key);
 		if (!objek) return c.json({ error: "tidak_ditemukan" }, 404);
