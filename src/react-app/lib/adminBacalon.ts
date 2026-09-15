@@ -50,3 +50,26 @@ export async function ambilDetailBacalonAdmin(id: string, signal?: AbortSignal) 
 export function urlUnduhAdmin(userId: string, berkasId: string) {
 	return `/api/admin/${encodeURIComponent(userId)}/berkas/${encodeURIComponent(berkasId)}/unduh`;
 }
+
+export type KategoriEkspor = "terkini" | "pemeriksaan";
+
+export function urlEksporCsv(kategori: KategoriEkspor) {
+	return `/api/admin/ekspor/${kategori}`;
+}
+
+export function urlEksporZip(userId: string, kategori: KategoriEkspor) {
+	return `/api/admin/${encodeURIComponent(userId)}/ekspor/${kategori}`;
+}
+
+export async function resetPasswordAdmin(userId: string, password: string) {
+	const response = await fetch(`/api/admin/${encodeURIComponent(userId)}/reset-password`, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ password }),
+	});
+	if (!response.ok) {
+		const body = await response.json().catch(() => null) as { error?: string } | null;
+		throw new Error(body?.error === "konfirmasi_kata_sandi_gagal" ? "Kata sandi Admin salah." : "Reset kata sandi gagal.");
+	}
+	return (await response.json() as { password: string }).password;
+}

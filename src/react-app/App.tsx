@@ -9,6 +9,7 @@ import { Masuk } from "~/react-app/routes/Masuk";
 import { AdminLayout } from "~/react-app/routes/AdminLayout";
 import { AdminBeranda } from "~/react-app/routes/AdminBeranda";
 import { AdminDetail } from "~/react-app/routes/AdminDetail";
+import { AdminEkspor } from "~/react-app/routes/AdminEkspor";
 import { AdminAudit } from "~/react-app/routes/AdminAudit";
 import { AdminPeraturan } from "~/react-app/routes/AdminPeraturan";
 import { Peraturan } from "~/react-app/routes/Peraturan";
@@ -39,6 +40,7 @@ function App() {
 				<Route path="admin" element={<AdminLayout />}>
 				<Route index element={<AdminBeranda />} />
 				<Route path=":id" element={<AdminDetail />} />
+					<Route path="ekspor" element={<AdminEkspor />} />
 					<Route path="audit" element={<AdminAudit />} />
 					<Route path="peraturan" element={<AdminPeraturan />} />
 				</Route>

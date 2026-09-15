@@ -29,6 +29,7 @@ export function AdminLayout() {
 							<h1 className="font-display text-3xl text-navy">Admin bersama</h1>
 							<nav aria-label="Navigasi Admin" className="flex gap-4 font-semibold text-navy">
 								<NavLink to="/admin" end className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Beranda</NavLink>
+								<NavLink to="/admin/ekspor" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Ekspor</NavLink>
 								<NavLink to="/admin/audit" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Audit</NavLink>
 								<NavLink to="/admin/peraturan" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Peraturan</NavLink>
 							</nav>

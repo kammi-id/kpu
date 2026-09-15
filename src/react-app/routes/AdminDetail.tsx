@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { buttonVariants } from "~/components/ui/button";
 import { KELOMPOK_BERKAS } from "~/lib/kelompok";
+import { ResetPasswordDialog } from "~/react-app/components/ResetPasswordDialog";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
-import { ambilDetailBacalonAdmin, urlUnduhAdmin, type DetailBacalonAdmin } from "~/react-app/lib/adminBacalon";
+import { ambilDetailBacalonAdmin, urlEksporZip, urlUnduhAdmin, type DetailBacalonAdmin } from "~/react-app/lib/adminBacalon";
 
 const LABEL_REKOMENDASI = { A3_PW: "A.3 dari PW", A4_PD: "A.4 dari PD" } as const;
 
@@ -46,8 +47,18 @@ export function AdminDetail() {
 		<div className="flex flex-col gap-8">
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div><h2 className="font-display text-3xl text-navy">{data.name}</h2><p className="mt-2 text-muted-foreground">Status Kelengkapan Berkas: {data.jumlahHadir}/10</p></div>
-				<StatusBadge terbuka={data.lengkap}>{data.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge>
+				<div className="flex items-center gap-3">
+					<StatusBadge terbuka={data.lengkap}>{data.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge>
+					<ResetPasswordDialog userId={data.id} nama={data.name} />
+				</div>
 			</div>
+			<section aria-labelledby="ekspor-akun">
+				<h3 id="ekspor-akun" className="font-display text-xl text-navy">Ekspor akun</h3>
+				<div className="mt-3 flex flex-wrap gap-3">
+					<a href={urlEksporZip(data.id, "terkini")} className={buttonVariants({ variant: "outline", size: "sm" })}>Unduh ZIP Terkini</a>
+					<a href={urlEksporZip(data.id, "pemeriksaan")} className={buttonVariants({ variant: "outline", size: "sm" })}>Unduh ZIP Pemeriksaan</a>
+				</div>
+			</section>
 			<section aria-labelledby="data-pribadi"><h3 id="data-pribadi" className="font-display text-xl text-navy">Data pribadi</h3><dl className="mt-3 grid gap-x-8 gap-y-3 rounded-xl border border-border bg-white p-5 sm:grid-cols-2">{dataPribadi.map(([label, isi]) => <div key={label}><dt className="text-sm font-semibold text-muted-foreground">{label}</dt><dd className="mt-1">{nilai(isi)}</dd></div>)}</dl></section>
 			<section aria-labelledby="kelompok-berkas"><h3 id="kelompok-berkas" className="font-display text-xl text-navy">Sepuluh kelompok berkas</h3><div className="mt-3 divide-y divide-border rounded-xl border border-border bg-white">{KELOMPOK_BERKAS.map((kelompok) => {
 				const berkas = data.berkas.filter((item) => item.kelompok === kelompok.nomor);
