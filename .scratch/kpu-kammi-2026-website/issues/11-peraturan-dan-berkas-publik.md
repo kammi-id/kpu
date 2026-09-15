@@ -14,7 +14,7 @@ Rujukan: [spec](../spec.md) bagian Peraturan dan Berkas Publik, dan Kelompok ber
 
 **Blocked by:** 08
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Hanya sesi Admin yang dapat menyimpan Peraturan serta mengunggah dan menghapus Berkas Publik. Sesi Bakal Calon dan tanpa sesi ditolak.
 - [ ] Markdown Peraturan berisi `<script>`, atribut `on*`, atau tautan `javascript:` tersimpan apa adanya, tidak pernah dijawab sebagai HTML, dan tidak dieksekusi atau dirender sebagai HTML di `/peraturan` maupun pratinjau (acceptance 28).

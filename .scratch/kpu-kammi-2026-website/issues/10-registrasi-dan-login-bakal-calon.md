@@ -19,7 +19,7 @@ Rujukan: [spec](../spec.md) bagian Autentikasi dan sesi, Tahap × kemampuan, dan
 
 **Blocked by:** 08
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Registrasi menuntut nama, email unik, WhatsApp unik ternormalisasi, kata sandi ≥ 8 karakter, centang persetujuan, dan Turnstile yang divalidasi server (acceptance 7).
 - [ ] Registrasi tanpa centang persetujuan ditolak server. `persetujuanVersi` dan `persetujuanPada` diisi server, bukan klien.
