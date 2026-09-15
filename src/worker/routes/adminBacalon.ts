@@ -1,7 +1,12 @@
 import { Hono } from "hono";
+import { catatAudit } from "../lib/audit";
 import { headerUnduh } from "./akunBerkas";
 import { ambilSesi, buatAuth, rahasiaTersedia, type EnvDenganRahasia } from "../lib/auth";
+import { konfirmasiKataSandiAdmin } from "../lib/konfirmasiAdmin";
 import { layananAktif, tahapPada } from "../lib/tahap";
+
+const ALFABET_KATA_SANDI_SEMENTARA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+const BATAS_ACAK_TANPA_BIAS = 256 - (256 % ALFABET_KATA_SANDI_SEMENTARA.length);
 
 type BarisTabel = {
 	id: string;
@@ -42,6 +47,23 @@ type BarisBerkas = {
 	jenisRekomendasi: string | null;
 	diunggahPada: string;
 };
+
+function payloadKonfirmasiKataSandi(data: unknown): data is { password: string } {
+	return Boolean(data && typeof data === "object" && typeof (data as Record<string, unknown>).password === "string");
+}
+
+function kataSandiSementara() {
+	let hasil = "";
+	while (hasil.length < 16) {
+		const angkaAcak = crypto.getRandomValues(new Uint8Array(32));
+		for (const angka of angkaAcak) {
+			if (angka >= BATAS_ACAK_TANPA_BIAS) continue;
+			hasil += ALFABET_KATA_SANDI_SEMENTARA[angka % ALFABET_KATA_SANDI_SEMENTARA.length];
+			if (hasil.length === 16) return hasil;
+		}
+	}
+	return hasil;
+}
 
 async function adminAtauTolak(c: { env: EnvDenganRahasia; req: { raw: Request }; json: (data: unknown, status?: 401 | 403) => Response }, sekarang: () => Date) {
 	if (!rahasiaTersedia(c.env)) return { response: c.json({ error: "layanan_tidak_tersedia" }, 403) };
@@ -96,6 +118,57 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			lengkap: Boolean(detail.lengkap),
 			berkas: berkas.results.map(({ r2Key: _r2Key, userId: _userId, ...item }) => item),
 		});
+	});
+
+	route.post("/:id/reset-password", async (c) => {
+		const akses = await adminAtauTolak(c, sekarang);
+		if ("response" in akses) return akses.response;
+		const sasaranUserId = c.req.param("id");
+		const sasaran = await c.env.DB.prepare('SELECT "id" FROM "user" WHERE "id" = ? AND "role" = ?')
+			.bind(sasaranUserId, "bacalon")
+			.first<{ id: string }>();
+		if (!sasaran) return c.json({ error: "tidak_ditemukan" }, 404);
+
+		const body: unknown = await c.req.json().catch(() => null);
+		if (!payloadKonfirmasiKataSandi(body)) {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "reset_kata_sandi", sasaranUserId, hasil: "gagal" },
+				sekarang(),
+			);
+			return c.json({ error: "permintaan_tidak_valid" }, 400);
+		}
+
+		const auth = buatAuth(c.env);
+		const waktu = sekarang();
+		if (!(await konfirmasiKataSandiAdmin(auth, c.env, akses.sesi, c.req.raw.headers, body.password, waktu))) {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "reset_kata_sandi", sasaranUserId, hasil: "gagal" },
+				waktu,
+			);
+			return c.json({ error: "konfirmasi_kata_sandi_gagal" }, 401);
+		}
+
+		const password = kataSandiSementara();
+		try {
+			await auth.api.setUserPassword({ headers: c.req.raw.headers, body: { userId: sasaran.id, newPassword: password } });
+			await auth.api.revokeUserSessions({ headers: c.req.raw.headers, body: { userId: sasaran.id } });
+		} catch {
+			await catatAudit(
+				c.env.DB,
+				{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "reset_kata_sandi", sasaranUserId, hasil: "gagal" },
+				waktu,
+			);
+			return c.json({ error: "reset_kata_sandi_gagal" }, 500);
+		}
+
+		await catatAudit(
+			c.env.DB,
+			{ aktor: "Admin bersama", aktorUserId: akses.sesi.user.id, sesiId: akses.sesi.session.id, tindakan: "reset_kata_sandi", sasaranUserId, hasil: "berhasil" },
+			waktu,
+		);
+		return c.json({ password });
 	});
 
 	route.get("/:userId/berkas/:id/unduh", async (c) => {
