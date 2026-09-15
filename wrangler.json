@@ -33,7 +33,7 @@
 			// database_id ditulis Operator lewat `wrangler d1 create` (tiket 09 / checklist C7)
 			"binding": "DB",
 			"database_name": "kpu-kammi-2026",
-			"database_id": "00000000-0000-0000-0000-000000000000"
+			"database_id": "f435972e-fbe4-4734-ab9b-9fa4f01c8c18"
 		}
 	],
 	"r2_buckets": [
@@ -44,7 +44,7 @@
 	],
 	"vars": {
 		"BETTER_AUTH_URL": "https://kpu.kammi.id",
-		"TURNSTILE_SITE_KEY": ""
+		"TURNSTILE_SITE_KEY": "0x4AAAAAAE2vx2CfceqJZAVs"
 	},
 	"triggers": {
 		"crons": ["0 17 * * *"]
