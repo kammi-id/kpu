@@ -8,7 +8,7 @@ Rujukan: [spec](../spec.md) bagian Klien React (sitemap Admin), Kelompok berkas 
 
 **Blocked by:** 12, 13
 
-**Status:** ready-for-human
+**Status:** done
 
 - [ ] Tabel menampilkan `x/10` dan label yang sama persis dengan yang dilihat pemilik akun (acceptance 21).
 - [ ] Pencarian nama menyaring tabel. Baris Admin tidak pernah muncul.
@@ -23,3 +23,4 @@ Rujukan: [spec](../spec.md) bagian Klien React (sitemap Admin), Kelompok berkas 
 
 - Diimplementasikan 2026-09-15. Rute Admin membaca hanya user berperan `bacalon` bersama `vKelengkapan`; detail dan unduhan hanya tersedia untuk sesi Admin, dan unduhan dialirkan sebagai attachment dengan `nosniff`.
 - Uji seam Worker mencakup pencarian, detail/404, penolakan sesi Bakal Calon, attachment, batas seluruh tahap hingga Selesai, dan tidak adanya kebocoran data Bakal Calon pada rute API publik. `npm test`, `npm run lint`, dan `npm run build` lulus. Status tetap `ready-for-human` sampai walkthrough peramban melalui login Admin dapat dilakukan dan dicatat.
+- Walkthrough Chrome DevTools 2026-09-15: Admin lokal sekali pakai berhasil masuk; tabel menampilkan data Bakal Calon, pencarian nama mengembalikan baris yang sesuai, dan detail menampilkan data pribadi serta sepuluh kelompok berkas. Console tidak memuat error aplikasi. Data uji dan konfigurasi lokal sementara telah dihapus; perilaku attachment tetap dibuktikan oleh uji seam Worker.
