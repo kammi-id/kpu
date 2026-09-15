@@ -6,7 +6,9 @@ type TindakanAudit =
 	| "ubah_data"
 	| "ubah_peraturan"
 	| "unggah_berkas_publik"
-	| "hapus_berkas_publik";
+	| "hapus_berkas_publik"
+	| "unggah_berkas"
+	| "hapus_berkas";
 type HasilAudit = "berhasil" | "gagal" | "ditolak";
 
 export async function catatAudit(

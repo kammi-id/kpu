@@ -6,21 +6,30 @@ import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { LABEL_TAHAP } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
 
-// Sementara statis (tiket 10): "x/10" nyata dari `vKelengkapan` adalah tiket 13.
-const RINGKASAN_SEMENTARA = { jumlahHadir: 0, lengkap: false };
+// Status Kelengkapan Berkas (tiket 13): dibaca dari /api/akun, sama seperti
+// /akun/berkas — vKelengkapan tetap satu-satunya sumber, tidak dihitung ulang di sini.
+type RingkasanKelengkapan = { jumlahHadir: number; lengkap: boolean };
+const RINGKASAN_AWAL: RingkasanKelengkapan = { jumlahHadir: 0, lengkap: false };
 
 export function AkunLayout() {
 	const navigate = useNavigate();
 	const { data: tahap } = useTahap();
 	const [siap, setSiap] = useState(false);
+	const [ringkasan, setRingkasan] = useState<RingkasanKelengkapan>(RINGKASAN_AWAL);
 
 	useEffect(() => {
 		let dibatalkan = false;
 		void Promise.all([fetch("/api/auth/get-session"), fetch("/api/akun")])
-			.then(async ([sesi, akun]) => ({ sesi: await sesi.json(), ok: sesi.ok && akun.ok }))
-			.then(({ sesi, ok }) => {
+			.then(async ([sesi, akun]) => ({
+				sesi: await sesi.json(),
+				akun: akun.ok ? (await akun.json()) as { jumlahHadir: number; lengkap: boolean } : null,
+				ok: sesi.ok && akun.ok,
+			}))
+			.then(({ sesi, akun, ok }) => {
 				if (!ok || sesi?.user?.role !== "bacalon") return navigate("/masuk", { replace: true });
-				if (!dibatalkan) setSiap(true);
+				if (dibatalkan) return;
+				if (akun) setRingkasan({ jumlahHadir: akun.jumlahHadir, lengkap: akun.lengkap });
+				setSiap(true);
 			})
 			.catch(() => navigate("/masuk", { replace: true }));
 		return () => { dibatalkan = true; };
@@ -44,11 +53,11 @@ export function AkunLayout() {
 								<div>
 									<h1 className="font-display text-3xl text-navy">Akun Bakal Calon</h1>
 									<p className="mt-1 text-sm text-muted-foreground">
-										Status Kelengkapan Berkas: {RINGKASAN_SEMENTARA.jumlahHadir}/10
+										Status Kelengkapan Berkas: {ringkasan.jumlahHadir}/10
 									</p>
 								</div>
-								<StatusBadge terbuka={RINGKASAN_SEMENTARA.lengkap}>
-									{RINGKASAN_SEMENTARA.lengkap ? "Lengkap" : "Belum lengkap"}
+								<StatusBadge terbuka={ringkasan.lengkap}>
+									{ringkasan.lengkap ? "Lengkap" : "Belum lengkap"}
 								</StatusBadge>
 							</div>
 							<nav aria-label="Navigasi akun" className="mt-5 flex flex-wrap gap-4 font-semibold text-navy">
@@ -57,6 +66,9 @@ export function AkunLayout() {
 								</NavLink>
 								<NavLink to="/akun/data" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
 									Data pribadi
+								</NavLink>
+								<NavLink to="/akun/berkas" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
+									Berkas
 								</NavLink>
 								<NavLink to="/akun/pengaturan" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
 									Pengaturan
