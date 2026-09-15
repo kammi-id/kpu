@@ -55,6 +55,9 @@ export function AkunLayout() {
 								<NavLink to="/akun" end className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
 									Ringkasan
 								</NavLink>
+								<NavLink to="/akun/data" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
+									Data pribadi
+								</NavLink>
 								<NavLink to="/akun/pengaturan" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>
 									Pengaturan
 								</NavLink>

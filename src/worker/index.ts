@@ -12,6 +12,7 @@ import {
 	whatsappTernormalisasi,
 } from "./lib/auth";
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
+import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRuteAdminPeraturan, buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
@@ -188,6 +189,7 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/peraturan", buatRutePeraturanPublik());
 	app.route("/api/unduhan", buatRuteUnduhan());
 	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik());
+	app.route("/api/akun/data", buatRuteAkunData(sekarang));
 	app.route("/api/admin/peraturan", buatRuteAdminPeraturan(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.get("/api/konfigurasi-publik", (c) => c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }));

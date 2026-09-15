@@ -15,6 +15,7 @@ import { Unduhan } from "~/react-app/routes/Unduhan";
 import { Daftar } from "~/react-app/routes/Daftar";
 import { AkunLayout } from "~/react-app/routes/AkunLayout";
 import { AkunBeranda } from "~/react-app/routes/AkunBeranda";
+import { AkunData } from "~/react-app/routes/AkunData";
 import { AkunPengaturan } from "~/react-app/routes/AkunPengaturan";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
 				</Route>
 				<Route path="akun" element={<AkunLayout />}>
 					<Route index element={<AkunBeranda />} />
+					<Route path="data" element={<AkunData />} />
 					<Route path="pengaturan" element={<AkunPengaturan />} />
 				</Route>
 			</Routes>

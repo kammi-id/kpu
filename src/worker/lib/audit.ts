@@ -3,6 +3,7 @@ type TindakanAudit =
 	| "login"
 	| "registrasi"
 	| "onboarding_admin"
+	| "ubah_data"
 	| "ubah_peraturan"
 	| "unggah_berkas_publik"
 	| "hapus_berkas_publik";

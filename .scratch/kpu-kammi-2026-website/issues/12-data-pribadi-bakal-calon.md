@@ -8,7 +8,7 @@ Rujukan: [spec](../spec.md) bagian Data pribadi dan Tahap × kemampuan.
 
 **Blocked by:** 10
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Simpan pertama membuat baris `profil`; simpan berikutnya menimpa. Semua kolom boleh kosong.
 - [ ] Tanggal lahir yang bukan tanggal valid dan tahun lulus DM 3 di luar 1998–2026 ditolak dengan pesan jelas.
