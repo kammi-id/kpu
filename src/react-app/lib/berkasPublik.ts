@@ -7,15 +7,10 @@ export type BerkasPublik = {
 	ukuranByte: number;
 };
 
-export type PeraturanPublik = {
-	isiMarkdown: string | null;
-	berkasPublik: BerkasPublik[];
-};
-
-export async function ambilPeraturan(signal?: AbortSignal): Promise<PeraturanPublik> {
+export async function ambilDokumenResmi(signal?: AbortSignal): Promise<BerkasPublik[]> {
 	const response = await fetch("/api/peraturan", { signal });
 	if (!response.ok) throw new Error("Peraturan tidak dapat dimuat");
-	return (await response.json()) as PeraturanPublik;
+	return ((await response.json()) as { berkasPublik: BerkasPublik[] }).berkasPublik;
 }
 
 export async function ambilUnduhan(signal?: AbortSignal): Promise<BerkasPublik[]> {

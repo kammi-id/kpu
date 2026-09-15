@@ -11,7 +11,6 @@ const TABEL_APLIKASI = [
 	"berkas",
 	"percobaanLogin",
 	"berkasPublik",
-	"peraturan",
 	"user",
 	"audit",
 ] as const;

@@ -43,7 +43,6 @@ beforeEach(async () => {
 		env.DB.prepare('DELETE FROM "session"'),
 		env.DB.prepare('DELETE FROM "percobaanLogin"'),
 		env.DB.prepare('DELETE FROM "berkasPublik"'),
-		env.DB.prepare('DELETE FROM "peraturan"'),
 		env.DB.prepare('DELETE FROM "user"'),
 	]);
 });
@@ -54,9 +53,6 @@ describe("Penghapusan Akhir (tiket 18, acceptance 32)", () => {
 		await env.BERKAS.put(`berkas/${crypto.randomUUID()}`, new Uint8Array([1]));
 		await env.BERKAS.put("ekspor/terkini/bacalon.csv", "id,nama\r\n");
 		await env.BERKAS.put(`publik/${crypto.randomUUID()}`, new Uint8Array([2]));
-		await env.DB.prepare(`INSERT INTO "peraturan" ("id", "isiMarkdown", "diubahPada") VALUES (1, 'x', ?)`)
-			.bind(WAKTU_SELESAI.toISOString())
-			.run();
 
 		await jalankanTerjadwal(WAKTU_SELESAI);
 
@@ -64,7 +60,6 @@ describe("Penghapusan Akhir (tiket 18, acceptance 32)", () => {
 		expect((await env.BERKAS.list({ prefix: "ekspor/" })).objects).toHaveLength(0);
 		expect((await env.BERKAS.list({ prefix: "publik/" })).objects).toHaveLength(0);
 		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(userId).first()).toBeNull();
-		expect(await env.DB.prepare('SELECT 1 FROM "peraturan" WHERE "id" = 1').first()).toBeNull();
 
 		const audit = await env.DB.prepare('SELECT "aktor", "tindakan", "hasil", "keterangan" FROM "audit"').all<{
 			aktor: string;

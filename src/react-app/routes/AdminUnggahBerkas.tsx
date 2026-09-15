@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SlotBerkasPublik } from "~/react-app/components/SlotBerkasPublik";
-import { ambilPeraturan, ambilUnduhan, type BerkasPublik } from "~/react-app/lib/berkasPublik";
+import { ambilDokumenResmi, ambilUnduhan, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 
 const FORMULIR = ["Formulir A.1", "Formulir A.2", "Formulir A.3", "Formulir A.4", "Formulir A.5", "Formulir A.6"];
 const JUDUL_SALINAN_PERATURAN = "Peraturan";
@@ -17,15 +17,14 @@ export function AdminUnggahBerkas() {
 	}
 
 	async function muatDokumen() {
-		const data = await ambilPeraturan();
-		setDokumen(data.berkasPublik);
+		setDokumen(await ambilDokumenResmi());
 	}
 
 	useEffect(() => {
-		Promise.all([ambilUnduhan(), ambilPeraturan()])
+		Promise.all([ambilUnduhan(), ambilDokumenResmi()])
 			.then(([dataFormulir, dataDokumen]) => {
 				setFormulir(dataFormulir);
-				setDokumen(dataDokumen.berkasPublik);
+				setDokumen(dataDokumen);
 				setPesan("");
 			})
 			.catch(() => setPesan("Berkas tidak dapat dimuat."));

@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const SKEMA_BERAWALAN = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
 const SKEMA_DIIZINKAN = new Set(["http:", "https:", "mailto:"]);
@@ -29,9 +30,10 @@ export function SafeMarkdown({ children }: { children: string }) {
 				[&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:font-display [&_h3]:text-lg
 				[&_p]:my-3 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6
 				[&_li]:my-1 [&_a]:text-merah [&_a]:underline [&_a]:underline-offset-[0.2em]
-				[&_strong]:font-semibold [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground"
+				[&_strong]:font-semibold [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground
+				[&_table]:my-5 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-3 [&_th]:text-left [&_td]:border [&_td]:border-border [&_td]:p-3"
 		>
-			<ReactMarkdown urlTransform={urlAman}>{children}</ReactMarkdown>
+			<ReactMarkdown remarkPlugins={[remarkGfm]} urlTransform={urlAman}>{children}</ReactMarkdown>
 		</div>
 	);
 }

@@ -107,7 +107,7 @@ CREATE TABLE "audit" (
   "sesiId" TEXT,
   "aktor" TEXT NOT NULL CHECK ("aktor" IN ('Admin bersama', 'Bakal Calon Ketua Umum', 'Anonim', 'Sistem')),
   "aktorUserId" TEXT,
-  "tindakan" TEXT NOT NULL CHECK ("tindakan" IN ('login', 'registrasi', 'reset_kata_sandi', 'unggah_berkas', 'hapus_berkas', 'ubah_data', 'ekspor', 'penutupan_akun', 'hapus_data', 'onboarding_admin', 'ubah_peraturan', 'unggah_berkas_publik', 'hapus_berkas_publik', 'ekspor_harian')),
+  "tindakan" TEXT NOT NULL CHECK ("tindakan" IN ('login', 'registrasi', 'reset_kata_sandi', 'unggah_berkas', 'hapus_berkas', 'ubah_data', 'ekspor', 'penutupan_akun', 'hapus_data', 'onboarding_admin', 'unggah_berkas_publik', 'hapus_berkas_publik', 'ekspor_harian')),
   "sasaranUserId" TEXT,
   "sasaranBerkasId" TEXT,
   "hasil" TEXT NOT NULL CHECK ("hasil" IN ('berhasil', 'gagal', 'ditolak')),
@@ -119,13 +119,6 @@ CREATE TABLE "percobaanLogin" (
   "kunci" TEXT NOT NULL PRIMARY KEY,
   "gagal" INTEGER NOT NULL CHECK ("gagal" >= 0),
   "kedaluwarsa" DATE NOT NULL
-);
-
--- Tabel baru tiket 06
-CREATE TABLE "peraturan" (
-  "id" INTEGER NOT NULL PRIMARY KEY CHECK ("id" = 1),
-  "isiMarkdown" TEXT NOT NULL CHECK (length("isiMarkdown") <= 400000),
-  "diubahPada" DATE NOT NULL
 );
 
 CREATE TABLE "berkasPublik" (

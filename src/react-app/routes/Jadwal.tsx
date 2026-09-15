@@ -2,21 +2,21 @@ import { useEffect, useState } from "react";
 import { JadwalTimeline } from "~/react-app/components/JadwalTimeline";
 import { KartuUnduhanBerkas } from "~/react-app/components/KartuUnduhanBerkas";
 import { PublicPageHero } from "~/react-app/components/PublicPageHero";
-import { ambilPeraturan, type PeraturanPublik } from "~/react-app/lib/berkasPublik";
+import { ambilDokumenResmi, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { useTahap } from "~/react-app/lib/useTahap";
 import bendahara from "~/react-app/assets/illustrations/bendum.png";
 
 export function Jadwal() {
 	const { data, error } = useTahap();
-	const [dataBerkas, setDataBerkas] = useState<PeraturanPublik | null>(null);
+	const [dataBerkas, setDataBerkas] = useState<BerkasPublik[]>([]);
 
 	useEffect(() => {
 		const controller = new AbortController();
-		ambilPeraturan(controller.signal).then(setDataBerkas).catch(() => undefined);
+		ambilDokumenResmi(controller.signal).then(setDataBerkas).catch(() => undefined);
 		return () => controller.abort();
 	}, []);
 
-	const dokumen = dataBerkas?.berkasPublik.find((item) => item.judul === "Jadwal Resmi");
+	const dokumen = dataBerkas.find((item) => item.judul === "Jadwal Resmi");
 
 	return (
 		<PublicPageHero judul="Timeline Resmi KPU" ilustrasi={{ src: bendahara, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>

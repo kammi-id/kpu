@@ -59,20 +59,6 @@ async function sesiAdmin() {
 	return response.headers.get("set-cookie")?.split(";", 1)[0] as string;
 }
 
-async function setelWaktuSesiAdmin(waktu: Date) {
-	await env.DB.prepare(
-		`UPDATE "session" SET "createdAt" = ?, "updatedAt" = ?
-		 WHERE "userId" = (SELECT "id" FROM "user" WHERE "email" = ?)`,
-	)
-		.bind(waktu.toISOString(), waktu.toISOString(), DATA_ADMIN.email)
-		.run();
-}
-
-/**
- * Tiket 10 akan memiliki jalur registrasi lengkap. Untuk batas otorisasi tiket
- * ini, ubah Admin uji yang sudah memiliki sesi menjadi Bakal Calon yang lolos
- * constraint D1, lalu amati rute Worker seperti klien sungguhan.
- */
 async function sesiBacalon() {
 	const cookie = await sesiAdmin();
 	await env.DB.prepare(
@@ -82,14 +68,6 @@ async function sesiBacalon() {
 		.bind("6281234567890", "persetujuan-v1", WAKTU_UJI.toISOString(), DATA_ADMIN.email)
 		.run();
 	return cookie;
-}
-
-async function simpanPeraturan(cookie: string, markdown: string, waktu = WAKTU_UJI) {
-	return kirim(waktu, "/api/admin/peraturan", {
-		method: "PUT",
-		headers: { cookie, "content-type": "text/markdown" },
-		body: markdown,
-	});
 }
 
 async function sisipBerkasPublik(overrides: Partial<Record<string, unknown>> = {}) {
@@ -130,17 +108,15 @@ beforeEach(async () => {
 		env.DB.prepare('DELETE FROM "account"'),
 		env.DB.prepare('DELETE FROM "session"'),
 		env.DB.prepare('DELETE FROM "user"'),
-		env.DB.prepare('DELETE FROM "peraturan"'),
 		env.DB.prepare('DELETE FROM "berkasPublik"'),
 	]);
 });
 
 describe("GET /api/peraturan dan /api/unduhan (publik, seam Worker)", () => {
-	it("mengembalikan bentuk kosong (Menyusul) ketika belum ada Peraturan maupun Berkas Publik", async () => {
+	it("mengembalikan daftar kosong ketika belum ada Berkas Publik kategori peraturan", async () => {
 		const response = await kirim(WAKTU_UJI, "/api/peraturan");
 		expect(response.status).toBe(200);
-		const body = await response.json<{ isiMarkdown: string | null; berkasPublik: unknown[] }>();
-		expect(body.isiMarkdown).toBeNull();
+		const body = await response.json<{ berkasPublik: unknown[] }>();
 		expect(body.berkasPublik).toEqual([]);
 	});
 
@@ -169,80 +145,6 @@ describe("GET /api/peraturan dan /api/unduhan (publik, seam Worker)", () => {
 		const unduhan = await kirim(selesai, "/api/unduhan");
 		expect(unduhan.status).toBe(403);
 		expect(await unduhan.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
-	});
-});
-
-describe("PUT /api/admin/peraturan (seam Worker)", () => {
-	it("menolak tanpa sesi dan menolak sesi Bakal Calon", async () => {
-		expect((await simpanPeraturan("", "# Peraturan")).status).toBe(401);
-		const cookieBacalon = await sesiBacalon();
-		expect((await simpanPeraturan(cookieBacalon, "# Peraturan")).status).toBe(401);
-	});
-
-	it("menyimpan Markdown untuk sesi Admin dan mencatat audit ubah_peraturan beraktor Admin bersama", async () => {
-		const cookie = await sesiAdmin();
-		const response = await simpanPeraturan(cookie, "# PKPU Muktamar XIV");
-		expect(response.status).toBe(200);
-
-		const baris = await env.DB.prepare('SELECT "isiMarkdown" FROM "peraturan" WHERE "id" = 1').first<{
-			isiMarkdown: string;
-		}>();
-		expect(baris?.isiMarkdown).toBe("# PKPU Muktamar XIV");
-
-		const audit = await env.DB.prepare('SELECT "aktor", "tindakan", "hasil" FROM "audit" WHERE "tindakan" = ?')
-			.bind("ubah_peraturan")
-			.all();
-		expect(audit.results).toEqual([{ aktor: "Admin bersama", tindakan: "ubah_peraturan", hasil: "berhasil" }]);
-	});
-
-	it("menimpa tanpa riwayat: simpan kedua mengganti isi simpan pertama", async () => {
-		const cookie = await sesiAdmin();
-		await simpanPeraturan(cookie, "Versi pertama");
-		await simpanPeraturan(cookie, "Versi kedua");
-		const baris = await env.DB.prepare('SELECT "isiMarkdown" FROM "peraturan" WHERE "id" = 1').first<{
-			isiMarkdown: string;
-		}>();
-		expect(baris?.isiMarkdown).toBe("Versi kedua");
-		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "peraturan"').first<{ jumlah: number }>();
-		expect(jumlah?.jumlah).toBe(1);
-	});
-
-	it("acceptance 28: Markdown berisi <script>, atribut on*, dan javascript: tersimpan apa adanya dan tidak pernah dijawab sebagai HTML", async () => {
-		const cookie = await sesiAdmin();
-		const markdownBerbahaya =
-			'# Judul\n\n<script>alert("xss")</script>\n\n<img src=x onerror="alert(1)">\n\n[tautan](javascript:alert(2))';
-		const simpan = await simpanPeraturan(cookie, markdownBerbahaya);
-		expect(simpan.status).toBe(200);
-
-		const baca = await kirim(WAKTU_UJI, "/api/peraturan");
-		expect(baca.headers.get("content-type")).toContain("application/json");
-		const body = await baca.json<{ isiMarkdown: string }>();
-		expect(body.isiMarkdown).toBe(markdownBerbahaya);
-	});
-
-	it("menolak Markdown lebih dari 400.000 karakter tanpa mengubah baris tersimpan", async () => {
-		const cookie = await sesiAdmin();
-		await simpanPeraturan(cookie, "Awal aman");
-		const response = await simpanPeraturan(cookie, "a".repeat(400_001));
-		expect(response.status).toBe(413);
-
-		const baris = await env.DB.prepare('SELECT "isiMarkdown" FROM "peraturan" WHERE "id" = 1').first<{
-			isiMarkdown: string;
-		}>();
-		expect(baris?.isiMarkdown).toBe("Awal aman");
-	});
-
-	it("dapat dilakukan di tahap mana pun selain Selesai, dan ditolak tepat pada tahap Selesai", async () => {
-		const cookie = await sesiAdmin();
-		const pemeriksaan = new Date("2026-10-05T00:00:00.000Z");
-		await setelWaktuSesiAdmin(pemeriksaan);
-		expect((await simpanPeraturan(cookie, "Pemeriksaan", pemeriksaan)).status).toBe(200);
-		const terkunci = new Date("2026-10-12T00:00:00.000Z");
-		await setelWaktuSesiAdmin(terkunci);
-		expect((await simpanPeraturan(cookie, "Terkunci", terkunci)).status).toBe(200);
-		const selesai = new Date("2027-01-24T17:00:00.000Z");
-		await setelWaktuSesiAdmin(selesai);
-		expect((await simpanPeraturan(cookie, "Selesai", selesai)).status).toBe(403);
 	});
 });
 

@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { GerbangLayout } from "~/react-app/components/GerbangLayout";
 import { Layout } from "~/react-app/components/Layout";
@@ -17,10 +16,6 @@ import { AdminEkspor } from "~/react-app/routes/AdminEkspor";
 import { AdminAudit } from "~/react-app/routes/AdminAudit";
 import { AdminUnggahBerkas } from "~/react-app/routes/AdminUnggahBerkas";
 
-// Editor kaya (Tiptap) hanya dibutuhkan admin yang membuka /admin/peraturan —
-// dipisah dari bundel utama agar pengunjung publik dan Bakal Calon di ponsel
-// tidak ikut mengunduhnya (DESIGN.md "Ponsel sebagai alur utama").
-const AdminPeraturan = lazy(() => import("~/react-app/routes/AdminPeraturan").then((m) => ({ default: m.AdminPeraturan })));
 import { Peraturan } from "~/react-app/routes/Peraturan";
 import { Unduhan } from "~/react-app/routes/Unduhan";
 import { Daftar } from "~/react-app/routes/Daftar";
@@ -64,14 +59,6 @@ function App() {
 				<Route path="admin" element={<AdminLayout />}>
 				<Route index element={<AdminBeranda />} />
 				<Route path=":id" element={<AdminDetail />} />
-					<Route
-						path="peraturan"
-						element={
-							<Suspense fallback={<p className="text-muted-foreground">Memuat editor…</p>}>
-								<AdminPeraturan />
-							</Suspense>
-						}
-					/>
 					<Route path="unggah-berkas" element={<AdminUnggahBerkas />} />
 					<Route path="ekspor" element={<AdminEkspor />} />
 					<Route path="audit" element={<AdminAudit />} />

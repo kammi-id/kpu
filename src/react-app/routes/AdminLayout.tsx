@@ -1,4 +1,4 @@
-import { Download, FileText, Home, LogOut, ScrollText, UploadCloud } from "lucide-react";
+import { Download, Home, LogOut, ScrollText, UploadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
@@ -30,7 +30,6 @@ import muktamarLockupWarna from "~/react-app/assets/brand/muktamar-xiv-lockup-wa
 
 const NAV_ADMIN = [
 	{ ke: "/admin", label: "Beranda", ikon: Home, end: true },
-	{ ke: "/admin/peraturan", label: "Peraturan", ikon: FileText, end: false },
 	{ ke: "/admin/unggah-berkas", label: "Unggah Berkas", ikon: UploadCloud, end: false },
 	{ ke: "/admin/ekspor", label: "Ekspor Data", ikon: Download, end: false },
 	{ ke: "/admin/audit", label: "Audit", ikon: ScrollText, end: false },
