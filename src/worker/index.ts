@@ -14,6 +14,7 @@ import {
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
 import { ambilKelengkapan } from "./lib/kelengkapan";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
+import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRuteAdminPeraturan, buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
@@ -392,6 +393,9 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 			.all<BarisAudit>();
 		return c.json({ halaman, adaBerikutnya: audit.results.length === limit, data: audit.results });
 	});
+
+	// Rute statis Admin harus didaftarkan dahulu; detail tiket 14 memakai /:id.
+	app.route("/api/admin", buatRuteAdminBacalon(sekarang));
 
 	app.notFound((c) => c.json({ error: "tidak_ditemukan" }, 404));
 

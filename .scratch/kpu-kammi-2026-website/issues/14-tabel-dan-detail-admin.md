@@ -8,7 +8,7 @@ Rujukan: [spec](../spec.md) bagian Klien React (sitemap Admin), Kelompok berkas 
 
 **Blocked by:** 12, 13
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
 - [ ] Tabel menampilkan `x/10` dan label yang sama persis dengan yang dilihat pemilik akun (acceptance 21).
 - [ ] Pencarian nama menyaring tabel. Baris Admin tidak pernah muncul.
@@ -18,3 +18,8 @@ Rujukan: [spec](../spec.md) bagian Klien React (sitemap Admin), Kelompok berkas 
 - [ ] Respons seluruh API publik tidak memuat nama, kontak, atau berkas Bakal Calon, diuji dengan data Bakal Calon yang ada (acceptance 1).
 - [ ] Antarmuka tidak memuat label `Gugur`, `Lulus`, `Terverifikasi`, `Mengundurkan Diri`, `Calon Ketua Umum` sebagai status, atau `kandidat`.
 - [ ] Butir server diuji lewat seam Worker.
+
+## Comments
+
+- Diimplementasikan 2026-09-15. Rute Admin membaca hanya user berperan `bacalon` bersama `vKelengkapan`; detail dan unduhan hanya tersedia untuk sesi Admin, dan unduhan dialirkan sebagai attachment dengan `nosniff`.
+- Uji seam Worker mencakup pencarian, detail/404, penolakan sesi Bakal Calon, attachment, batas seluruh tahap hingga Selesai, dan tidak adanya kebocoran data Bakal Calon pada rute API publik. `npm test`, `npm run lint`, dan `npm run build` lulus. Status tetap `ready-for-human` sampai walkthrough peramban melalui login Admin dapat dilakukan dan dicatat.

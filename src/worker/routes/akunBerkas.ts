@@ -27,7 +27,7 @@ type BarisDaftar = {
 };
 
 /** `Content-Disposition: attachment` aman untuk nama berkas non-ASCII (RFC 5987/6266). */
-function headerUnduh(namaAsli: string): string {
+export function headerUnduh(namaAsli: string): string {
 	const fallback = namaAsli.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
 	return `attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(namaAsli)}`;
 }
