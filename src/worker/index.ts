@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { catatAudit } from "./lib/audit";
+import { buatEksporHarian } from "./lib/ekspor";
 import {
 	ambilSesi,
 	batasiLimaSesi,
@@ -401,8 +402,12 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 
 	return {
 		fetch: app.fetch,
-		async scheduled(_controller: ScheduledController, _env: Env, _ctx: ExecutionContext) {
-			// Ekspor Harian, Snapshot Pemeriksaan, dan Penghapusan Akhir: lihat tiket 16 dan 18.
+		// Ekspor Harian, Snapshot Pemeriksaan, dan Penghapusan Akhir: lihat tiket 16 dan 18.
+		// `scheduledTime` controller dipakai sebagai "sekarang", bukan `sekarang()` yang
+		// disuntikkan di atas untuk fetch/uji — spec mewajibkan waktu cron sendiri supaya
+		// uji dapat memilih `scheduledTime` lewat seam Worker tanpa memengaruhi jam fetch.
+		async scheduled(controller: ScheduledController, env: Env, _ctx: ExecutionContext) {
+			await buatEksporHarian(env, new Date(controller.scheduledTime));
 		},
 	};
 }
