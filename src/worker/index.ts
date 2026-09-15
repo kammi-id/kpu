@@ -12,6 +12,8 @@ import {
 	whatsappTernormalisasi,
 } from "./lib/auth";
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
+import { ambilKelengkapan } from "./lib/kelengkapan";
+import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRuteAdminPeraturan, buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
@@ -190,6 +192,7 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik());
 	app.route("/api/admin/peraturan", buatRuteAdminPeraturan(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
+	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
 	app.get("/api/konfigurasi-publik", (c) => c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }));
 
 	app.all("/api/auth/*", async (c) => {
@@ -312,16 +315,18 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 		return response;
 	});
 
-	// Sekadar gerbang sesi untuk shell /akun (tiket 10). `vKelengkapan` yang
-	// sesungguhnya dan sidebar `x/10` dinamis adalah tiket 13; di sini sidebar
-	// tetap statis "0/10" / "Belum lengkap" seperti kata tiket.
+	// Gerbang sesi untuk shell /akun, plus Status Kelengkapan Berkas (tiket 13):
+	// sidebar, /akun, dan /akun/berkas membaca `jumlahHadir`/`lengkap` dari sini,
+	// semuanya bersumber dari `vKelengkapan` (satu-satunya sumber, tak ada
+	// perhitungan kedua di TypeScript).
 	app.get("/api/akun", async (c) => {
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
 		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
 		if (!sesi || sesi.user.role !== "bacalon") return c.json({ error: "tidak_berwenang" }, 401);
 		// Tahap × kemampuan: "baca data sendiri" ditolak pada Selesai walau sesi masih hidup.
 		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
-		return c.json({ ok: true });
+		const kelengkapan = await ambilKelengkapan(c.env.DB, sesi.user.id);
+		return c.json({ ok: true, jumlahHadir: kelengkapan?.jumlahHadir ?? 0, lengkap: Boolean(kelengkapan?.lengkap) });
 	});
 
 	app.get("/api/akun/pengaturan", async (c) => {
