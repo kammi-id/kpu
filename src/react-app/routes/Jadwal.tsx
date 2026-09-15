@@ -1,61 +1,39 @@
-import { CheckCircle2, Circle, CircleDot } from "lucide-react";
+import { useEffect, useState } from "react";
+import { JadwalTimeline } from "~/react-app/components/JadwalTimeline";
+import { KartuUnduhanBerkas } from "~/react-app/components/KartuUnduhanBerkas";
+import { PublicPageHero } from "~/react-app/components/PublicPageHero";
+import { ambilPeraturan, type PeraturanPublik } from "~/react-app/lib/berkasPublik";
 import { useTahap } from "~/react-app/lib/useTahap";
-import type { StatusJadwal } from "~/react-app/lib/tahap";
-
-const IKON_STATUS: Record<StatusJadwal, typeof CheckCircle2> = {
-	selesai: CheckCircle2,
-	berjalan: CircleDot,
-	terjadwal: Circle,
-};
-
-const LABEL_STATUS: Record<StatusJadwal, string> = {
-	selesai: "Selesai",
-	berjalan: "Berjalan",
-	terjadwal: "Terjadwal",
-};
+import bendahara from "~/react-app/assets/illustrations/bendum.png";
 
 export function Jadwal() {
 	const { data, error } = useTahap();
+	const [dataBerkas, setDataBerkas] = useState<PeraturanPublik | null>(null);
+
+	useEffect(() => {
+		const controller = new AbortController();
+		ambilPeraturan(controller.signal).then(setDataBerkas).catch(() => undefined);
+		return () => controller.abort();
+	}, []);
+
+	const dokumen = dataBerkas?.berkasPublik.find((item) => item.judul === "Jadwal Resmi");
 
 	return (
-		<section className="mx-auto max-w-[76rem] px-4 py-10 sm:px-8">
-			<h1 className="font-display text-3xl text-navy">Jadwal Resmi</h1>
-			<p className="mt-2 max-w-[60ch] text-muted-foreground">
-				Sepuluh tahap penjaringan Calon Ketua Umum PP KAMMI, seluruhnya dalam waktu WIB.
-			</p>
-
+		<PublicPageHero judul="Timeline Resmi KPU" ilustrasi={{ src: bendahara, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>
 			{error ? (
-				<p className="mt-6 text-marun">Jadwal tidak dapat dimuat. Muat ulang halaman ini.</p>
+				<p className="text-marun">Jadwal tidak dapat dimuat. Muat ulang halaman ini.</p>
 			) : !data ? (
-				<p className="mt-6 text-muted-foreground">Memuat jadwal…</p>
+				<p className="text-muted-foreground">Memuat jadwal…</p>
 			) : (
-				<ol className="mt-6 divide-y divide-border rounded-2xl border border-border bg-white">
-					{data.jadwal.map((item) => {
-						const Ikon = IKON_STATUS[item.status];
-						const berjalan = item.status === "berjalan";
-						return (
-							<li
-								key={item.nama}
-								aria-current={berjalan ? "step" : undefined}
-								className={`flex items-center gap-4 px-5 py-4 ${
-									berjalan ? "bg-merah text-white" : "text-navy"
-								}`}
-							>
-								<Ikon className="size-5 shrink-0" aria-hidden />
-								<span className="flex-1 font-semibold">{item.nama}</span>
-								<span className="tabular-nums">{item.rentangWib} WIB</span>
-								<span
-									className={`text-[0.8125rem] font-bold tracking-[0.08em] uppercase ${
-										berjalan ? "text-white" : "text-muted-foreground"
-									}`}
-								>
-									{LABEL_STATUS[item.status]}
-								</span>
-							</li>
-						);
-					})}
-				</ol>
+				<div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-10">
+					<div className="order-2 lg:order-1">
+						<JadwalTimeline jadwal={data.jadwal} />
+					</div>
+					<div className="order-1 lg:sticky lg:top-8 lg:order-2">
+						<KartuUnduhanBerkas judul="Jadwal Resmi" berkas={dokumen} />
+					</div>
+				</div>
 			)}
-		</section>
+		</PublicPageHero>
 	);
 }

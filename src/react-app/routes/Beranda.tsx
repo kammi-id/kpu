@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { FileText, CalendarDays, Download, Lock, ShieldCheck } from "lucide-react";
+import { FileText, CalendarDays, Download, Lock } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
+import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
-import kpuBersama from "~/react-app/assets/brand/kpu-bersama.webp";
+import ketua from "~/react-app/assets/illustrations/ketum.png";
 
 const PINTU = [
 	{ ke: "/peraturan", label: "Peraturan", ikon: FileText, deskripsi: "Ringkasan PKPU dan dokumen lengkap" },
@@ -18,23 +19,21 @@ export function Beranda() {
 
 	return (
 		<>
-			<section className="bg-merah text-white">
-				<div className="mx-auto grid max-w-[76rem] gap-8 px-4 py-10 sm:px-8 sm:py-14 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
+			<section className={KELAS_SEKSI_HERO}>
+				<div className={KELAS_GRID_HERO}>
 					<div>
-						<h1 className="font-display text-[clamp(2.5rem,8vw,5.25rem)] leading-[0.95] font-normal uppercase [text-shadow:0.02em_0.02em_0_var(--marun),0.04em_0.04em_0_var(--marun)]">
-							Penjaringan Calon Ketua Umum PP KAMMI
-						</h1>
-						<p className="mt-4 text-lg font-semibold tabular-nums">Ambon · 27–31 Oktober 2026</p>
+						<h1 className={KELAS_JUDUL_HERO}>Pendaftaran Bakal Calon Ketua Umum PP KAMMI</h1>
+						<p className="mt-4 text-lg font-semibold">Muktamar KAMMI XIV Ambon</p>
 					</div>
 					<img
-						src={kpuBersama}
-						alt="Foto bersama KPU Muktamar XIV KAMMI"
-						className="hidden w-full rounded-2xl border-4 border-white shadow-[0_28px_60px_-28px_rgb(70_0_8_/_0.55)] lg:block"
+						src={ketua}
+						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
+						className={`relative z-0 -mb-8 sm:-mb-10 lg:-mb-12 ${KELAS_ILUSTRASI_HERO}`}
 					/>
 				</div>
 			</section>
 
-			<section className="mx-auto -mt-6 max-w-[76rem] px-4 sm:-mt-10 sm:px-8">
+			<section className="relative z-10 mx-auto -mt-6 max-w-[76rem] px-4 sm:-mt-10 sm:px-8">
 				<div className="rounded-2xl bg-white p-5 text-navy shadow-[0_28px_60px_-28px_rgb(70_0_8_/_0.55),0_2px_8px_rgb(70_0_8_/_0.14)] sm:p-8">
 					{error ? (
 						<p className="text-marun">
@@ -125,16 +124,6 @@ export function Beranda() {
 						</span>
 					</Link>
 				))}
-			</section>
-
-			<section className="mx-auto max-w-[76rem] px-4 pb-12 sm:px-8">
-				<div className="flex items-start gap-3 rounded-xl bg-hijau px-5 py-4 text-white">
-					<ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden />
-					<p className="text-[0.9375rem] leading-relaxed">
-						Situs ini tidak menayangkan identitas, profil, status, atau berkas Bakal Calon
-						Ketua Umum kepada publik.
-					</p>
-				</div>
 			</section>
 		</>
 	);

@@ -25,7 +25,7 @@ export function Onboard() {
 	}
 
 	return (
-		<section className="mx-auto flex max-w-[36rem] px-4 py-10 sm:px-8">
+		<section className="w-full max-w-xl">
 			<Card className="w-full">
 				<CardHeader>
 					<CardTitle className="font-display text-2xl text-navy">Onboarding Admin</CardTitle>

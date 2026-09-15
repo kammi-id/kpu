@@ -1,44 +1,142 @@
+import { Download, FileText, Home, LogOut, ScrollText, UploadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Footer } from "~/react-app/components/Footer";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarHeader,
+	SidebarInset,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarProvider,
+	SidebarTrigger,
+} from "~/components/ui/sidebar";
+import muktamarLockupWarna from "~/react-app/assets/brand/muktamar-xiv-lockup-warna.webp";
+
+const NAV_ADMIN = [
+	{ ke: "/admin", label: "Beranda", ikon: Home, end: true },
+	{ ke: "/admin/peraturan", label: "Peraturan", ikon: FileText, end: false },
+	{ ke: "/admin/unggah-berkas", label: "Unggah Berkas", ikon: UploadCloud, end: false },
+	{ ke: "/admin/ekspor", label: "Ekspor Data", ikon: Download, end: false },
+	{ ke: "/admin/audit", label: "Audit", ikon: ScrollText, end: false },
+];
 
 export function AdminLayout() {
 	const navigate = useNavigate();
+	const { pathname } = useLocation();
 	const [siap, setSiap] = useState(false);
 
 	useEffect(() => {
 		let dibatalkan = false;
+		async function tanpaSesi() {
+			// Belum ada sesi Admin: bila Admin bersama belum pernah dibuat, langsung
+			// ke onboarding alih-alih menyuruh pengguna login ke akun yang tidak ada.
+			const onboardTersedia = await fetch("/api/konfigurasi-publik")
+				.then((response) => response.json())
+				.then((body: { onboardTersedia?: boolean }) => Boolean(body.onboardTersedia))
+				.catch(() => false);
+			if (!dibatalkan) navigate(onboardTersedia ? "/onboard" : "/masuk", { replace: true });
+		}
 		void fetch("/api/auth/get-session")
 			.then(async (response) => ({ response, body: await response.json() }))
 			.then(({ response, body }) => {
-				if (!response.ok || !body?.session || body.user?.role !== "admin") return navigate("/masuk", { replace: true });
+				if (!response.ok || !body?.session || body.user?.role !== "admin") return tanpaSesi();
 				if (!dibatalkan) setSiap(true);
 			})
-			.catch(() => navigate("/masuk", { replace: true }));
+			.catch(() => tanpaSesi());
 		return () => {
 			dibatalkan = true;
 		};
 	}, [navigate]);
 
+	async function keluar() {
+		await fetch("/api/auth/sign-out", { method: "POST" });
+		navigate("/masuk", { replace: true });
+	}
+
+	if (!siap) {
+		return <p className="mx-auto max-w-[76rem] px-4 py-10 text-muted-foreground sm:px-8">Memeriksa sesi…</p>;
+	}
+
 	return (
-		<div className="flex min-h-svh flex-col">
-			<main className="flex-1">
-				{siap ? (
-					<section className="mx-auto max-w-[76rem] px-4 py-10 sm:px-8">
-						<header className="flex flex-col gap-3 border-b border-red-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
-							<h1 className="font-display text-3xl text-navy">Admin bersama</h1>
-							<nav aria-label="Navigasi Admin" className="flex gap-4 font-semibold text-navy">
-								<NavLink to="/admin" end className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Beranda</NavLink>
-								<NavLink to="/admin/ekspor" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Ekspor</NavLink>
-								<NavLink to="/admin/audit" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Audit</NavLink>
-								<NavLink to="/admin/peraturan" className={({ isActive }) => isActive ? "underline decoration-2 underline-offset-4" : ""}>Peraturan</NavLink>
-							</nav>
-						</header>
-						<div className="pt-6"><Outlet /></div>
-					</section>
-				) : <p className="mx-auto max-w-[76rem] px-4 py-10 text-muted-foreground sm:px-8">Memeriksa sesi…</p>}
-			</main>
-			<Footer />
-		</div>
+		<SidebarProvider className="h-svh min-h-0 overflow-hidden">
+			<Sidebar>
+				<SidebarHeader className="px-3 pt-3">
+					<NavLink to="/admin" className="flex items-center gap-2.5" aria-label="Beranda Admin">
+						<img src={muktamarLockupWarna} alt="Muktamar KAMMI XIV" className="h-10 w-auto" />
+						<span className="text-xs leading-tight font-semibold text-navy">
+							Komisi Penjaringan Umum
+							<br />
+							Muktamar KAMMI XIV
+						</span>
+					</NavLink>
+				</SidebarHeader>
+				<SidebarContent>
+					<SidebarGroup>
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{NAV_ADMIN.map((item) => (
+									<SidebarMenuItem key={item.ke}>
+										<SidebarMenuButton
+											render={<NavLink to={item.ke} end={item.end} />}
+											isActive={item.end ? pathname === item.ke : pathname.startsWith(item.ke)}
+										>
+											<item.ikon />
+											<span>{item.label}</span>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				</SidebarContent>
+				<SidebarFooter>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<Dialog>
+								<SidebarMenuButton render={<DialogTrigger />}>
+									<LogOut />
+									<span>Keluar</span>
+								</SidebarMenuButton>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Keluar dari Admin bersama?</DialogTitle>
+										<DialogDescription>Sesi ini akan diakhiri di perangkat ini. Anggota KPU lain tetap dapat masuk kembali dengan kredensial yang sama.</DialogDescription>
+									</DialogHeader>
+									<DialogFooter>
+										<DialogClose render={<Button variant="outline" />}>Batal</DialogClose>
+										<Button variant="destructive" onClick={() => void keluar()}>Keluar</Button>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarFooter>
+			</Sidebar>
+			<SidebarInset className="h-svh min-h-0 overflow-hidden">
+				<header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
+					<SidebarTrigger />
+					<p className="text-sm font-semibold text-muted-foreground">Admin bersama</p>
+				</header>
+				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-8 sm:px-8">
+					<Outlet />
+				</div>
+			</SidebarInset>
+		</SidebarProvider>
 	);
 }

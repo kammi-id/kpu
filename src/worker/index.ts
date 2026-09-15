@@ -199,7 +199,14 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/admin/peraturan", buatRuteAdminPeraturan(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
-	app.get("/api/konfigurasi-publik", (c) => c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }));
+	app.get("/api/konfigurasi-publik", async (c) => {
+		const onboardTersedia =
+			rahasiaTersedia(c.env) &&
+			Boolean(c.env.ONBOARD_TOKEN) &&
+			layananAktif(tahapPada(sekarang())) &&
+			!(await c.env.DB.prepare('SELECT 1 FROM "user" WHERE "role" = ?').bind("admin").first());
+		return c.json({ turnstileSiteKey: c.env.TURNSTILE_SITE_KEY, onboardTersedia });
+	});
 
 	app.all("/api/auth/*", async (c) => {
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();

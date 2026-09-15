@@ -15,7 +15,15 @@ export default defineConfig({
 			return {
 				wrangler: { configPath: "./wrangler.json" },
 				miniflare: {
-					bindings: { TEST_MIGRATIONS: migrations },
+					// Pinned so the suite is independent of a developer's local `.dev.vars`
+					// (e.g. BETTER_AUTH_URL overridden for `npm run dev`), which Miniflare
+					// otherwise loads automatically and which would desync from the
+					// `https://kpu.kammi.id` origin every test request sends.
+					bindings: {
+						TEST_MIGRATIONS: migrations,
+						BETTER_AUTH_URL: "https://kpu.kammi.id",
+						TURNSTILE_SITE_KEY: "",
+					},
 				},
 			};
 		}),

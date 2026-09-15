@@ -37,7 +37,7 @@ export function Daftar() {
 	}
 
 	return (
-		<section className="mx-auto flex max-w-[42rem] px-4 py-10 sm:px-8">
+		<section className="w-full max-w-2xl">
 			<Card className="w-full">
 				<CardHeader>
 					<CardTitle className="font-display text-2xl text-navy">Daftar Bakal Calon Ketua Umum</CardTitle>

@@ -1,4 +1,24 @@
-import muktamarLockupPutih from "~/react-app/assets/brand/muktamar-xiv-lockup-putih.webp";
+import { Globe } from "lucide-react";
+import kammi from "~/react-app/assets/brand/kammi.webp";
+
+function IkonInstagram({ className }: { className?: string }) {
+	return (
+		<svg
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={2}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden
+			className={className}
+		>
+			<rect x="3" y="3" width="18" height="18" rx="5" />
+			<circle cx="12" cy="12" r="4" />
+			<circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+		</svg>
+	);
+}
 
 /**
  * Komponen tetap di setiap rute (acceptance 34). Penegasan bahwa KPU adalah
@@ -7,17 +27,42 @@ import muktamarLockupPutih from "~/react-app/assets/brand/muktamar-xiv-lockup-pu
 export function Footer() {
 	return (
 		<footer className="bg-marun text-white">
-			<div className="mx-auto flex max-w-[76rem] flex-col gap-3 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-				<img src={muktamarLockupPutih} alt="Muktamar KAMMI XIV" className="h-8 w-auto" />
-				<p className="max-w-[56ch] text-sm leading-relaxed text-white">
-					Komisi Penjaringan Umum (KPU) Muktamar XIV KAMMI adalah badan internal Muktamar
-					KAMMI. KPU tidak memiliki hubungan atau afiliasi dengan penyelenggara pemilihan
-					umum nasional. Situs resmi:{" "}
-					<a href="https://kammi.id" className="underline underline-offset-[0.2em]">
-						kammi.id
-					</a>
-					.
-				</p>
+			<div className="mx-auto max-w-[76rem] px-4 py-6 sm:px-8">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex items-center gap-3">
+						<img src={kammi} alt="Logo Pengurus Pusat KAMMI" className="h-9 w-auto" />
+						<span className="text-sm font-semibold">
+							Kesatuan Aksi
+							<br />
+							Mahasiswa Muslim Indonesia
+						</span>
+					</div>
+					<div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+						<a
+							href="https://www.kammi.id"
+							className="flex items-center gap-2 text-sm font-semibold underline underline-offset-[0.2em]"
+						>
+							<Globe className="size-4" aria-hidden />
+							www.kammi.id
+						</a>
+						<a
+							href="https://www.instagram.com/muktamarxivkammi/"
+							className="flex items-center gap-2 text-sm font-semibold underline underline-offset-[0.2em]"
+						>
+							<IkonInstagram className="size-4" />
+							muktamarxivkammi
+						</a>
+					</div>
+				</div>
+				<div className="mt-6 border-t border-white/20 pt-4 text-xs leading-relaxed">
+					<p className="max-w-[70ch]">
+						Komisi Penjaringan Umum (KPU) Muktamar XIV KAMMI adalah badan internal Muktamar KAMMI dan
+						tidak memiliki hubungan atau afiliasi dengan penyelenggara pemilihan umum nasional. Situs
+						ini tidak menayangkan identitas, profil, status, atau berkas Bakal Calon Ketua Umum kepada
+						publik.
+					</p>
+					<p className="mt-2">© 2026 Komisi Penjaringan Umum Muktamar XIV KAMMI.</p>
+				</div>
 			</div>
 		</footer>
 	);

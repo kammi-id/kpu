@@ -320,6 +320,17 @@ describe("onboarding dan sesi Admin (seam Worker)", () => {
 		]);
 	});
 
+	it("menandai onboardTersedia di /api/konfigurasi-publik sebelum dan sesudah onboarding, dan bila secret hilang", async () => {
+		expect((await (await kirim("/api/konfigurasi-publik")).json() as { onboardTersedia: boolean }).onboardTersedia).toBe(true);
+		expect((await onboarding()).status).toBe(201);
+		expect((await (await kirim("/api/konfigurasi-publik")).json() as { onboardTersedia: boolean }).onboardTersedia).toBe(false);
+
+		await env.DB.prepare('DELETE FROM "user" WHERE "role" = ?').bind("admin").run();
+		const tanpaSecret = await kirim("/api/konfigurasi-publik", undefined, { HMAC_SECRET: undefined });
+		expect(tanpaSecret.status).toBe(200);
+		expect((await tanpaSecret.json() as { onboardTersedia: boolean }).onboardTersedia).toBe(false);
+	});
+
 	it("membatasi HTTP Better Auth ke endpoint yang dipakai", async () => {
 		expect((await kirim("/api/auth/update-user", json({ name: "Tidak boleh" }))).status).toBe(404);
 		expect((await kirim("/api/auth/admin/create-user", json(DATA_ADMIN))).status).toBe(404);

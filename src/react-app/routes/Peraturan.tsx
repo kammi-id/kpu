@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { DaftarBerkasPublik } from "~/react-app/components/DaftarBerkasPublik";
+import { KartuUnduhanBerkas } from "~/react-app/components/KartuUnduhanBerkas";
+import { PublicPageHero } from "~/react-app/components/PublicPageHero";
 import { SafeMarkdown } from "~/react-app/components/SafeMarkdown";
 import { ambilPeraturan, type PeraturanPublik } from "~/react-app/lib/berkasPublik";
+import sekjen from "~/react-app/assets/illustrations/sekjend.png";
 
 export function Peraturan() {
 	const [data, setData] = useState<PeraturanPublik | null>(null);
@@ -15,19 +17,24 @@ export function Peraturan() {
 		return () => controller.abort();
 	}, []);
 
+	const dokumen = data?.berkasPublik.find((item) => item.judul === "Peraturan");
+
 	return (
-		<section className="mx-auto max-w-[76rem] px-4 py-10 sm:px-8">
-			<h1 className="font-display text-3xl text-navy">Peraturan</h1>
-			<p className="mt-2 max-w-[60ch] text-muted-foreground">Ringkasan PKPU dan dokumen peraturan KPU Muktamar XIV KAMMI.</p>
-			{gagal ? <p className="mt-6 text-marun">Peraturan tidak dapat dimuat. Muat ulang halaman ini.</p> : !data ? <p className="mt-6 text-muted-foreground">Memuat Peraturan…</p> : (
-				<div className="mt-6 space-y-10">
-					{data.isiMarkdown ? <SafeMarkdown>{data.isiMarkdown}</SafeMarkdown> : <p className="text-muted-foreground">Menyusul.</p>}
-					<section aria-labelledby="dokumen-peraturan">
-						<h2 id="dokumen-peraturan" className="font-display text-2xl text-navy">Dokumen Peraturan</h2>
-						<div className="mt-4"><DaftarBerkasPublik berkas={data.berkasPublik} /></div>
-					</section>
+		<PublicPageHero judul="Peraturan KPU" ilustrasi={{ src: sekjen, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>
+			{gagal ? (
+				<p className="text-marun">Peraturan tidak dapat dimuat. Muat ulang halaman ini.</p>
+			) : !data ? (
+				<p className="text-muted-foreground">Memuat Peraturan…</p>
+			) : (
+				<div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-10">
+					<div className="order-2 lg:order-1">
+						{data.isiMarkdown ? <SafeMarkdown>{data.isiMarkdown}</SafeMarkdown> : <p className="text-muted-foreground">Menyusul.</p>}
+					</div>
+					<div className="order-1 lg:sticky lg:top-8 lg:order-2">
+						<KartuUnduhanBerkas judul="Dokumen Peraturan" berkas={dokumen} />
+					</div>
 				</div>
 			)}
-		</section>
+		</PublicPageHero>
 	);
 }

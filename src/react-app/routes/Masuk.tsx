@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -11,6 +11,21 @@ export function Masuk() {
 	const [mengirim, setMengirim] = useState(false);
 	const [perluTurnstile, setPerluTurnstile] = useState(false);
 	const [tokenTurnstile, setTokenTurnstile] = useState<string | null>(null);
+
+	useEffect(() => {
+		let dibatalkan = false;
+		// Belum ada Admin bersama: tidak ada gunanya menampilkan formulir login,
+		// arahkan langsung ke onboarding.
+		void fetch("/api/konfigurasi-publik")
+			.then((response) => response.json())
+			.then((body: { onboardTersedia?: boolean }) => {
+				if (!dibatalkan && body.onboardTersedia) navigate("/onboard", { replace: true });
+			})
+			.catch(() => undefined);
+		return () => {
+			dibatalkan = true;
+		};
+	}, [navigate]);
 
 	async function kirim(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -33,7 +48,7 @@ export function Masuk() {
 	}
 
 	return (
-		<section className="mx-auto flex max-w-[30rem] px-4 py-10 sm:px-8">
+		<section className="w-full max-w-120">
 			<Card className="w-full">
 				<CardHeader>
 					<CardTitle className="font-display text-2xl text-navy">Masuk</CardTitle>
