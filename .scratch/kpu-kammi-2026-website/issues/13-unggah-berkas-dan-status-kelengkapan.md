@@ -18,7 +18,7 @@ Rujukan: [spec](../spec.md) bagian Kelompok berkas dan unggahan, Skema D1 (`vKel
 
 **Blocked by:** 10
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Kelompok 6 hanya menerima PDF. Sembilan kelompok lain menerima PDF, JPEG, dan PNG (acceptance 14).
 - [ ] Berkas > 20 MiB, berkas tanpa `Content-Length`, dan berkas keenam dalam satu kelompok ditolak dengan alasan jelas (acceptance 15).
