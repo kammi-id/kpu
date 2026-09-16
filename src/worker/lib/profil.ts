@@ -20,7 +20,7 @@ export function tanggalLahirValid(tanggal: string): boolean {
 	);
 }
 
-/** Batas tahun lulus DM 3, mencerminkan CHECK D1 `"tahunLulusDm3" BETWEEN 1998 AND 2026`. */
+/** Batas tahun lulus AB 3, mencerminkan CHECK D1 `"tahunLulusDm3" BETWEEN 1998 AND 2026`. */
 export function tahunLulusDm3Valid(tahun: number): boolean {
 	return Number.isInteger(tahun) && tahun >= 1998 && tahun <= 2026;
 }

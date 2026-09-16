@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { KartuUnduhanBerkas } from "~/react-app/components/KartuUnduhanBerkas";
 import { PublicPageHero } from "~/react-app/components/PublicPageHero";
 import { SafeMarkdown } from "~/react-app/components/SafeMarkdown";
-import peraturanKpu from "../../../.scratch/pkpu-split/out/Peraturan KPU Muktamar KAMMI 2026.md?raw";
+import peraturanKpu from "~/content/peraturan.md?raw";
 import { ambilDokumenResmi, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import sekjen from "~/react-app/assets/illustrations/sekjend.png";
 

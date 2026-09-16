@@ -206,7 +206,7 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		});
 	});
 
-	it("menolak tanggal lahir yang bukan tanggal kalender sungguhan dan tahun lulus DM 3 di luar 1998–2026", async () => {
+	it("menolak tanggal lahir yang bukan tanggal kalender sungguhan dan tahun lulus AB 3 di luar 1998–2026", async () => {
 		const { cookie } = await daftarBacalon("tanggal@example.test", "081111111115");
 
 		const tanggalSalahFormat = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ tanggalLahir: "15-01-2000" }));

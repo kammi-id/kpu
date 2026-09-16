@@ -91,7 +91,11 @@ function gabung(...bagianBytes: Uint8Array[]) {
 }
 
 function csv(nilai: string | number | null) {
-	const teks = nilai === null ? "" : String(nilai);
+	let teks = nilai === null ? "" : String(nilai);
+	// Formula injection (OWASP CSV Injection): awalan =+-@ atau tab dieksekusi sebagai
+	// formula oleh Excel/Sheets saat Admin membuka CSV ini. Bakal Calon mengendalikan
+	// penuh field ini lewat PUT /api/akun/data dan pendaftaran.
+	if (/^[=+\-@\t]/.test(teks)) teks = `'${teks}`;
 	return /[",\r\n]/.test(teks) ? `"${teks.replaceAll('"', '""')}"` : teks;
 }
 

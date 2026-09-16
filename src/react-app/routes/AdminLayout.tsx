@@ -2,6 +2,7 @@ import { Download, Home, LogOut, ScrollText, UploadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
+import { Footer } from "~/react-app/components/Footer";
 import {
 	Dialog,
 	DialogClose,
@@ -132,8 +133,11 @@ export function AdminLayout() {
 					<SidebarTrigger />
 					<p className="text-sm font-semibold text-muted-foreground">Admin bersama</p>
 				</header>
-				<div className="min-h-0 flex-1 overflow-y-auto px-4 py-8 sm:px-8">
-					<Outlet />
+				<div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+					<div className="flex-1 px-4 py-8 sm:px-8">
+						<Outlet />
+					</div>
+					<Footer />
 				</div>
 			</SidebarInset>
 		</SidebarProvider>

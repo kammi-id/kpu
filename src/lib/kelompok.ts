@@ -20,7 +20,7 @@ export interface KelompokBerkas {
 
 export const KELOMPOK_BERKAS: readonly KelompokBerkas[] = [
 	{ nomor: 1, label: "Formulir A.1 yang telah ditandatangani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 2, label: "KTA atau Sertifikat DM 3", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
+	{ nomor: 2, label: "KTA atau Sertifikat AB 3", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
 	{ nomor: 3, label: "SK kepengurusan PD dan/atau PW", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
 	{ nomor: 4, label: "Sertifikat atau SK Instruktur KAMMI", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
 	{ nomor: 5, label: "Surat keterangan sehat jasmani dan rohani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },

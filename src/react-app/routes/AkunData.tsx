@@ -55,7 +55,7 @@ const PESAN_GALAT: Record<string, string> = {
 	whatsapp_tidak_valid: "Nomor WhatsApp tidak valid. Gunakan format 08…, +62…, atau 62….",
 	whatsapp_sudah_dipakai: "Nomor WhatsApp ini sudah dipakai akun lain.",
 	tanggal_lahir_tidak_valid: "Tanggal lahir bukan tanggal kalender yang sah.",
-	tahun_lulus_tidak_valid: "Tahun lulus DM 3 harus antara 1998 dan 2026.",
+	tahun_lulus_tidak_valid: "Tahun lulus AB 3 harus antara 1998 dan 2026.",
 	permintaan_tidak_valid: "Data tidak valid. Periksa kembali isian Anda.",
 	tidak_berwenang: "Sesi telah berakhir. Silakan masuk kembali.",
 	layanan_selesai: "Layanan telah selesai.",
@@ -209,11 +209,11 @@ export function AkunData() {
 							<Input id="asalPd" value={form.asalPd} onChange={(event) => ubah("asalPd", event.target.value)} />
 						</div>
 						<div className="flex flex-col gap-2">
-							<label htmlFor="tahunLulusDm3" className="text-sm font-semibold text-navy">Tahun lulus DM 3</label>
+							<label htmlFor="tahunLulusDm3" className="text-sm font-semibold text-navy">Tahun lulus AB 3</label>
 							<Input id="tahunLulusDm3" type="number" inputMode="numeric" min={1998} max={2026} value={form.tahunLulusDm3} onChange={(event) => ubah("tahunLulusDm3", event.target.value)} />
 						</div>
 						<div className="flex flex-col gap-2">
-							<label htmlFor="tempatLulusDm3" className="text-sm font-semibold text-navy">Tempat lulus DM 3</label>
+							<label htmlFor="tempatLulusDm3" className="text-sm font-semibold text-navy">Tempat lulus AB 3</label>
 							<Input id="tempatLulusDm3" value={form.tempatLulusDm3} onChange={(event) => ubah("tempatLulusDm3", event.target.value)} />
 						</div>
 						<div className="flex flex-col gap-2">

@@ -74,6 +74,9 @@ export function AkunBerkasKelompok() {
 			setPesan(`Berkas harus berupa ${kelompok.hanyaPdf ? "PDF" : "PDF, JPEG, atau PNG"}.`);
 			return;
 		}
+		// Disimpan sebelum await: event.currentTarget sudah null begitu fetch selesai,
+		// karena dispatch event native sudah berakhir saat itu.
+		const form = event.currentTarget;
 		setMenyimpan(true);
 		setPesan("");
 		const query = new URLSearchParams({ namaAsli: file.name });
@@ -85,7 +88,7 @@ export function AkunBerkasKelompok() {
 				body: file,
 			});
 			if (!response.ok) throw new Error();
-			event.currentTarget.reset();
+			form.reset();
 			setFile(null);
 			await muat(kelompok.nomor);
 			setPesan("Berkas tersimpan.");
