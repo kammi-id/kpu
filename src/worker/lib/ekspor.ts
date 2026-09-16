@@ -326,7 +326,7 @@ export async function buatEksporHarian(env: Env, waktu: Date) {
 			dipertahankan.add(kunciZipAkun("terkini", bacalon.id));
 		}
 		await hapusTerkiniUsang(env.BERKAS, dipertahankan);
-		if (tanggalWib(waktu) === "2026-10-05" && !(await env.BERKAS.head(kunciCsvBacalon("pemeriksaan")))) {
+		if (tanggalWib(waktu) === "2026-09-27" && !(await env.BERKAS.head(kunciCsvBacalon("pemeriksaan")))) {
 			for (const kunci of dipertahankan) await salinSnapshot(env.BERKAS, kunci);
 		}
 		await catatAudit(env.DB, { aktor: "Sistem", tindakan: "ekspor_harian", hasil: "berhasil" }, waktu);

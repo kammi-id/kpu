@@ -18,7 +18,7 @@ Pengendali Data Pribadi adalah PP KAMMI melalui Komisi Penjaringan Umum (KPU) Mu
 
 ## Masa retensi
 
-Data disimpan selama proses penjaringan berlangsung dan dihapus **paling lambat 25 Januari 2027**, yakni 90 hari setelah penutupan resmi proses yang dihitung sejak dimulainya Forum Muktamar pada 27 Oktober 2026, kecuali ada dasar retensi atau sengketa terdokumentasi yang menunda penghapusan.
+Data disimpan selama proses penjaringan berlangsung dan dihapus **paling lambat 28 Januari 2027**, yakni 90 hari setelah penutupan resmi proses yang dihitung sejak dimulainya Forum Muktamar pada 30 Oktober 2026, kecuali ada dasar retensi atau sengketa terdokumentasi yang menunda penghapusan.
 
 ## Hak Anda sebagai subjek data
 

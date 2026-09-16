@@ -11,10 +11,10 @@ const MS = 1000;
 
 const BATAS: { nama: string; mulaiUtc: string; tahapBaru: Tahap }[] = [
 	{ nama: "Masa Pendaftaran", mulaiUtc: "2026-09-16T17:00:00.000Z", tahapBaru: "MasaPendaftaran" },
-	{ nama: "Pemeriksaan", mulaiUtc: "2026-10-04T17:00:00.000Z", tahapBaru: "Pemeriksaan" },
-	{ nama: "Masa Perbaikan", mulaiUtc: "2026-10-07T17:00:00.000Z", tahapBaru: "MasaPerbaikan" },
-	{ nama: "Terkunci", mulaiUtc: "2026-10-11T17:00:00.000Z", tahapBaru: "Terkunci" },
-	{ nama: "Selesai", mulaiUtc: "2027-01-24T17:00:00.000Z", tahapBaru: "Selesai" },
+	{ nama: "Pemeriksaan", mulaiUtc: "2026-09-26T17:00:00.000Z", tahapBaru: "Pemeriksaan" },
+	{ nama: "Masa Perbaikan", mulaiUtc: "2026-09-29T17:00:00.000Z", tahapBaru: "MasaPerbaikan" },
+	{ nama: "Terkunci", mulaiUtc: "2026-10-03T17:00:00.000Z", tahapBaru: "Terkunci" },
+	{ nama: "Selesai", mulaiUtc: "2027-01-27T17:00:00.000Z", tahapBaru: "Selesai" },
 ];
 
 const SEBELUM: Record<Tahap, Tahap> = {

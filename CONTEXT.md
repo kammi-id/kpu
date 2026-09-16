@@ -17,11 +17,11 @@ Penanda otomatis berupa status tiap kelompok, jumlah kelompok terpenuhi, dan has
 _Avoid_: status verifikasi, berkas sah, lulus administrasi
 
 **Masa Pendaftaran**:
-Periode 17 September 2026 pukul 00.00 WIB sampai 4 Oktober 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya.
+Periode 17 September 2026 pukul 00.00 WIB sampai 26 September 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya.
 _Avoid_: masa verifikasi, masa perbaikan
 
 **Masa Perbaikan**:
-Periode 8 Oktober 2026 pukul 00.00 WIB sampai 11 Oktober 2026 pukul 23.59 WIB ketika akun baru tidak dapat dibuat, tetapi semua Bakal Calon Ketua Umum yang sudah memiliki akun dapat memperbaiki data dan berkas.
+Periode 30 September 2026 pukul 00.00 WIB sampai 3 Oktober 2026 pukul 23.59 WIB ketika akun baru tidak dapat dibuat, tetapi semua Bakal Calon Ketua Umum yang sudah memiliki akun dapat memperbaiki data dan berkas.
 _Avoid_: perpanjangan pendaftaran, pendaftaran ulang
 
 **Calon Ketua Umum**:
@@ -69,11 +69,11 @@ Permintaan Bakal Calon Ketua Umum untuk menghentikan pemrosesan datanya. Akun la
 _Avoid_: mengundurkan diri, gugur, hapus akun instan
 
 **Masa Retensi**:
-Jangka 90 hari sejak penutupan resmi proses penjaringan pada 27 Oktober 2026, ketika data masih disimpan dan dapat diekspor. Masa ini berakhir dengan Penghapusan Akhir pada 25 Januari 2027.
+Jangka 90 hari sejak penutupan resmi proses penjaringan pada 30 Oktober 2026, ketika data masih disimpan dan dapat diekspor. Masa ini berakhir dengan Penghapusan Akhir pada 28 Januari 2027.
 _Avoid_: arsip permanen, backup jangka panjang
 
 **Penghapusan Akhir**:
-Penghapusan otomatis seluruh data dan berkas aplikasi pada 25 Januari 2027 pukul 00.00 WIB, tanpa konfirmasi serah-terima atau sengketa. Satu-satunya yang tersisa adalah catatan non-pribadi berisi jumlah yang dihapus; penghapusan dinyatakan tuntas setelah jendela pemulihan otomatis platform berakhir pada 24 Februari 2027.
+Penghapusan otomatis seluruh data dan berkas aplikasi pada 28 Januari 2027 pukul 00.00 WIB, tanpa konfirmasi serah-terima atau sengketa. Satu-satunya yang tersisa adalah catatan non-pribadi berisi jumlah yang dihapus; penghapusan dinyatakan tuntas setelah jendela pemulihan otomatis platform berakhir pada 27 Februari 2027.
 _Avoid_: arsip, penghapusan manual, penutupan akun
 
 **Tahap Selesai**:
@@ -85,7 +85,7 @@ Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pu
 _Avoid_: backup, arsip serah-terima terenkripsi
 
 **Snapshot Pemeriksaan**:
-Salinan Ekspor Harian 5 Oktober 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi.
+Salinan Ekspor Harian 27 September 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi.
 _Avoid_: hasil verifikasi, berkas sah
 
 **Peraturan**:

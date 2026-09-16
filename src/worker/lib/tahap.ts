@@ -11,10 +11,10 @@ export type Tahap =
 
 // Batas tahap: instan UTC. WIB = UTC+7 tanpa DST. Setiap batas inklusif di awal, eksklusif di akhir.
 const MULAI_MASA_PENDAFTARAN = Date.UTC(2026, 8, 16, 17, 0, 0); // 17 Sep 2026 00.00 WIB
-const MULAI_PEMERIKSAAN = Date.UTC(2026, 9, 4, 17, 0, 0); // 5 Okt 2026 00.00 WIB
-const MULAI_MASA_PERBAIKAN = Date.UTC(2026, 9, 7, 17, 0, 0); // 8 Okt 2026 00.00 WIB
-const MULAI_TERKUNCI = Date.UTC(2026, 9, 11, 17, 0, 0); // 12 Okt 2026 00.00 WIB
-const MULAI_SELESAI = Date.UTC(2027, 0, 24, 17, 0, 0); // 25 Jan 2027 00.00 WIB
+const MULAI_PEMERIKSAAN = Date.UTC(2026, 8, 26, 17, 0, 0); // 27 Sep 2026 00.00 WIB
+const MULAI_MASA_PERBAIKAN = Date.UTC(2026, 8, 29, 17, 0, 0); // 30 Sep 2026 00.00 WIB
+const MULAI_TERKUNCI = Date.UTC(2026, 9, 3, 17, 0, 0); // 4 Okt 2026 00.00 WIB
+const MULAI_SELESAI = Date.UTC(2027, 0, 27, 17, 0, 0); // 28 Jan 2027 00.00 WIB
 
 export function tahapPada(sekarang: Date): Tahap {
 	const t = sekarang.getTime();
@@ -59,56 +59,56 @@ export const JADWAL_SEPULUH: readonly JadwalItem[] = [
 	},
 	{
 		nama: "Pengambilan dan pengembalian berkas",
-		rentangWib: "17 September–4 Oktober 2026",
+		rentangWib: "17–26 September 2026",
 		mulai: MULAI_MASA_PENDAFTARAN,
 		akhirEksklusif: MULAI_PEMERIKSAAN,
 	},
 	{
 		nama: "Verifikasi administrasi dan uji kualifikasi",
-		rentangWib: "5–7 Oktober 2026",
+		rentangWib: "27–29 September 2026",
 		mulai: MULAI_PEMERIKSAAN,
 		akhirEksklusif: MULAI_MASA_PERBAIKAN,
 	},
 	{
 		nama: "Perbaikan kelengkapan",
-		rentangWib: "8–11 Oktober 2026",
+		rentangWib: "30 September–3 Oktober 2026",
 		mulai: MULAI_MASA_PERBAIKAN,
 		akhirEksklusif: MULAI_TERKUNCI,
 	},
 	{
 		nama: "Penetapan",
-		rentangWib: "12 Oktober 2026",
+		rentangWib: "4 Oktober 2026",
 		mulai: MULAI_TERKUNCI,
-		akhirEksklusif: Date.UTC(2026, 9, 12, 17, 0, 0),
+		akhirEksklusif: Date.UTC(2026, 9, 4, 17, 0, 0),
 	},
 	{
 		nama: "Visi-misi dan kampanye",
-		rentangWib: "13–18 Oktober 2026",
-		mulai: Date.UTC(2026, 9, 12, 17, 0, 0),
-		akhirEksklusif: Date.UTC(2026, 9, 18, 17, 0, 0),
+		rentangWib: "5–27 Oktober 2026",
+		mulai: Date.UTC(2026, 9, 4, 17, 0, 0),
+		akhirEksklusif: Date.UTC(2026, 9, 27, 17, 0, 0),
 	},
 	{
 		nama: "Debat I",
-		rentangWib: "19 Oktober 2026",
-		mulai: Date.UTC(2026, 9, 18, 17, 0, 0),
-		akhirEksklusif: Date.UTC(2026, 9, 19, 17, 0, 0),
+		rentangWib: "13 Oktober 2026",
+		mulai: Date.UTC(2026, 9, 12, 17, 0, 0),
+		akhirEksklusif: Date.UTC(2026, 9, 13, 17, 0, 0),
 	},
 	{
 		nama: "Debat II",
-		rentangWib: "23 Oktober 2026",
-		mulai: Date.UTC(2026, 9, 22, 17, 0, 0),
-		akhirEksklusif: Date.UTC(2026, 9, 23, 17, 0, 0),
+		rentangWib: "20 Oktober 2026",
+		mulai: Date.UTC(2026, 9, 19, 17, 0, 0),
+		akhirEksklusif: Date.UTC(2026, 9, 20, 17, 0, 0),
 	},
 	{
 		nama: "Masa tenang",
-		rentangWib: "25–26 Oktober 2026",
-		mulai: Date.UTC(2026, 9, 24, 17, 0, 0),
-		akhirEksklusif: Date.UTC(2026, 9, 26, 17, 0, 0),
+		rentangWib: "28–29 Oktober 2026",
+		mulai: Date.UTC(2026, 9, 27, 17, 0, 0),
+		akhirEksklusif: Date.UTC(2026, 9, 29, 17, 0, 0),
 	},
 	{
 		nama: "Forum Muktamar",
-		rentangWib: "mulai 27 Oktober 2026",
-		mulai: Date.UTC(2026, 9, 26, 17, 0, 0),
+		rentangWib: "mulai 30 Oktober 2026",
+		mulai: Date.UTC(2026, 9, 29, 17, 0, 0),
 		akhirEksklusif: null,
 	},
 ] as const;

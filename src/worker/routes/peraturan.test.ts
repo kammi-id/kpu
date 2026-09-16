@@ -137,7 +137,7 @@ describe("GET /api/peraturan dan /api/unduhan (publik, seam Worker)", () => {
 	});
 
 	it("tiket 18: ditolak dengan kode tahap pada Selesai", async () => {
-		const selesai = new Date("2027-01-24T17:00:00.000Z");
+		const selesai = new Date("2027-01-27T17:00:00.000Z");
 		const peraturan = await kirim(selesai, "/api/peraturan");
 		expect(peraturan.status).toBe(403);
 		expect(await peraturan.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
@@ -213,7 +213,7 @@ describe("Berkas Publik (seam Worker)", () => {
 		expect(response.headers.get("content-disposition")).toContain("attachment");
 		expect(response.headers.get("x-content-type-options")).toBe("nosniff");
 
-		const selesai = new Date("2027-01-24T17:00:00.000Z");
+		const selesai = new Date("2027-01-27T17:00:00.000Z");
 		const ditolak = await kirim(selesai, `/api/berkas-publik/${id}`);
 		expect(ditolak.status).toBe(403);
 		expect(await ditolak.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });

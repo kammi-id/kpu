@@ -7,12 +7,12 @@ const encoder = new TextEncoder();
 
 // MasaPendaftaran (bukan Selesai): Ekspor Harian berjalan normal.
 const WAKTU_EKSPOR = new Date("2026-09-20T17:00:00.000Z");
-// WIB 5 Okt 2026 00.00 — batas awal tahap Pemeriksaan dan pemicu Snapshot.
-const WAKTU_PEMERIKSAAN_5_OKT = new Date("2026-10-04T17:00:00.000Z");
-// WIB 6 Okt 2026 00.00 — sehari setelahnya; Snapshot tidak boleh ditimpa.
-const WAKTU_PEMERIKSAAN_6_OKT = new Date("2026-10-05T17:00:00.000Z");
+// WIB 27 Sep 2026 00.00 — batas awal tahap Pemeriksaan dan pemicu Snapshot.
+const WAKTU_PEMERIKSAAN_27_SEP = new Date("2026-09-26T17:00:00.000Z");
+// WIB 28 Sep 2026 00.00 — sehari setelahnya; Snapshot tidak boleh ditimpa.
+const WAKTU_PEMERIKSAAN_28_SEP = new Date("2026-09-27T17:00:00.000Z");
 // Batas tahap Selesai (inklusif), lihat lib/tahap.ts MULAI_SELESAI.
-const WAKTU_SELESAI = new Date("2027-01-24T17:00:00.000Z");
+const WAKTU_SELESAI = new Date("2027-01-27T17:00:00.000Z");
 
 let whatsappBerikutnya = 0;
 
@@ -218,21 +218,21 @@ describe("Ekspor Harian (acceptance 24, 31)", () => {
 		expect(baris.results).toEqual([{ aktor: "Sistem", tindakan: "ekspor_harian", hasil: "gagal" }]);
 	});
 
-	it("run bertanggal WIB 5 Oktober 2026 menyalin ke ekspor/pemeriksaan sekali, run 6 Oktober tidak menimpanya", async () => {
-		const userId = await buatBacalon("Nabila Putri", "nabila@example.test", WAKTU_PEMERIKSAAN_5_OKT);
-		await buatBerkas(userId, WAKTU_PEMERIKSAAN_5_OKT, "identitas.pdf", encoder.encode("berkas identitas 5 okt"));
+	it("run bertanggal WIB 27 September 2026 menyalin ke ekspor/pemeriksaan sekali, run 28 September tidak menimpanya", async () => {
+		const userId = await buatBacalon("Nabila Putri", "nabila@example.test", WAKTU_PEMERIKSAAN_27_SEP);
+		await buatBerkas(userId, WAKTU_PEMERIKSAAN_27_SEP, "identitas.pdf", encoder.encode("berkas identitas 5 okt"));
 
-		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_5_OKT);
+		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_27_SEP);
 
 		const snapshotCsv = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
 		const snapshotZip = new Uint8Array(await (await env.BERKAS.get(`ekspor/pemeriksaan/${userId}.zip`))?.arrayBuffer() as ArrayBuffer);
 		expect(snapshotCsv).toContain("Nabila Putri");
 
 		// Roster berubah sebelum run berikutnya: akun baru masuk.
-		const userBaru = await buatBacalon("Siti Aminah", "siti@example.test", WAKTU_PEMERIKSAAN_6_OKT);
-		await buatBerkas(userBaru, WAKTU_PEMERIKSAAN_6_OKT, "identitas.pdf", encoder.encode("berkas identitas siti"));
+		const userBaru = await buatBacalon("Siti Aminah", "siti@example.test", WAKTU_PEMERIKSAAN_28_SEP);
+		await buatBerkas(userBaru, WAKTU_PEMERIKSAAN_28_SEP, "identitas.pdf", encoder.encode("berkas identitas siti"));
 
-		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_6_OKT);
+		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_28_SEP);
 
 		// Snapshot Pemeriksaan tidak berubah sama sekali.
 		const snapshotCsvSetelah = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();

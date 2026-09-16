@@ -15,7 +15,7 @@ const RAHASIA_UJI = {
 type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
 
 const MASA_PENDAFTARAN = new Date("2026-09-20T00:00:00.000Z");
-const SELESAI = new Date("2027-01-24T17:00:00.000Z");
+const SELESAI = new Date("2027-01-27T17:00:00.000Z");
 let whatsappBerikutnya = 0;
 
 function envUji(): EnvUji {
@@ -271,10 +271,10 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		const admin = await sesiAdmin();
 		for (const waktu of [
 			new Date("2026-09-16T16:59:59.999Z"), new Date("2026-09-16T17:00:00.000Z"),
-			new Date("2026-10-04T16:59:59.999Z"), new Date("2026-10-04T17:00:00.000Z"),
-			new Date("2026-10-07T16:59:59.999Z"), new Date("2026-10-07T17:00:00.000Z"),
-			new Date("2026-10-11T16:59:59.999Z"), new Date("2026-10-11T17:00:00.000Z"),
-			new Date("2027-01-24T16:59:59.999Z"),
+			new Date("2026-09-26T16:59:59.999Z"), new Date("2026-09-26T17:00:00.000Z"),
+			new Date("2026-09-29T16:59:59.999Z"), new Date("2026-09-29T17:00:00.000Z"),
+			new Date("2026-10-03T16:59:59.999Z"), new Date("2026-10-03T17:00:00.000Z"),
+			new Date("2027-01-27T16:59:59.999Z"),
 		]) {
 			await pindahWaktuSesi("admin@example.test", waktu);
 			expect((await kirim(waktu, "/api/admin", { headers: { cookie: admin } })).status).toBe(200);
