@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
+import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import ketua from "~/react-app/assets/illustrations/ketum.png";
@@ -25,9 +26,13 @@ export function Beranda() {
 						<h1 className={KELAS_JUDUL_HERO}>Pendaftaran Bakal Calon Ketua Umum PP KAMMI</h1>
 						<p className="mt-4 text-lg font-semibold">Muktamar KAMMI XIV Ambon</p>
 					</div>
-					<img
+					<ResponsiveImage
 						src={ketua}
 						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
+						width={960}
+						intrinsicWidth={1122}
+						intrinsicHeight={1402}
+						loading="eager"
 						className={`relative z-0 -mb-8 sm:-mb-10 lg:-mb-12 ${KELAS_ILUSTRASI_HERO}`}
 					/>
 				</div>

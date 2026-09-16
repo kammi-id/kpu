@@ -93,7 +93,10 @@ export function Unduhan() {
 	}
 
 	return (
-		<PublicPageHero judul="Berkas Kelengkapan" ilustrasi={{ src: agung, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>
+		<PublicPageHero
+			judul="Berkas Kelengkapan"
+			ilustrasi={{ src: agung, alt: "Ilustrasi KPU Muktamar XIV KAMMI", intrinsicWidth: 1122, intrinsicHeight: 1402 }}
+		>
 			<p className="max-w-[60ch] text-muted-foreground">
 				Unduh templat resmi berikut, lengkapi sesuai petunjuk pada tiap formulir, lalu unggah kembali salinannya lewat akun
 				Bakal Calon Ketua Umum selama Masa Pendaftaran atau Masa Perbaikan.

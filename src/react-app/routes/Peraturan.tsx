@@ -18,7 +18,10 @@ export function Peraturan() {
 	}, []);
 
 	return (
-		<PublicPageHero judul="Peraturan KPU" ilustrasi={{ src: sekjen, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>
+		<PublicPageHero
+			judul="Peraturan KPU"
+			ilustrasi={{ src: sekjen, alt: "Ilustrasi KPU Muktamar XIV KAMMI", intrinsicWidth: 1089, intrinsicHeight: 924 }}
+		>
 			<div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-10">
 				<div className="order-2 lg:order-1"><SafeMarkdown>{peraturanKpu}</SafeMarkdown></div>
 				<div className="order-1 lg:sticky lg:top-8 lg:order-2"><KartuUnduhanBerkas judul="Dokumen Peraturan" berkas={dokumen} /></div>

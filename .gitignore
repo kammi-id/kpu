@@ -152,6 +152,9 @@ dist
 # vuepress build output
 .vuepress/dist
 
+# Gambar OpenGraph digenerate saat build (scripts/buatGambarOg.mjs) — lihat plan gambar+OG
+public/og/
+
 # vuepress v2.x temp and cache directory
 .temp
 

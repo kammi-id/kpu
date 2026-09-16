@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
+import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
 
 type Props = {
 	judul: string;
-	ilustrasi?: { src: string; alt: string };
+	ilustrasi?: { src: string; alt: string; intrinsicWidth: number; intrinsicHeight: number };
 	children: ReactNode;
 };
 
@@ -49,7 +50,17 @@ export function PublicPageHero({ judul, ilustrasi, children }: Props) {
 					<div>
 						<h1 className={KELAS_JUDUL_HERO}>{judul}</h1>
 					</div>
-					{ilustrasi ? <img src={ilustrasi.src} alt={ilustrasi.alt} className={KELAS_ILUSTRASI_HERO} /> : null}
+					{ilustrasi ? (
+						<ResponsiveImage
+							src={ilustrasi.src}
+							alt={ilustrasi.alt}
+							width={960}
+							intrinsicWidth={ilustrasi.intrinsicWidth}
+							intrinsicHeight={ilustrasi.intrinsicHeight}
+							className={KELAS_ILUSTRASI_HERO}
+							loading="eager"
+						/>
+					) : null}
 				</div>
 			</section>
 			<section className="mx-auto max-w-[76rem] px-4 py-10 text-navy sm:px-8 sm:py-14">{children}</section>

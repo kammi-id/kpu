@@ -19,7 +19,10 @@ export function Jadwal() {
 	const dokumen = dataBerkas.find((item) => item.judul === "Jadwal Resmi");
 
 	return (
-		<PublicPageHero judul="Timeline Resmi KPU" ilustrasi={{ src: bendahara, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}>
+		<PublicPageHero
+			judul="Timeline Resmi KPU"
+			ilustrasi={{ src: bendahara, alt: "Ilustrasi KPU Muktamar XIV KAMMI", intrinsicWidth: 1024, intrinsicHeight: 1481 }}
+		>
 			{error ? (
 				<p className="text-marun">Jadwal tidak dapat dimuat. Muat ulang halaman ini.</p>
 			) : !data ? (

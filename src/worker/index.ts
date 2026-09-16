@@ -23,6 +23,8 @@ import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
+import { buatRuteGambar } from "./routes/gambar";
+import { buatRuteMetaHalaman } from "./routes/metaHalaman";
 
 const JALUR_AUTH = new Set([
 	"/api/auth/sign-up/email",
@@ -199,6 +201,8 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/akun/data", buatRuteAkunData(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
+	app.route("/img", buatRuteGambar());
+	app.route("/", buatRuteMetaHalaman());
 	app.get("/api/konfigurasi-publik", async (c) => {
 		const onboardTersedia =
 			rahasiaTersedia(c.env) &&
