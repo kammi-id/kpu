@@ -51,10 +51,57 @@
 	},
 	"triggers": {
 		"crons": ["0 17 * * *"]
+	},
+	/**
+	 * Non-production environment, deployed as a separate Worker (`kpu-preview`) on every
+	 * push to a pull request. Uses its own D1 database and R2 bucket so preview traffic
+	 * never touches production data, and its own workers.dev URL instead of the
+	 * kpu.kammi.id custom domain. Routes, workers_dev, and triggers are inheritable in
+	 * Wrangler but are still overridden explicitly here so preview never picks up the
+	 * production custom domain or cron by accident.
+	 */
+	"env": {
+		"preview": {
+			"workers_dev": true,
+			"preview_urls": false,
+			"routes": [],
+			"assets": {
+				"directory": "./dist/client",
+				"binding": "ASSETS",
+				"not_found_handling": "single-page-application",
+				"run_worker_first": ["/api/*", "/onboard", "/img", "/jadwal", "/tentang", "/peraturan", "/unduhan"]
+			},
+			"images": {
+				"binding": "IMAGES"
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "kpu-kammi-2026-preview",
+					"database_id": "26e74422-8eea-4cad-944b-bae27da82736"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "BERKAS",
+					"bucket_name": "kpu-kammi-2026-berkas-preview"
+				}
+			],
+			"vars": {
+				"BETTER_AUTH_URL": "https://kpu-preview.ppkammi2045.workers.dev",
+				// Turnstile "always passes" test keys (Cloudflare-documented), so PR previews
+				// never depend on a dashboard-provisioned Turnstile widget.
+				"TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+			},
+			"triggers": {
+				"crons": []
+			}
+		}
 	}
 	/**
 	 * Secrets (BETTER_AUTH_SECRET, HMAC_SECRET, TURNSTILE_SECRET_KEY, ONBOARD_TOKEN) are set with
-	 * `wrangler secret put` in production and `.dev.vars` locally — never written here.
+	 * `wrangler secret put [--env preview]` in production/preview and `.dev.vars` locally —
+	 * never written here.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
 }
