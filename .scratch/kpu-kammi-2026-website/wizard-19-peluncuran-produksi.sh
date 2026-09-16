@@ -202,9 +202,10 @@ if ! confirm "ponytail-review, code-review, dan security-review pada diff di ata
   warn "berhenti di sini. Jalankan review lebih dulu, lalu ulangi wizard ini."
   exit 1
 fi
-if confirm "Gabungkan dev-20260915 ke main dan push ke origin/main sekarang?"; then
+if confirm "Gabungkan dev-20260915 ke main (squash, satu commit) dan push ke origin/main sekarang?"; then
   git checkout main
-  git merge --no-ff dev-20260915 -m "merge: gabungkan dev-20260915 untuk peluncuran tiket 19"
+  git merge --squash dev-20260915
+  git commit -m "feat: peluncuran tiket 19 — gabungan dev-20260915 (squash)"
   git push origin main
   say "Selesai. Cabang aktif sekarang: $(git branch --show-current)"
 else
