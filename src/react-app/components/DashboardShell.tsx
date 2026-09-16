@@ -3,7 +3,6 @@ import { LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Button } from "~/components/ui/button";
-import { Footer } from "~/react-app/components/Footer";
 import {
 	Dialog,
 	DialogClose,
@@ -49,9 +48,10 @@ interface DashboardShellProps {
 
 /**
  * Dasbor sidebar bersama Admin dan Bacalon (lihat Q6 grilling): chrome (logo,
- * sidebar, dialog keluar, footer) sama persis — hanya nav, label header, dan
- * teks dialog keluar yang berbeda per peran. Gerbang sesi/peran tetap di
- * masing-masing pemanggil (AdminLayout, BacalonLayout), bukan di sini.
+ * sidebar, dialog keluar) sama persis — hanya nav, label header, dan teks
+ * dialog keluar yang berbeda per peran. Footer publik sengaja tidak
+ * ditampilkan di dasbor. Gerbang sesi/peran tetap di masing-masing pemanggil
+ * (AdminLayout, BacalonLayout), bukan di sini.
  */
 export function DashboardShell({ navItems, beranda, headerLabel, logoutJudul, logoutDeskripsi, onLogout, children }: DashboardShellProps) {
 	const { pathname } = useLocation();
@@ -118,7 +118,6 @@ export function DashboardShell({ navItems, beranda, headerLabel, logoutJudul, lo
 				</header>
 				<div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
 					<div className="flex-1 px-4 py-8 sm:px-8">{children}</div>
-					<Footer />
 				</div>
 			</SidebarInset>
 		</SidebarProvider>
