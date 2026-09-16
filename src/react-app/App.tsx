@@ -19,7 +19,8 @@ import { AdminUnggahBerkas } from "~/react-app/routes/AdminUnggahBerkas";
 import { Peraturan } from "~/react-app/routes/Peraturan";
 import { Unduhan } from "~/react-app/routes/Unduhan";
 import { Daftar } from "~/react-app/routes/Daftar";
-import { AkunLayout } from "~/react-app/routes/AkunLayout";
+import { AdminPengaturan } from "~/react-app/routes/AdminPengaturan";
+import { BacalonLayout } from "~/react-app/routes/BacalonLayout";
 import { AkunBeranda } from "~/react-app/routes/AkunBeranda";
 import { AkunData } from "~/react-app/routes/AkunData";
 import { AkunBerkas } from "~/react-app/routes/AkunBerkas";
@@ -62,8 +63,9 @@ function App() {
 					<Route path="unggah-berkas" element={<AdminUnggahBerkas />} />
 					<Route path="ekspor" element={<AdminEkspor />} />
 					<Route path="audit" element={<AdminAudit />} />
+					<Route path="pengaturan" element={<AdminPengaturan />} />
 				</Route>
-				<Route path="akun" element={<AkunLayout />}>
+				<Route path="bacalon" element={<BacalonLayout />}>
 					<Route index element={<AkunBeranda />} />
 					<Route path="data" element={<AkunData />} />
 					<Route path="pengaturan" element={<AkunPengaturan />} />

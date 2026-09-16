@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { SafeMarkdown } from "~/react-app/components/SafeMarkdown";
 import { Turnstile } from "~/react-app/components/Turnstile";
-import { PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
+import { alasanPendaftaranTertutup } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
 
 // `persetujuan-v1.md` dibundel saat build, sama seperti `tentang.md` (tiket 07).
@@ -47,7 +47,7 @@ export function Daftar() {
 			body: JSON.stringify(data),
 		});
 		setMengirim(false);
-		if (response.ok) return navigate("/akun", { replace: true });
+		if (response.ok) return navigate("/bacalon", { replace: true });
 		const body = ((await response.json().catch(() => ({}))) as { error?: string }) ?? {};
 		setPesan((body.error && PESAN_GALAT[body.error]) || "Pendaftaran tidak dapat diproses. Coba lagi.");
 	}
@@ -61,7 +61,7 @@ export function Daftar() {
 				</CardHeader>
 				<CardContent>
 					{!bolehRegistrasi && tahap ? (
-						<p className="mb-5 rounded-xl bg-muted p-4 text-sm text-navy">{PENJELASAN_TAHAP[tahap.tahap]}</p>
+						<p className="mb-5 rounded-xl bg-muted p-4 text-sm text-navy">{alasanPendaftaranTertutup(tahap)}</p>
 					) : null}
 					<form className="flex flex-col gap-5" onSubmit={kirim}>
 						<fieldset disabled={!bolehRegistrasi || mengirim} className="flex flex-col gap-5">

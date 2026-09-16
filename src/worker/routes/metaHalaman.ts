@@ -2,7 +2,7 @@ import { Hono } from "hono";
 
 type KontenMeta = { title: string; description: string; ogImage: string };
 
-// Beranda dan seluruh rute tertutup (masuk/daftar/onboard/admin/akun) + 404
+// Beranda dan seluruh rute tertutup (masuk/daftar/onboard/admin/bacalon) + 404
 // memakai default di index.html apa adanya (og:image = /og/default.png) —
 // tak perlu didaftarkan di sini. Hanya 4 rute publik lain yang perlu OG
 // berbeda per halaman; lihat plan gambar+OG untuk alasan pembagian ini.

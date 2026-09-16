@@ -56,7 +56,7 @@ export function AkunBerkas() {
 					{KELOMPOK_BERKAS.map((kelompok) => (
 						<li key={kelompok.nomor}>
 							<Link
-								to={`/akun/berkas/${kelompok.nomor}`}
+								to={`/bacalon/berkas/${kelompok.nomor}`}
 								className="flex items-center justify-between gap-3 px-4 py-4 hover:bg-muted"
 							>
 								<span>

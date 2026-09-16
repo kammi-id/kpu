@@ -21,8 +21,10 @@ function IkonInstagram({ className }: { className?: string }) {
 }
 
 /**
- * Komponen tetap di setiap rute (acceptance 34). Penegasan bahwa KPU adalah
- * badan internal Muktamar KAMMI, bukan penyelenggara pemilihan umum nasional.
+ * Komponen tetap di setiap rute publik dan dasbor (acceptance 34), kecuali
+ * GerbangLayout (/masuk, /daftar, /onboard) — pengecualian disengaja untuk
+ * layar publik non-administratif tersebut. Penegasan bahwa KPU adalah badan
+ * internal Muktamar KAMMI, bukan penyelenggara pemilihan umum nasional.
  */
 export function Footer() {
 	return (

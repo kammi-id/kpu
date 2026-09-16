@@ -74,10 +74,12 @@ melalui enam tahap.
 - Sitemap tetap mengikuti Varian A (situs dokumen):
   - **Publik:** `/`, `/peraturan`, `/jadwal`, `/unduhan`, `/tentang`, serta
     `/masuk` dan `/daftar` sebagai satu gerbang dengan dua tab.
-  - **Bakal Calon:** `/akun`, `/akun/data`, `/akun/berkas`, `/akun/berkas/:no`,
-    `/akun/pengaturan`.
+  - **Bakal Calon:** `/bacalon`, `/bacalon/data`, `/bacalon/berkas`,
+    `/bacalon/berkas/:no`, `/bacalon/pengaturan` — layout dasbor sama dengan
+    Admin (amandemen: dipindah dari `/akun`).
   - **Admin:** `/admin`, `/admin/:id`, `/admin/ekspor`, `/admin/audit`,
-    `/admin/peraturan`, dan `/onboard`.
+    `/admin/peraturan`, `/admin/pengaturan` (Penutupan Pendaftaran Manual),
+    dan `/onboard`.
 - Stack: satu Cloudflare Worker (Hono dan SPA React 19 + Vite) dengan D1, R2
   privat, Better Auth, dan Turnstile. UI dibangun dari komponen shadcn (Base
   UI) dan kelas Tailwind, termasuk nilai arbitrer, tanpa CSS tulisan tangan.

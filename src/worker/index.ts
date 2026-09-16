@@ -15,12 +15,14 @@ import {
 	whatsappTernormalisasi,
 } from "./lib/auth";
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
+import { pendaftaranDitutupManual } from "./lib/pengaturan";
 import { teksSatuBarisValid } from "./lib/profil";
 import { ambilKelengkapan } from "./lib/kelengkapan";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
+import { buatRutePengaturanAdmin } from "./routes/pengaturanAdmin";
 import { buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
 import { buatRuteGambar } from "./routes/gambar";
@@ -225,7 +227,7 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 				return c.json({ error: "permintaan_tidak_valid" }, 400);
 			}
 			const tahap = tahapPada(waktu);
-			if (!bolehRegistrasi(tahap)) {
+			if (!bolehRegistrasi(tahap) || (await pendaftaranDitutupManual(c.env.DB))) {
 				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
 				return c.json({ error: "registrasi_tidak_diizinkan", tahap }, 403);
 			}
@@ -446,6 +448,8 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 			.all<BarisAudit>();
 		return c.json({ halaman, adaBerikutnya: audit.results.length === limit, data: audit.results });
 	});
+
+	app.route("/api/admin/pengaturan", buatRutePengaturanAdmin(sekarang));
 
 	// Rute statis Admin harus didaftarkan dahulu; detail tiket 14 memakai /:id.
 	app.route("/api/admin", buatRuteAdminBacalon(sekarang));

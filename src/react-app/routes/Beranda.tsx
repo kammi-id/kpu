@@ -6,7 +6,7 @@ import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
 import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
 import { useTahap } from "~/react-app/lib/useTahap";
-import { LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
+import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import ketua from "~/react-app/assets/illustrations/ketum.png";
 
 const PINTU = [
@@ -85,7 +85,7 @@ export function Beranda() {
 												Daftar
 											</Button>
 											<p id="alasan-daftar-tertutup" className="mt-2 text-sm text-marun">
-												{PENJELASAN_TAHAP[data.tahap]}
+												{alasanPendaftaranTertutup(data)}
 											</p>
 										</div>
 									)}

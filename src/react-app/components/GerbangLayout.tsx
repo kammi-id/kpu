@@ -1,13 +1,13 @@
 import { ArrowLeft } from "lucide-react";
 import { Link, Outlet } from "react-router-dom";
 import muktamarLockupWarna from "~/react-app/assets/brand/muktamar-xiv-lockup-warna.webp";
-import { Footer } from "~/react-app/components/Footer";
 
 /**
  * Gerbang akun: /masuk, /daftar, /onboard. Tanpa Header publik — halaman ini
  * bukan bagian dari navigasi situs, jadi identitas KAMMI ditulis ulang di sini
  * (logo + teks seperti Header) dan satu tautan kembali menggantikan nav.
- * Footer tetap tampil (acceptance 34).
+ * Footer disembunyikan di sini: pengecualian acceptance 34, hanya berlaku
+ * untuk rute publik non-administratif ini (bukan /bacalon atau /admin).
  */
 export function GerbangLayout() {
 	return (
@@ -32,7 +32,6 @@ export function GerbangLayout() {
 					Kembali ke halaman depan
 				</Link>
 			</div>
-			<Footer />
 		</div>
 	);
 }
