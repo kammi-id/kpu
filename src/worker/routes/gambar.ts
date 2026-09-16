@@ -17,6 +17,17 @@ const POLA_SUMBER_DIIZINKAN = [
 	/^\/assets\/ilham-[\w-]+\.png$/,
 ];
 
+// `vite dev` tidak melakukan fingerprint nama berkas (itu hanya terjadi saat
+// `vite build`) — import gambar di komponen React menghasilkan path mentah
+// `/src/react-app/assets/...` di dev, bukan `/assets/<nama>-<hash>.png`.
+// Tanpa ini `/img` selalu 400 di `npm run dev`. `import.meta.env.DEV` statis
+// false saat build produksi sehingga cabang ini dibuang oleh Vite — whitelist
+// produksi (di atas) tidak melonggar.
+const POLA_SUMBER_DEV = [
+	/^\/src\/react-app\/assets\/illustrations\/(agung|bendum|ketum|kpu|sekjend)\.png$/,
+	/^\/src\/react-app\/assets\/members\/(alfiansyah|khaidir|rafika|robby|ilham)\.png$/,
+];
+
 // Lebar tetap: membatasi jumlah unique transformation Cloudflare Images
 // (ditagih per kombinasi src+parameter/bulan) supaya biayanya tetap
 // terprediksi — lihat DESIGN.md/plan gambar responsif.
@@ -30,6 +41,7 @@ const FORMAT_KELUARAN = {
 type FormatKeluaran = keyof typeof FORMAT_KELUARAN;
 
 function sumberDiizinkan(src: string) {
+	if (import.meta.env.DEV && POLA_SUMBER_DEV.some((pola) => pola.test(src))) return true;
 	return POLA_SUMBER_DIIZINKAN.some((pola) => pola.test(src));
 }
 

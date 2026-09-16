@@ -41,11 +41,17 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
+      // `render` di seluruh pemakai saat ini selalu elemen non-<button> (Link,
+      // <a>) — default `nativeButton` mengikuti itu supaya Base UI memakai
+      // semantik role="button" + keyboard handling yang benar untuk link,
+      // alih-alih memaksa semantik <button> asli yang tidak pernah ada di DOM.
+      nativeButton={nativeButton ?? props.render === undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
