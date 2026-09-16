@@ -26,10 +26,7 @@
 		"directory": "./dist/client",
 		"binding": "ASSETS",
 		"not_found_handling": "single-page-application",
-		"run_worker_first": ["/api/*", "/onboard", "/img", "/jadwal", "/tentang", "/peraturan", "/unduhan"]
-	},
-	"images": {
-		"binding": "IMAGES"
+		"run_worker_first": ["/api/*", "/onboard", "/jadwal", "/tentang", "/peraturan", "/unduhan"]
 	},
 	"d1_databases": [
 		{
@@ -69,10 +66,7 @@
 				"directory": "./dist/client",
 				"binding": "ASSETS",
 				"not_found_handling": "single-page-application",
-				"run_worker_first": ["/api/*", "/onboard", "/img", "/jadwal", "/tentang", "/peraturan", "/unduhan"]
-			},
-			"images": {
-				"binding": "IMAGES"
+				"run_worker_first": ["/api/*", "/onboard", "/jadwal", "/tentang", "/peraturan", "/unduhan"]
 			},
 			"d1_databases": [
 				{

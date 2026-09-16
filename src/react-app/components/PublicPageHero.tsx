@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
+import { ResponsiveImage, type GambarResponsif } from "~/react-app/components/ResponsiveImage";
 
 type Props = {
 	judul: string;
-	ilustrasi?: { src: string; alt: string; intrinsicWidth: number; intrinsicHeight: number };
+	ilustrasi?: { gambar: GambarResponsif; alt: string };
 	children: ReactNode;
 };
 
@@ -52,11 +52,8 @@ export function PublicPageHero({ judul, ilustrasi, children }: Props) {
 					</div>
 					{ilustrasi ? (
 						<ResponsiveImage
-							src={ilustrasi.src}
+							gambar={ilustrasi.gambar}
 							alt={ilustrasi.alt}
-							width={960}
-							intrinsicWidth={ilustrasi.intrinsicWidth}
-							intrinsicHeight={ilustrasi.intrinsicHeight}
 							className={KELAS_ILUSTRASI_HERO}
 							loading="eager"
 						/>

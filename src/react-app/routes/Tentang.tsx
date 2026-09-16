@@ -1,17 +1,12 @@
 import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
-import kpu from "~/react-app/assets/illustrations/kpu.png";
-import khaidir from "~/react-app/assets/members/khaidir.png";
-import robby from "~/react-app/assets/members/robby.png";
-import alfiansyah from "~/react-app/assets/members/alfiansyah.png";
-import rafika from "~/react-app/assets/members/rafika.png";
-import ilham from "~/react-app/assets/members/ilham.png";
+import { kpu, khaidir, robby, alfiansyah, rafika, ilham } from "~/react-app/assets/generated";
 
 const ANGGOTA = [
-	{ nama: "Khaidir Ali", foto: khaidir, lebarAsli: 3421, tinggiAsli: 3980 },
-	{ nama: "Robby Kaharuddin", foto: robby, lebarAsli: 2690, tinggiAsli: 3892 },
-	{ nama: "Muhammad Alfiansyah", foto: alfiansyah, lebarAsli: 2782, tinggiAsli: 4125 },
-	{ nama: "Rafika Afriyanti", foto: rafika, lebarAsli: 1871, tinggiAsli: 2628 },
-	{ nama: "R. Ilham Sastra Ardhie Purnomo", foto: ilham, lebarAsli: 910, tinggiAsli: 1218 },
+	{ nama: "Khaidir Ali", foto: khaidir },
+	{ nama: "Robby Kaharuddin", foto: robby },
+	{ nama: "Muhammad Alfiansyah", foto: alfiansyah },
+	{ nama: "Rafika Afriyanti", foto: rafika },
+	{ nama: "R. Ilham Sastra Ardhie Purnomo", foto: ilham },
 ];
 
 export function Tentang() {
@@ -28,11 +23,8 @@ export function Tentang() {
 				</div>
 				<div className="mx-auto mt-10 max-w-[60rem] px-6 sm:mt-14 sm:px-10 lg:mt-16">
 					<ResponsiveImage
-						src={kpu}
+						gambar={kpu}
 						alt="Ilustrasi lima anggota Komisi Penjaringan Umum Muktamar XIV KAMMI"
-						width={960}
-						intrinsicWidth={1638}
-						intrinsicHeight={886}
 						loading="eager"
 						className="mx-auto h-auto w-full"
 					/>
@@ -51,11 +43,8 @@ export function Tentang() {
 						>
 							<span className="text-xl leading-snug font-bold text-navy sm:text-2xl">{orang.nama}</span>
 							<ResponsiveImage
-								src={orang.foto}
+								gambar={orang.foto}
 								alt=""
-								width={480}
-								intrinsicWidth={orang.lebarAsli}
-								intrinsicHeight={orang.tinggiAsli}
 								className="mt-auto h-64 w-auto self-center object-contain object-bottom filter-[drop-shadow(2px_0_0_white)_drop-shadow(-2px_0_0_white)_drop-shadow(0_2px_0_white)_drop-shadow(0_-2px_0_white)_drop-shadow(1.5px_1.5px_0_white)_drop-shadow(-1.5px_-1.5px_0_white)_drop-shadow(1.5px_-1.5px_0_white)_drop-shadow(-1.5px_1.5px_0_white)_drop-shadow(0_10px_12px_rgb(70_0_8/0.22))] sm:h-72"
 							/>
 						</li>

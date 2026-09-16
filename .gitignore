@@ -155,6 +155,9 @@ dist
 # Gambar OpenGraph digenerate saat build (scripts/buatGambarOg.mjs) — lihat plan gambar+OG
 public/og/
 
+# Varian avif/webp/png digenerate saat build/dev (scripts/buatGambarResponsif.mjs)
+src/react-app/assets/generated/
+
 # vuepress v2.x temp and cache directory
 .temp
 

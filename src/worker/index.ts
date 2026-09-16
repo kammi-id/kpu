@@ -25,7 +25,6 @@ import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/b
 import { buatRutePengaturanAdmin } from "./routes/pengaturanAdmin";
 import { buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
-import { buatRuteGambar } from "./routes/gambar";
 import { buatRuteMetaHalaman } from "./routes/metaHalaman";
 
 const JALUR_AUTH = new Set([
@@ -203,7 +202,6 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/akun/data", buatRuteAkunData(sekarang));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
-	app.route("/img", buatRuteGambar());
 	app.route("/", buatRuteMetaHalaman());
 	app.get("/api/konfigurasi-publik", async (c) => {
 		const onboardTersedia =

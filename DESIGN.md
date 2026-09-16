@@ -147,11 +147,9 @@ Aset merek (sumber asli di `public/`, turunan web di `src/react-app/assets/brand
 | --- | --- | --- |
 | Logo PP KAMMI | `kammi.webp` | Header, berpasangan dengan teks "Pengurus Pusat / Kesatuan Aksi Mahasiswa Muslim Indonesia" |
 | Lockup Muktamar XIV (tanda + "Muktamar KAMMI XIV") putih / warna | `muktamar-xiv-lockup-putih.webp`, `muktamar-xiv-lockup-warna.webp` | Header dan footer; putih di atas merah atau marun, warna di atas putih |
-| Logo Muktamar XIV lengkap (dengan Ambon, tanggal, tagline) putih / warna | `muktamar-xiv-putih.webp`, `muktamar-xiv-warna.webp` | Ukuran besar saja (layar Selesai, beranda desktop), tidak di bawah tinggi 160px |
-| Foto bersama KPU | `kpu-bersama.webp` | Beranda atau Tentang, tanpa nama atau jabatan sampai `tentang.md` tersedia |
 | Ornamen tonal | `ornamen.svg` | Mask tonal di atas bidang merah atau marun. Ini tile geometris sementara; ganti dengan berkas pola asli kampanye bila sudah tersedia |
 
-Foto per anggota di `public/members/` belum dipakai sampai nama dan jabatan tersedia.
+Foto per anggota (Tentang.tsx) dan ilustrasi hero dipakai lewat `ResponsiveImage` — varian avif/webp/png digenerate saat build dari `src/react-app/assets/illustrations/` dan `members/` (lihat `scripts/buatGambarResponsif.mjs`), bukan diimpor langsung.
 
 ## Colors
 
