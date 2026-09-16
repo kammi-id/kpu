@@ -1,68 +1,120 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/lilita-one/latin-400.css";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-500.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tiga tinta Muktamar XIV: merah sebagai bidang, hijau untuk status terbuka, putih enamel untuk panel.
+   Navy hanya untuk teks; marun untuk footer dan tepi display. Nilai merah, hijau, dan navy diambil dari logo Muktamar XIV. */
 :root {
-	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-	line-height: 1.5;
-	font-weight: 400;
-
-	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
-
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+
+	--merah: #dc0a0a;
+	--merah-tua: #b00606;
+	--marun: #8a0b10;
+	--hijau: #056035;
+	--hijau-muda: #e6f2eb;
+	--navy: #06244c;
+
+	--background: #ffffff;
+	--foreground: var(--navy);
+	--card: #ffffff;
+	--card-foreground: var(--navy);
+	--popover: #ffffff;
+	--popover-foreground: var(--navy);
+	--primary: var(--merah);
+	--primary-foreground: #ffffff;
+	--secondary: var(--hijau);
+	--secondary-foreground: #ffffff;
+	--muted: #fbf3f2;
+	--muted-foreground: #4a5872;
+	--accent: #f8e7e6;
+	--accent-foreground: var(--marun);
+	--destructive: var(--merah-tua);
+	--border: #eedada;
+	--input: #e3c9c9;
+	--ring: var(--navy);
+	--radius: 0.875rem;
+
+	--sidebar: var(--muted);
+	--sidebar-foreground: var(--navy);
+	--sidebar-border: var(--border);
+	--sidebar-ring: var(--ring);
+	--sidebar-accent: var(--accent);
+	--sidebar-accent-foreground: var(--navy);
 }
 
-a {
-	font-weight: 500;
-	color: #646cff;
-	text-decoration: inherit;
-}
-a:hover {
-	color: #535bf2;
+@theme inline {
+	--font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+	--font-display: "Lilita One", "Poppins", ui-sans-serif, sans-serif;
+	--color-merah: var(--merah);
+	--color-merah-tua: var(--merah-tua);
+	--color-marun: var(--marun);
+	--color-hijau: var(--hijau);
+	--color-hijau-muda: var(--hijau-muda);
+	--color-navy: var(--navy);
+	--color-ring: var(--ring);
+	--color-input: var(--input);
+	--color-border: var(--border);
+	--color-destructive: var(--destructive);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-accent: var(--accent);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-muted: var(--muted);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-secondary: var(--secondary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-primary: var(--primary);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-popover: var(--popover);
+	--color-card-foreground: var(--card-foreground);
+	--color-card: var(--card);
+	--color-foreground: var(--foreground);
+	--color-background: var(--background);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--radius-sm: calc(var(--radius) * 0.4);
+	--radius-md: calc(var(--radius) * 0.7);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.15);
+	--radius-2xl: calc(var(--radius) * 1.4);
+	--radius-3xl: calc(var(--radius) * 1.8);
+	--radius-4xl: calc(var(--radius) * 2.2);
 }
 
-body {
-	margin: 0;
-	display: flex;
-	place-items: center;
-	min-width: 320px;
-	min-height: 100vh;
-}
-
-h1 {
-	font-size: 3.2em;
-	line-height: 1.1;
-}
-
-button {
-	border-radius: 8px;
-	border: 1px solid transparent;
-	padding: 0.6em 1.2em;
-	font-size: 1em;
-	font-weight: 500;
-	font-family: inherit;
-	background-color: #1a1a1a;
-	cursor: pointer;
-	transition: border-color 0.25s;
-}
-button:hover {
-	border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-	outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-	:root {
-		color: #213547;
-		background-color: #ffffff;
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
 	}
-	a:hover {
-		color: #747bff;
+	html {
+		@apply bg-marun font-sans [scrollbar-color:var(--merah)_var(--muted)];
 	}
-	button {
-		background-color: #f9f9f9;
+	body {
+		@apply min-h-svh min-w-[320px] bg-background text-foreground antialiased;
+	}
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		cursor: pointer;
+	}
+	::selection {
+		@apply bg-hijau text-white;
+	}
+	:where(a) {
+		@apply underline-offset-[0.2em];
+	}
+	:where(input, textarea) {
+		@apply caret-merah;
 	}
 }
