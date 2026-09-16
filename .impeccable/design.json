@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-15T05:45:00+07:00",
+  "title": "Design System: KPU Muktamar XIV KAMMI 2026",
+  "extensions": {
+    "colorMeta": {
+      "merah": { "role": "primary", "displayName": "Merah Muktamar", "canonical": "#dc0a0a", "tonalRamp": ["#fdeaea", "#f7b5b5", "#ee5c5c", "#dc0a0a", "#b00606", "#8a0b10", "#5c070b"] },
+      "merah-tua": { "role": "primary-hover", "displayName": "Merah Tua", "canonical": "#b00606" },
+      "marun": { "role": "tertiary", "displayName": "Marun Footer", "canonical": "#8a0b10" },
+      "hijau": { "role": "secondary", "displayName": "Hijau KAMMI", "canonical": "#056035", "tonalRamp": ["#e6f2eb", "#a9d3b9", "#3f9366", "#056035", "#044a29", "#03331c"] },
+      "hijau-muda": { "role": "secondary-container", "displayName": "Hijau Muda", "canonical": "#e6f2eb" },
+      "navy": { "role": "on-surface", "displayName": "Navy Tinta", "canonical": "#06244c" },
+      "putih": { "role": "surface", "displayName": "Putih Enamel", "canonical": "#ffffff" },
+      "muted": { "role": "surface-variant", "displayName": "Putih Merah Pucat", "canonical": "#fbf3f2" },
+      "muted-foreground": { "role": "on-surface-variant", "displayName": "Navy Redup", "canonical": "#4a5872" },
+      "accent": { "role": "surface-container", "displayName": "Merah Pucat", "canonical": "#f8e7e6" },
+      "border": { "role": "outline-variant", "displayName": "Garis Pucat", "canonical": "#eedada" },
+      "input": { "role": "outline", "displayName": "Garis Input", "canonical": "#e3c9c9" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Poster", "purpose": "Judul halaman publik dan ubin split-flap; kapital dengan tepi 3D marun di bingkai publik." },
+      "headline": { "displayName": "Judul Kerja", "purpose": "Judul halaman akun dan Admin, tanpa tepi 3D." },
+      "title": { "displayName": "Judul Kecil", "purpose": "Label tombol, nama kelompok berkas, judul baris." },
+      "body": { "displayName": "Isi", "purpose": "Paragraf, penjelasan tahap, isi formulir." },
+      "label": { "displayName": "Kepala Kolom", "purpose": "Kepala kolom papan dan tabel di atas garis navy 2px; bukan eyebrow." }
+    },
+    "shadows": [
+      { "name": "panel-enamel", "value": "0 28px 60px -28px rgb(70 0 8 / 0.55), 0 2px 8px rgb(70 0 8 / 0.14)", "purpose": "Satu-satunya elevasi: panel papan yang terangkat dari bidang merah." },
+      { "name": "bibir-tombol", "value": "0 2px 0 var(--marun)", "purpose": "Pelat tombol utama." },
+      { "name": "ubin-flap", "value": "inset 0 -0.2em 0 rgb(0 0 0 / 0.18), 0 1px 2px rgb(60 0 0 / 0.3)", "purpose": "Ketebalan ubin split-flap." },
+      { "name": "tepi-3d-display", "value": "0 0.02em 0 var(--marun), 0 0.04em 0 var(--marun), 0 0.06em 0 var(--marun), 0 0.08em 0 var(--marun), 0 0.14em 0.2em rgb(60 0 0 / 0.35)", "purpose": "Text-shadow judul poster di atas merah." }
+    ],
+    "motion": [
+      { "name": "flap-tik", "value": "42ms", "purpose": "Satu tik putaran huruf split-flap; huruf ke-i mengunci setelah 5 + 1.6i tik. Sekali per muat, statis bila reduced-motion." },
+      { "name": "ease-keluar", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Transisi status dan hover, dari keadaan yang sudah terlihat." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Tombol Utama",
+      "kind": "button",
+      "refersTo": "button-primary-lg",
+      "description": "Tindakan utama, misalnya Daftar sebagai Bakal Calon atau Simpan data.",
+      "html": "<button class=\"ds-btn\">Daftar sebagai Bakal Calon</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; gap:8px; height:48px; padding:0 20px; border:0; border-radius:1rem; background:var(--merah,#dc0a0a); color:#fff; font:600 1rem/1 Poppins, ui-sans-serif, sans-serif; box-shadow:0 2px 0 var(--marun,#8a0b10); cursor:pointer; transition:background .2s cubic-bezier(.16,1,.3,1); } .ds-btn:hover { background:var(--merah-tua,#b00606); } .ds-btn:focus-visible { outline:3px solid rgb(6 36 76 / .4); outline-offset:2px; }"
+    },
+    {
+      "name": "Tombol Ditutup Tahap",
+      "kind": "button",
+      "refersTo": "button-ditutup-tahap",
+      "description": "Tindakan yang ditolak tahap: tetap tampak, diarsir, bergembok, dengan alasan tertulis.",
+      "html": "<div class=\"ds-tutup\"><button class=\"ds-tutup-btn\" aria-disabled=\"true\" aria-describedby=\"alasan\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg>Daftar sebagai Bakal Calon</button><p id=\"alasan\">Pendaftaran baru dibuka 17 September 2026 pukul 00.00 WIB.</p></div>",
+      "css": ".ds-tutup { display:flex; flex-direction:column; gap:12px; font-family:Poppins, ui-sans-serif, sans-serif; } .ds-tutup-btn { display:inline-flex; align-items:center; gap:8px; width:max-content; height:48px; padding:0 20px; border:1px solid var(--border,#eedada); border-radius:1rem; background:repeating-linear-gradient(135deg, var(--muted,#fbf3f2) 0 7px, var(--accent,#f8e7e6) 7px 14px); color:rgb(138 11 16 / .7); font:600 1rem/1 Poppins, sans-serif; cursor:not-allowed; } .ds-tutup p { margin:0; font-size:.875rem; color:var(--muted-foreground,#4a5872); }"
+    },
+    {
+      "name": "Status Bernama",
+      "kind": "chip",
+      "refersTo": "status-dibuka",
+      "description": "Status selalu ikon + teks: hijau untuk terbuka atau hadir, merah pucat bermarun untuk ditutup atau belum ada.",
+      "html": "<div class=\"ds-status\"><span class=\"ds-pil ds-buka\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg>Pendaftaran dibuka</span><span class=\"ds-pil ds-tutup-pil\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/></svg>Pendaftaran ditutup</span></div>",
+      "css": ".ds-status { display:flex; flex-wrap:wrap; gap:8px; } .ds-pil { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:.6125rem; font:600 .875rem/1.3 Poppins, sans-serif; } .ds-buka { background:var(--hijau,#056035); color:#fff; } .ds-tutup-pil { background:var(--accent,#f8e7e6); color:var(--marun,#8a0b10); border:1px solid rgb(138 11 16 / .25); }"
+    },
+    {
+      "name": "Ubin Split-Flap",
+      "kind": "custom",
+      "refersTo": "ubin-flap",
+      "description": "Nama tahap berjalan pada panel papan; satu per layar.",
+      "html": "<div class=\"ds-flap\" aria-label=\"Masa Pendaftaran\"><span>M</span><span>A</span><span>S</span><span>A</span><i></i><span>P</span><span>E</span><span>N</span><span>D</span><span>A</span><span>F</span><span>T</span><span>A</span><span>R</span><span>A</span><span>N</span></div>",
+      "css": ".ds-flap { display:flex; flex-wrap:wrap; gap:3px; max-width:560px; } .ds-flap i { width:14px; } .ds-flap span { position:relative; display:grid; place-items:center; width:32px; aspect-ratio:5/7; overflow:hidden; border-radius:.3rem; background:var(--marun,#8a0b10); color:#fff; font:400 29px/1 'Lilita One', Poppins, sans-serif; box-shadow:inset 0 -.2em 0 rgb(0 0 0 / .18), 0 1px 2px rgb(60 0 0 / .3); } .ds-flap span::after { content:''; position:absolute; left:0; right:0; top:50%; height:1px; background:rgb(0 0 0 / .4); }"
+    },
+    {
+      "name": "Baris Jadwal",
+      "kind": "custom",
+      "refersTo": "panel-papan",
+      "description": "Baris papan jadwal resmi; baris berjalan memakai bidang merah.",
+      "html": "<ol class=\"ds-jadwal\"><li class=\"selesai\"><b>✓</b><span>Pengumuman dan sosialisasi<small>Selesai</small></span><time>13–16 Sep 2026</time></li><li class=\"jalan\" aria-current=\"step\"><b>●</b><span>Pengambilan dan pengembalian berkas<small>Berjalan</small></span><time>17 Sep – 4 Okt 2026</time></li><li><b>○</b><span>Verifikasi administrasi dan uji kualifikasi<small>Terjadwal</small></span><time>5–7 Okt 2026</time></li></ol>",
+      "css": ".ds-jadwal { list-style:none; margin:0; padding:0; max-width:520px; font-family:Poppins, sans-serif; color:var(--navy,#06244c); border-top:2px solid var(--navy,#06244c); } .ds-jadwal li { display:grid; grid-template-columns:20px 1fr auto; gap:12px; align-items:start; padding:10px 8px; border-bottom:1px solid var(--border,#eedada); font-size:.9375rem; } .ds-jadwal b { font-size:.75rem; line-height:1.6; text-align:center; } .ds-jadwal span { display:flex; flex-direction:column; font-weight:500; } .ds-jadwal small { font-size:.7rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-foreground,#4a5872); } .ds-jadwal time { font-size:.875rem; font-variant-numeric:tabular-nums; } .ds-jadwal .selesai { color:var(--muted-foreground,#4a5872); } .ds-jadwal .jalan { background:var(--merah,#dc0a0a); color:#fff; border-radius:.875rem; border-color:transparent; font-weight:700; } .ds-jadwal .jalan small { color:#fff; }"
+    },
+    {
+      "name": "Footer Penegasan",
+      "kind": "nav",
+      "refersTo": "footer-penegasan",
+      "description": "Pita marun di setiap rute dengan penegasan tiadanya hubungan dengan penyelenggara pemilu nasional.",
+      "html": "<footer class=\"ds-footer\"><p>Komisi Penjaringan Umum Muktamar XIV KAMMI 2026 adalah badan internal Muktamar KAMMI dan tidak memiliki hubungan dengan penyelenggara pemilihan umum nasional.</p><a href=\"https://kammi.id\">kammi.id</a></footer>",
+      "css": ".ds-footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px 32px; padding:24px 32px; background:var(--marun,#8a0b10); color:#fff; font:400 .875rem/1.6 Poppins, sans-serif; } .ds-footer p { margin:0; max-width:64ch; } .ds-footer a { color:#fff; font-weight:600; text-underline-offset:.2em; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Papan Keberangkatan Pelabuhan Ambon",
+    "overview": "Penjaringan dibaca seperti papan jadwal pelabuhan Ambon: sepuluh jadwal WIB, satu baris sedang berjalan, sisanya jelas terjadwal atau ditutup. Materialnya dari kampanye Muktamar XIV: bidang merah bermotif, hijau KAMMI, putih enamel, huruf display tebal bertepi 3D, dan pita footer marun. Energi kampanye hidup di bingkai publik; area kerja akun dan Admin tenang di atas putih dengan tanda status yang sama.",
+    "keyCharacteristics": [
+      "Tiga tinta dari logo Muktamar XIV: merah, hijau, putih; navy hanya teks.",
+      "Panel papan enamel dengan nama tahap dalam ubin split-flap.",
+      "Tindakan tertutup tahap tetap tampak, diarsir, dan beralasan.",
+      "Status selalu ikon + teks; waktu selalu WIB tabular.",
+      "Ponsel 390px sebagai kanvas pertama."
+    ],
+    "rules": [
+      { "name": "Kaidah Sepertiga Merah", "body": "Rute publik: merah menguasai sedikitnya sepertiga layar sebagai bidang. Area kerja: merah hanya tombol utama dan galat.", "section": "colors" },
+      { "name": "Kaidah Tiga Tinta", "body": "Merah, hijau, putih; navy untuk teks, marun untuk footer dan tepi. Tidak ada gradien atau warna keempat.", "section": "colors" },
+      { "name": "Kaidah Satu Papan", "body": "Satu papan flap per layar, satu elevasi (panel enamel), satu putaran gerak per muat.", "section": "elevation" },
+      { "name": "Kaidah Kepala Kolom", "body": "Label kapital hanya sebagai kepala kolom di atas garis navy 2px, tidak pernah eyebrow di atas judul.", "section": "typography" }
+    ],
+    "dos": [
+      "Pakai logo asli tanpa diwarnai ulang atau diberi efek.",
+      "Tunjukkan alasan setiap tindakan yang tertutup tahap.",
+      "Tulis status sebagai tanda + teks, waktu dalam WIB tabular.",
+      "Uji di 390px dengan salinan asli lebih dulu."
+    ],
+    "donts": [
+      "Jangan menulis Gugur, Lulus, Terverifikasi, Mengundurkan Diri, kandidat, kirim pendaftaran, atau KPU RI.",
+      "Jangan membawa kosakata pelabuhan ke salinan.",
+      "Jangan memakai eyebrow, gradien, kaca, atau kartu ikon seukuran sebagai struktur.",
+      "Jangan memakai Lilita One untuk paragraf atau di bawah 1.5rem.",
+      "Jangan menampilkan jabatan anggota KPU yang belum diberikan."
+    ]
+  }
+}

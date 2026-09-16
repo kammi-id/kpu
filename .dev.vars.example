@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local development (gitignored). Never commit real values.
+#
+# BETTER_AUTH_SECRET and HMAC_SECRET: `openssl rand -base64 32`
+# ONBOARD_TOKEN: `openssl rand -base64 24` (temporary; delete after onboarding in production)
+# TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY: Cloudflare Turnstile "always passes" test keys
+#   are fine for local dev — see https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+BETTER_AUTH_SECRET=
+HMAC_SECRET=
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+ONBOARD_TOKEN=
+BETTER_AUTH_URL=http://localhost:5173
+TURNSTILE_SITE_KEY=1x00000000000000000000AA
