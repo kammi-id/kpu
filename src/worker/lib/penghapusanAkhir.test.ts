@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { buatWorker } from "../index";
 import { jalankanPenghapusanAkhir } from "./penghapusanAkhir";
 
-// Batas tahap Selesai (lib/tahap.ts MULAI_SELESAI): 24 Jan 2027 17.00Z (inklusif).
-const WAKTU_SELESAI = new Date("2027-01-24T17:00:00.000Z");
-const TEPAT_SEBELUM_SELESAI = new Date("2027-01-24T16:59:59.999Z");
+// Batas tahap Selesai (lib/tahap.ts MULAI_SELESAI): 27 Jan 2027 17.00Z (inklusif).
+const WAKTU_SELESAI = new Date("2027-01-27T17:00:00.000Z");
+const TEPAT_SEBELUM_SELESAI = new Date("2027-01-27T16:59:59.999Z");
 
 let whatsappBerikutnya = 0;
 

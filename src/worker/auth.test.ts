@@ -176,7 +176,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 		expect(auditDitolak).toEqual({ aktor: "Anonim", hasil: "ditolak" });
 
 		// Batas instan: BelumDibuka, Pemeriksaan, MasaPerbaikan, Terkunci, Selesai — tepat pada mulainya.
-		for (const waktu of ["2026-09-15T00:00:00.000Z", "2026-10-04T17:00:00.000Z", "2026-10-07T17:00:00.000Z", "2026-10-11T17:00:00.000Z", "2027-01-24T17:00:00.000Z"]) {
+		for (const waktu of ["2026-09-15T00:00:00.000Z", "2026-09-26T17:00:00.000Z", "2026-09-29T17:00:00.000Z", "2026-10-03T17:00:00.000Z", "2027-01-27T17:00:00.000Z"]) {
 			const response = await kirimPada(new Date(waktu), "/api/auth/sign-up/email", jsonDenganTurnstile({ name: "Bakal", email: `${waktu}@example.test`, whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true" }));
 			expect(response.status).toBe(403);
 			expect(await response.json()).toMatchObject({ error: "registrasi_tidak_diizinkan" });
@@ -295,9 +295,9 @@ describe("login Bakal Calon dan percobaanLogin (seam Worker)", () => {
 		const cookie = await daftarBacalon("selesai@example.test");
 		await env.DB
 			.prepare('UPDATE "session" SET "createdAt" = ?, "updatedAt" = ?, "expiresAt" = ?')
-			.bind("2027-01-24T23:00:00.000Z", "2027-01-24T23:00:00.000Z", "2027-01-25T23:00:00.000Z")
+			.bind("2027-01-27T23:00:00.000Z", "2027-01-27T23:00:00.000Z", "2027-01-28T23:00:00.000Z")
 			.run();
-		const response = await kirimPada(new Date("2027-01-25T00:00:00.000Z"), "/api/akun", { headers: { cookie } });
+		const response = await kirimPada(new Date("2027-01-28T00:00:00.000Z"), "/api/akun", { headers: { cookie } });
 		expect(response.status).toBe(403);
 		expect(await response.json()).toMatchObject({ error: "layanan_selesai" });
 	});
@@ -413,9 +413,9 @@ describe("onboarding dan sesi Admin (seam Worker)", () => {
 		const cookie = await masuk();
 		await env.DB
 			.prepare('UPDATE "session" SET "createdAt" = ?, "updatedAt" = ?, "expiresAt" = ?')
-			.bind("2027-01-24T16:59:00.000Z", "2027-01-24T16:59:00.000Z", "2027-01-25T16:59:00.000Z")
+			.bind("2027-01-27T16:59:00.000Z", "2027-01-27T16:59:00.000Z", "2027-01-28T16:59:00.000Z")
 			.run();
-		const selesai = new Date("2027-01-25T00:00:00.000Z");
+		const selesai = new Date("2027-01-28T00:00:00.000Z");
 		expect((await kirimPada(selesai, "/api/auth/sign-in/email", json({ email: DATA_ADMIN.email, password: DATA_ADMIN.password }))).status).toBe(403);
 		expect((await kirimPada(selesai, "/api/admin/audit", { headers: { cookie } })).status).toBe(401);
 	});

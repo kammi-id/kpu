@@ -7,9 +7,9 @@ import rafika from "~/react-app/assets/members/rafika.png";
 import ilham from "~/react-app/assets/members/ilham.png";
 
 const ANGGOTA = [
-	{ nama: "Khaidir Ali, S.H", foto: khaidir, lebarAsli: 3421, tinggiAsli: 3980 },
-	{ nama: "Robby Kaharuddin, M.E", foto: robby, lebarAsli: 2690, tinggiAsli: 3892 },
-	{ nama: "Alfiansyah, M.K.M", foto: alfiansyah, lebarAsli: 2782, tinggiAsli: 4125 },
+	{ nama: "Khaidir Ali", foto: khaidir, lebarAsli: 3421, tinggiAsli: 3980 },
+	{ nama: "Robby Kaharuddin", foto: robby, lebarAsli: 2690, tinggiAsli: 3892 },
+	{ nama: "Muhammad Alfiansyah", foto: alfiansyah, lebarAsli: 2782, tinggiAsli: 4125 },
 	{ nama: "Rafika Afriyanti", foto: rafika, lebarAsli: 1871, tinggiAsli: 2628 },
 	{ nama: "R. Ilham Sastra Ardhie Purnomo", foto: ilham, lebarAsli: 910, tinggiAsli: 1218 },
 ];
@@ -41,7 +41,7 @@ export function Tentang() {
 
 			<section className="mx-auto max-w-5xl px-4 py-12 sm:px-8 sm:py-16">
 				<p className="border-b-2 border-navy pb-2 text-[0.8125rem] font-bold tracking-[0.08em] text-muted-foreground uppercase">
-					Anggota KPU
+					Komisioner KPU
 				</p>
 				<ol className="mt-7 grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
 					{ANGGOTA.map((orang) => (

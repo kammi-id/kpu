@@ -29,7 +29,7 @@ describe("API tahap (seam Worker, jam disuntikkan)", () => {
 	});
 
 	it("mengembalikan Selesai pada dan setelah Penghapusan Akhir, layanan tidak aktif", async () => {
-		const response = await ambilTahap(() => new Date("2027-01-24T17:00:00.000Z"));
+		const response = await ambilTahap(() => new Date("2027-01-27T17:00:00.000Z"));
 		const body = await response.json();
 		expect(body.tahap).toBe("Selesai");
 		expect(body.layananAktif).toBe(false);

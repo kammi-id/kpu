@@ -30,7 +30,7 @@ function App() {
 	// Tahap Selesai (tiket 18): satu-satunya isi seluruh situs, tanpa memandang
 	// rute — Beranda dkk. tetap dirender sampai /api/tahap menjawab, karena
 	// menunggu tahap sebelum render pertama akan menunda seluruh situs demi
-	// jendela yang hanya berlaku setelah 25 Januari 2027.
+	// jendela yang hanya berlaku setelah 28 Januari 2027.
 	const { data: tahap } = useTahap();
 	if (tahap?.tahap === "Selesai") {
 		return (

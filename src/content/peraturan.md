@@ -231,7 +231,3 @@ Pada tanggal: 1 September 2026
 
 Komisi Penjaringan Umum  
 Muktamar KAMMI 2026
-
-| Ketua | Sekretaris |
-| --- | --- |
-| (...........................................) | (...........................................) |

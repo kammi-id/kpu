@@ -116,7 +116,7 @@ export function AdminLayout() {
 								<DialogContent>
 									<DialogHeader>
 										<DialogTitle>Keluar dari Admin bersama?</DialogTitle>
-										<DialogDescription>Sesi ini akan diakhiri di perangkat ini. Anggota KPU lain tetap dapat masuk kembali dengan kredensial yang sama.</DialogDescription>
+										<DialogDescription>Sesi ini akan diakhiri di perangkat ini. Komisioner KPU lain tetap dapat masuk kembali dengan kredensial yang sama.</DialogDescription>
 									</DialogHeader>
 									<DialogFooter>
 										<DialogClose render={<Button variant="outline" />}>Batal</DialogClose>

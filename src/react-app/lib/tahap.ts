@@ -35,10 +35,10 @@ export const LABEL_TAHAP: Record<Tahap, string> = {
 export const PENJELASAN_TAHAP: Record<Tahap, string> = {
 	BelumDibuka:
 		"Pendaftaran belum dibuka. Masa Pendaftaran mulai 17 September 2026 pukul 00.00 WIB.",
-	MasaPendaftaran: "Pendaftaran dibuka sampai 4 Oktober 2026 pukul 23.59 WIB.",
+	MasaPendaftaran: "Pendaftaran dibuka sampai 26 September 2026 pukul 23.59 WIB.",
 	Pemeriksaan:
-		"KPU sedang memeriksa berkas. Data dan berkas hanya-baca sampai 7 Oktober 2026 pukul 23.59 WIB.",
-	MasaPerbaikan: "Lengkapi kekurangan sampai 11 Oktober 2026 pukul 23.59 WIB.",
+		"KPU sedang memeriksa berkas. Data dan berkas hanya-baca sampai 29 September 2026 pukul 23.59 WIB.",
+	MasaPerbaikan: "Lengkapi kekurangan sampai 3 Oktober 2026 pukul 23.59 WIB.",
 	Terkunci: "Pendaftaran dan perubahan data telah ditutup untuk siklus ini.",
 	Selesai: "Proses penjaringan telah selesai dan data telah dihapus.",
 };
