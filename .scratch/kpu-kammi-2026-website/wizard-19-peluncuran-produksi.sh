@@ -193,8 +193,9 @@ note "perilaku bergantung waktu dengan jam yang disuntikkan)."
 note "Batas keras: 17 September 2026 00.00 WIB (16 September 17.00 UTC)."
 
 # ── Stage 1: Tinjau dan gabungkan cabang ───────────────────────────────────
-stage "Tinjau & gabungkan cabang ke main"
-say "dev-20260915 akan digabung ke main sebelum deploy produksi."
+stage "Tinjau & gabungkan cabang ke main (lewat PR, squash)"
+say "dev-20260915 masuk ke main lewat PR yang di-squash-merge — repo ini kini squash-only,"
+say "dan bila proteksi cabang main sudah aktif, push langsung ke main akan ditolak GitHub."
 git -C "$(pwd)" fetch origin >/dev/null 2>&1 || warn "git fetch gagal; lanjut dengan salinan lokal"
 say "Komit yang akan masuk ke main:"
 git -C "$(pwd)" log main..dev-20260915 --oneline || true
@@ -202,11 +203,22 @@ if ! confirm "ponytail-review, code-review, dan security-review pada diff di ata
   warn "berhenti di sini. Jalankan review lebih dulu, lalu ulangi wizard ini."
   exit 1
 fi
-if confirm "Gabungkan dev-20260915 ke main (squash, satu commit) dan push ke origin/main sekarang?"; then
+if confirm "Push dev-20260915, buka/gunakan PR ke main, lalu squash-merge sekarang?"; then
+  git push -u origin dev-20260915
+  pr_url=$(gh pr view dev-20260915 --json url -q .url 2>/dev/null || true)
+  if [[ -z "$pr_url" ]]; then
+    pr_url=$(gh pr create --base main --head dev-20260915 \
+      --title "feat: peluncuran tiket 19" \
+      --body "Review dan peluncuran produksi (tiket 19). ponytail-review, code-review, dan security-review sudah dijalankan pada cabang ini sebelum PR ini dibuka.")
+  fi
+  say "PR: $pr_url"
+  open_url "$pr_url"
+  confirm "PR sudah tinjauan akhir di GitHub dan siap di-squash-merge?" || { warn "berhenti di sini sampai PR siap."; exit 1; }
+  gh pr merge dev-20260915 --squash --delete-branch=false \
+    --subject "feat: peluncuran tiket 19" \
+    --body "Gabungan dev-20260915 (squash) untuk peluncuran produksi tiket 19."
   git checkout main
-  git merge --squash dev-20260915
-  git commit -m "feat: peluncuran tiket 19 — gabungan dev-20260915 (squash)"
-  git push origin main
+  git pull origin main
   say "Selesai. Cabang aktif sekarang: $(git branch --show-current)"
 else
   warn "dilewati — pastikan kamu berada di cabang yang benar sebelum stage deploy."
