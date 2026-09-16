@@ -12,7 +12,9 @@ type TindakanAudit =
 	| "ekspor_harian"
 	| "ekspor"
 	| "penutupan_akun"
-	| "hapus_data";
+	| "hapus_data"
+	| "tutup_pendaftaran"
+	| "buka_pendaftaran";
 type HasilAudit = "berhasil" | "gagal" | "ditolak";
 
 type DataAudit = {

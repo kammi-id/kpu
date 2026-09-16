@@ -99,3 +99,7 @@ _Avoid_: berkas Bakal Calon, lampiran pendaftaran
 **Onboarding Admin**:
 Pembuatan satu-satunya akun Admin bersama melalui halaman bertoken rahasia yang hanya terbuka selama akun Admin belum ada. Onboarding ulang adalah satu-satunya jalan pemulihan akses Admin.
 _Avoid_: registrasi Admin, reset kata sandi Admin
+
+**Penutupan Pendaftaran Manual**:
+Sakelar yang Admin aktifkan dari halaman Pengaturan untuk menutup pendaftaran akun baru kapan pun selama Masa Pendaftaran berlangsung, terlepas dari jadwalnya. Sakelar ini hanya dapat menutup; ia tidak pernah membuka pendaftaran di luar Masa Pendaftaran yang terjadwal.
+_Avoid_: penundaan pendaftaran, perpanjangan pendaftaran, penutupan otomatis

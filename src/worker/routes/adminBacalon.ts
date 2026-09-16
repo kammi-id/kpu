@@ -1,10 +1,10 @@
 import { Hono } from "hono";
+import { adminAtauTolak } from "../lib/aksesAdmin";
 import { catatAudit, pernyataanAudit } from "../lib/audit";
 import { headerUnduh } from "./akunBerkas";
-import { ambilSesi, buatAuth, rahasiaTersedia, type EnvDenganRahasia } from "../lib/auth";
+import { buatAuth, type EnvDenganRahasia } from "../lib/auth";
 import { hapusBarisCsvBacalon, KOLOM_MINTA_DITUTUP, kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
 import { konfirmasiKataSandiAdmin, payloadKataSandi } from "../lib/konfirmasiAdmin";
-import { layananAktif, tahapPada } from "../lib/tahap";
 
 const ALFABET_KATA_SANDI_SEMENTARA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
 const BATAS_ACAK_TANPA_BIAS = 256 - (256 % ALFABET_KATA_SANDI_SEMENTARA.length);
@@ -66,15 +66,6 @@ function kataSandiSementara() {
 
 function kategoriEkspor(nilai: string): KategoriEkspor | null {
 	return nilai === "terkini" || nilai === "pemeriksaan" ? nilai : null;
-}
-
-async function adminAtauTolak(c: { env: EnvDenganRahasia; req: { raw: Request }; json: (data: unknown, status?: 401 | 403) => Response }, sekarang: () => Date) {
-	if (!rahasiaTersedia(c.env)) return { response: c.json({ error: "layanan_tidak_tersedia" }, 403) };
-	const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
-	if (!sesi || sesi.user.role !== "admin") return { response: c.json({ error: "tidak_berwenang" }, 401) };
-	const tahap = tahapPada(sekarang());
-	if (!layananAktif(tahap)) return { response: c.json({ error: "tahap_tertutup", tahap }, 403) };
-	return { sesi };
 }
 
 /**

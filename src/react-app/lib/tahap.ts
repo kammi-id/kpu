@@ -18,6 +18,8 @@ export interface TahapApi {
 	sekarang: string;
 	tahap: Tahap;
 	bolehRegistrasi: boolean;
+	/** Penutupan Pendaftaran Manual (lihat CONTEXT.md): true hanya bila itu sebab sebenarnya `bolehRegistrasi` bernilai false. */
+	pendaftaranDitutupManual: boolean;
 	bolehUbahBacalon: boolean;
 	layananAktif: boolean;
 	jadwal: JadwalItemApi[];
@@ -42,6 +44,12 @@ export const PENJELASAN_TAHAP: Record<Tahap, string> = {
 	Terkunci: "Pendaftaran dan perubahan data telah ditutup untuk siklus ini.",
 	Selesai: "Proses penjaringan telah selesai dan data telah dihapus.",
 };
+
+/** Alasan tampil saat pendaftaran ditutup: Penutupan Pendaftaran Manual mengalahkan penjelasan tahap. */
+export function alasanPendaftaranTertutup(data: TahapApi): string {
+	if (data.pendaftaranDitutupManual) return "Pendaftaran sedang ditutup sementara oleh Admin.";
+	return PENJELASAN_TAHAP[data.tahap];
+}
 
 export async function ambilTahap(signal?: AbortSignal): Promise<TahapApi> {
 	const response = await fetch("/api/tahap", { signal });

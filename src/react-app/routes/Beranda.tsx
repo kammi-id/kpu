@@ -6,8 +6,8 @@ import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
 import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
 import { useTahap } from "~/react-app/lib/useTahap";
-import { LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
-import ketua from "~/react-app/assets/illustrations/ketum.png";
+import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
+import { ketum } from "~/react-app/assets/generated";
 
 const PINTU = [
 	{ ke: "/peraturan", label: "Peraturan", ikon: FileText, deskripsi: "Ringkasan PKPU dan dokumen lengkap" },
@@ -27,11 +27,8 @@ export function Beranda() {
 						<p className="mt-4 text-lg font-semibold">Muktamar KAMMI XIV Ambon</p>
 					</div>
 					<ResponsiveImage
-						src={ketua}
+						gambar={ketum}
 						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
-						width={960}
-						intrinsicWidth={1122}
-						intrinsicHeight={1402}
 						loading="eager"
 						className={`relative z-0 -mb-8 sm:-mb-10 lg:-mb-12 ${KELAS_ILUSTRASI_HERO}`}
 					/>
@@ -85,7 +82,7 @@ export function Beranda() {
 												Daftar
 											</Button>
 											<p id="alasan-daftar-tertutup" className="mt-2 text-sm text-marun">
-												{PENJELASAN_TAHAP[data.tahap]}
+												{alasanPendaftaranTertutup(data)}
 											</p>
 										</div>
 									)}

@@ -38,7 +38,7 @@ describe("Meta OpenGraph per halaman publik (seam Worker)", () => {
 		expect(html).not.toContain("Pendaftaran Bakal Calon Ketua Umum PP KAMMI — KPU Muktamar XIV</title>");
 	});
 
-	// Beranda ("/") dan rute tertutup (masuk/daftar/onboard/admin/akun) sengaja
+	// Beranda ("/") dan rute tertutup (masuk/daftar/onboard/admin/bacalon) sengaja
 	// TIDAK didaftarkan di buatRuteMetaHalaman() — keduanya tak pernah masuk
 	// Worker sama sekali di produksi (lihat run_worker_first di wrangler.json),
 	// jadi index.html disajikan Assets binding apa adanya dengan OG default.

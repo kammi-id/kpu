@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -40,7 +40,7 @@ export function Masuk() {
 		setMengirim(false);
 		if (response.ok) {
 			const body = await response.json() as { user?: { role?: string } };
-			return navigate(body.user?.role === "admin" ? "/admin" : "/akun", { replace: true });
+			return navigate(body.user?.role === "admin" ? "/admin" : "/bacalon", { replace: true });
 		}
 		const body = await response.json().catch(() => null) as { turnstileDiperlukan?: boolean } | null;
 		if (body?.turnstileDiperlukan) setPerluTurnstile(true);
@@ -68,7 +68,7 @@ export function Masuk() {
 						{pesan ? <p className="text-sm text-destructive" aria-live="polite">{pesan}</p> : null}
 						<Button type="submit" disabled={mengirim}>{mengirim ? "Memeriksa…" : "Masuk"}</Button>
 					</form>
-					<p className="mt-5 text-sm text-muted-foreground">Lupa kata sandi? Hubungi kanal resmi KPU di <a className="font-semibold text-merah underline" href="/tentang">/tentang</a>.</p>
+					<p className="mt-5 text-sm text-muted-foreground">Lupa kata sandi? Hubungi <Link className="font-semibold text-merah underline" to="/tentang">KPU</Link>.</p>
 				</CardContent>
 			</Card>
 		</section>

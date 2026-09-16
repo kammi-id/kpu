@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { PublicPageHero } from "~/react-app/components/PublicPageHero";
 import { ambilUnduhan, type BerkasPublik, urlUnduhBerkasPublik } from "~/react-app/lib/berkasPublik";
-import agung from "~/react-app/assets/illustrations/agung.png";
+import { agung } from "~/react-app/assets/generated";
 
 function ukuranTerformat(byte: number) {
 	return `${(byte / (1024 * 1024)).toFixed(2)} MB`;
@@ -95,7 +95,7 @@ export function Unduhan() {
 	return (
 		<PublicPageHero
 			judul="Berkas Kelengkapan"
-			ilustrasi={{ src: agung, alt: "Ilustrasi KPU Muktamar XIV KAMMI", intrinsicWidth: 1122, intrinsicHeight: 1402 }}
+			ilustrasi={{ gambar: agung, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}
 		>
 			<p className="max-w-[60ch] text-muted-foreground">
 				Unduh templat resmi berikut, lengkapi sesuai petunjuk pada tiap formulir, lalu unggah kembali salinannya lewat akun

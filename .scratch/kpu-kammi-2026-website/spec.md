@@ -22,7 +22,7 @@ Repo saat ini hanya berisi halaman "Coming Soon": Hono, React 19, Vite 7, dan sh
 
 Satu Cloudflare Worker di `https://kpu.kammi.id` melayani SPA React dan API Hono. D1 menyimpan akun, data, metadata berkas, Peraturan, dan audit. Bucket R2 privat menyimpan berkas Bakal Calon, Berkas Publik, dan Ekspor Harian.
 
-- **Publik** membaca beranda dengan spanduk tahap berjalan, Peraturan, jadwal, dan unduhan formulir, serta profil KPU dengan kanal resmi. Tidak satu pun data Bakal Calon Ketua Umum tampil. Setiap halaman memuat footer tetap berisi penegasan bahwa KPU tidak berhubungan dengan penyelenggara pemilihan umum nasional.
+- **Publik** membaca beranda dengan spanduk tahap berjalan, Peraturan, jadwal, dan unduhan formulir, serta profil KPU dengan kanal resmi. Tidak satu pun data Bakal Calon Ketua Umum tampil. Setiap halaman memuat footer tetap berisi penegasan bahwa KPU tidak berhubungan dengan penyelenggara pemilihan umum nasional, kecuali gerbang `/masuk`, `/daftar`, dan `/onboard` (amandemen: footer disembunyikan khusus pada layar publik non-administratif tersebut).
 - **Bakal Calon Ketua Umum** mendaftar dengan email, kata sandi, WhatsApp, centang persetujuan, dan Turnstile. Ia lalu mengisi data pribadi dan mengelola sepuluh kelompok berkas. Status `x/10` beserta label `Lengkap` atau `Belum lengkap` dihitung otomatis. Perubahan hanya diterima server pada Masa Pendaftaran dan Masa Perbaikan. Bakal Calon dapat mengajukan Permintaan Penutupan Akun dan Penarikan Persetujuan.
 - **Admin bersama** dibuat sekali lewat Onboarding Admin bertoken. Admin melihat tabel dan detail seluruh Bakal Calon Ketua Umum, mengunduh berkas, mereset kata sandi, dan menghapus data akun yang meminta ditutup. Admin juga mengelola Peraturan dan Berkas Publik, mengunduh Ekspor Harian dan Snapshot Pemeriksaan, serta membaca audit.
 - **Sistem** menjalankan cron harian pukul 00.00 WIB. Cron membuat Ekspor Harian, menyalin Snapshot Pemeriksaan satu kali pada 5 Oktober 2026, dan mulai 25 Januari 2027 menjalankan Penghapusan Akhir, lalu seluruh situs memasuki Tahap Selesai.
@@ -308,13 +308,13 @@ Asumsi tercatat: Permintaan Penutupan Akun tetap tersedia di luar jendela ubah. 
 
 - Sitemap persis tiket 04 ditambah `/onboard` dan `/admin/peraturan`:
   - **Publik:** `/`, `/peraturan`, `/jadwal`, `/unduhan`, `/tentang`, `/masuk` dan `/daftar` (satu gerbang dua tab).
-  - **Bakal Calon:** `/akun`, `/akun/data`, `/akun/berkas`, `/akun/berkas/:no`, `/akun/pengaturan`.
+  - **Bakal Calon:** `/bacalon`, `/bacalon/data`, `/bacalon/berkas`, `/bacalon/berkas/:no`, `/bacalon/pengaturan` (amandemen: dipindah dari `/akun`, layout dasbor disamakan dengan Admin).
   - **Admin:** `/admin`, `/admin/:id`, `/admin/ekspor`, `/admin/audit`, `/admin/peraturan`.
-- Shell SPA boleh termuat tanpa sesi. **Otorisasi selalu di API**: rute klien `/akun` dan `/admin` mengarahkan ke `/masuk` atau menampilkan penolakan berdasarkan jawaban API, dan tidak ada data yang tertanam di bundel.
+- Shell SPA boleh termuat tanpa sesi. **Otorisasi selalu di API**: rute klien `/bacalon` dan `/admin` mengarahkan ke `/masuk` atau menampilkan penolakan berdasarkan jawaban API, dan tidak ada data yang tertanam di bundel.
 - Komponen tetap:
   - spanduk tahap di beranda dan di atas seluruh rute akun;
   - sidebar akun dengan `x/10` + label;
-  - footer penegasan di **setiap** rute;
+  - footer penegasan di **setiap** rute, kecuali gerbang `/masuk`, `/daftar`, `/onboard` (amandemen);
   - layar Selesai yang menggantikan semua rute pada tahap Selesai.
 - UI memakai komponen shadcn (Base UI) dan kelas Tailwind, termasuk nilai arbitrer, tanpa CSS tulisan tangan. Tata letak mengacu ke prototipe Varian A pada branch `prototype/blueprint-tiga-peran` (commit `d9ade51`). Prototipe itu kode buang, bukan untuk disalin mentah. Judul dokumen dan salinan Coming Soon diganti.
 - Seluruh salinan UI berbahasa Indonesia dan memakai istilah `CONTEXT.md`. Label berikut dilarang di antarmuka mana pun: `Gugur`, `Lulus`, `Terverifikasi`, `Mengundurkan Diri`, `Calon Ketua Umum` (sebagai status), `kirim pendaftaran`, `kandidat`, `KPU RI`.

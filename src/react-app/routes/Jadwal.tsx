@@ -4,7 +4,7 @@ import { KartuUnduhanBerkas } from "~/react-app/components/KartuUnduhanBerkas";
 import { PublicPageHero } from "~/react-app/components/PublicPageHero";
 import { ambilDokumenResmi, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { useTahap } from "~/react-app/lib/useTahap";
-import bendahara from "~/react-app/assets/illustrations/bendum.png";
+import { bendum } from "~/react-app/assets/generated";
 
 export function Jadwal() {
 	const { data, error } = useTahap();
@@ -21,7 +21,7 @@ export function Jadwal() {
 	return (
 		<PublicPageHero
 			judul="Timeline Resmi KPU"
-			ilustrasi={{ src: bendahara, alt: "Ilustrasi KPU Muktamar XIV KAMMI", intrinsicWidth: 1024, intrinsicHeight: 1481 }}
+			ilustrasi={{ gambar: bendum, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}
 		>
 			{error ? (
 				<p className="text-marun">Jadwal tidak dapat dimuat. Muat ulang halaman ini.</p>
