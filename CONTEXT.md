@@ -45,8 +45,24 @@ Instansi kepemimpinan KAMMI di tingkat kabupaten atau kota.
 _Avoid_: daerah, cabang
 
 **Anggota Biasa III (AB 3)**:
-Jenjang keanggotaan KAMMI yang menjadi syarat status keanggotaan Bakal Calon Ketua Umum.
+Jenjang keanggotaan tertinggi dalam struktur kaderisasi KAMMI, dan menjadi syarat status keanggotaan Bakal Calon Ketua Umum.
 _Avoid_: DM 3, anggota senior
+
+**Sistem Keanggotaan KAMMI (kammi.id)**:
+Sistem milik PP KAMMI yang menjadi satu-satunya sumber kebenaran untuk data keanggotaan seorang kader, termasuk NIA, jenjang kaderisasi, dan keadaan kader. Aplikasi KPU bukan pengelola data keanggotaan; ia hanya membaca data ini lewat Verifikasi NIA.
+_Avoid_: basis data anggota, sumber data eksternal
+
+**NIA (Nomor Induk Anggota)**:
+Identitas 11 digit seorang kader di Sistem Keanggotaan KAMMI, dipakai untuk memverifikasi status keanggotaannya sebelum akun Bakal Calon dibuat.
+_Avoid_: NIK, NIM, nomor anggota, ID pengguna
+
+**Verifikasi NIA**:
+Proses mencocokkan sebuah NIA ke Sistem Keanggotaan KAMMI untuk memastikan nama, jenjang kaderisasi Anggota Biasa III, dan Keadaan Kader aktif terpenuhi, sebagai syarat pembuatan akun Bakal Calon. Berbeda dari uji kualifikasi Calon Ketua Umum yang dilakukan KPU kemudian.
+_Avoid_: Cek NIA (label tombol UI, bukan istilah domain), validasi NIA
+
+**Keadaan Kader**:
+Status keaktifan seorang kader di Sistem Keanggotaan KAMMI. Hanya keadaan "aktif" yang meloloskan Verifikasi NIA; keadaan lain apa pun dianggap tidak memenuhi syarat.
+_Avoid_: status anggota, status akun
 
 **Muktamar**:
 Permusyawaratan tertinggi KAMMI yang antara lain berwenang memilih dan menetapkan Ketua Umum PP KAMMI.

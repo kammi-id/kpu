@@ -93,7 +93,7 @@
 		}
 	}
 	/**
-	 * Secrets (BETTER_AUTH_SECRET, HMAC_SECRET, TURNSTILE_SECRET_KEY, ONBOARD_TOKEN) are set with
+	 * Secrets (BETTER_AUTH_SECRET, HMAC_SECRET, TURNSTILE_SECRET_KEY, ONBOARD_TOKEN, KAMMI_ID_TOKEN) are set with
 	 * `wrangler secret put [--env preview]` in production/preview and `.dev.vars` locally —
 	 * never written here.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/

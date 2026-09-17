@@ -9,6 +9,7 @@ const WAKTU_SELESAI = new Date("2027-01-27T17:00:00.000Z");
 const TEPAT_SEBELUM_SELESAI = new Date("2027-01-27T16:59:59.999Z");
 
 let whatsappBerikutnya = 0;
+let niaBerikutnya = 0;
 
 type BarisKeterangan = { tabel: Record<string, number>; objekR2: number };
 
@@ -20,18 +21,29 @@ async function jalankanTerjadwal(waktu: Date) {
 
 async function buatBacalon(nama: string, email: string, waktu: Date) {
 	whatsappBerikutnya += 1;
+	niaBerikutnya += 1;
 	const id = crypto.randomUUID();
 	await env.DB.prepare(
-		`INSERT INTO "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt", "role", "whatsapp", "persetujuanVersi", "persetujuanPada")
-		 VALUES (?, ?, ?, 1, ?, ?, 'bacalon', ?, 'persetujuan-v1', ?)`,
+		`INSERT INTO "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt", "role", "whatsapp", "persetujuanVersi", "persetujuanPada", "nia")
+		 VALUES (?, ?, ?, 1, ?, ?, 'bacalon', ?, 'persetujuan-v1', ?, ?)`,
 	)
-		.bind(id, nama, email, waktu.toISOString(), waktu.toISOString(), `62812345${String(whatsappBerikutnya).padStart(4, "0")}`, waktu.toISOString())
+		.bind(
+			id,
+			nama,
+			email,
+			waktu.toISOString(),
+			waktu.toISOString(),
+			`62812345${String(whatsappBerikutnya).padStart(4, "0")}`,
+			waktu.toISOString(),
+			`3020100${String(niaBerikutnya).padStart(4, "0")}`,
+		)
 		.run();
 	return id;
 }
 
 beforeEach(async () => {
 	whatsappBerikutnya = 0;
+	niaBerikutnya = 0;
 	const objek = await env.BERKAS.list();
 	if (objek.objects.length) await env.BERKAS.delete(objek.objects.map((satu) => satu.key));
 	await env.DB.batch([
