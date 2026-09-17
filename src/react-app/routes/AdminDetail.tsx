@@ -38,7 +38,7 @@ export function AdminDetail() {
 	if (!data) return <p className="text-muted-foreground" aria-live="polite">{pesan}</p>;
 
 	const dataPribadi = [
-		["Nama lengkap", data.name], ["Email", data.email], ["WhatsApp", data.whatsapp], ["Nama panggilan", data.namaPanggilan],
+		["Nama lengkap", data.name], ["NIA", data.nia], ["Email", data.email], ["WhatsApp", data.whatsapp], ["Nama panggilan", data.namaPanggilan],
 		["Tempat lahir", data.tempatLahir], ["Tanggal lahir", data.tanggalLahir], ["Asal PW", data.asalPw], ["Asal PD", data.asalPd],
 		["Tahun lulus AB 3", data.tahunLulusDm3], ["Tempat lulus AB 3", data.tempatLulusDm3], ["Instruktur", data.instruktur],
 		["Capaian hafalan", data.capaianHafalan], ["Bahasa asing", data.bahasaAsing],

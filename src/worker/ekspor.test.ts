@@ -174,6 +174,10 @@ describe("Ekspor Harian (acceptance 24, 31)", () => {
 		const teksCsv = await csv?.text();
 		expect(teksCsv).toContain("Nabila Putri");
 		expect(teksCsv).toContain("Minta ditutup");
+		const baris = (teksCsv ?? "").trim().split("\r\n");
+		expect(baris[0].split(",")).toContain("nia");
+		const niaTersimpan = await env.DB.prepare('SELECT "nia" FROM "user" WHERE "id" = ?').bind(userId).first<{ nia: string }>();
+		expect(teksCsv).toContain(niaTersimpan?.nia as string);
 		expect(teksCsv).not.toContain(TANDA_PASSWORD);
 		expect(teksCsv).not.toContain(TANDA_TOKEN);
 		expect(teksCsv).not.toContain(TANDA_VERIFIKASI);

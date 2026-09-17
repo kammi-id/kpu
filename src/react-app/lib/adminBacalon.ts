@@ -12,6 +12,7 @@ export type RingkasanBacalonAdmin = {
 
 export type DetailBacalonAdmin = RingkasanBacalonAdmin & {
 	email: string;
+	nia: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
 	tanggalLahir: string | null;

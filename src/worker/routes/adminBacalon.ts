@@ -24,6 +24,7 @@ type BarisDetail = {
 	name: string;
 	email: string;
 	whatsapp: string;
+	nia: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
@@ -135,7 +136,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		if ("response" in akses) return akses.response;
 		const id = c.req.param("id");
 		const detail = await c.env.DB.prepare(
-			`SELECT u."id", u."name", u."email", u."whatsapp", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
+			`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
 			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
 			 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ? AND u."role" = 'bacalon'`,
