@@ -32,6 +32,12 @@ async function lajuNiaTerlampaui(env: EnvDenganRahasia, kunci: string, sekarang:
 	return (baris?.gagal ?? 0) >= BATAS_LAJU_NIA;
 }
 
+/**
+ * Kolom "gagal" di sini dipakai ulang sebagai penghitung PERMINTAAN (semua
+ * panggilan, sukses maupun gagal) — bukan penghitung kegagalan seperti
+ * namanya di baris percobaan login. Reuse tabel yang sama, arti kolom
+ * berbeda per namespace kunci.
+ */
 async function catatPermintaanNia(env: EnvDenganRahasia, kunci: string, sekarang: Date) {
 	const kedaluwarsa = new Date(sekarang.getTime() + KEDALUWARSA_LAJU_NIA_MS).toISOString();
 	await env.DB.prepare(
