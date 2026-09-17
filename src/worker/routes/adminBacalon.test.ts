@@ -58,9 +58,22 @@ async function sesiAdmin() {
 
 async function sesiBacalon(email: string, name: string) {
 	whatsappBerikutnya += 1;
+	niaBerikutnya += 1;
 	jaringan.use(http.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", () => HttpResponse.json({ success: true })));
+	// Penggerbangan NIA (tiket 04): sign-up/email memverifikasi ulang lewat kammi.id.
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama: name, jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
 	const response = await kirim(MASA_PENDAFTARAN, "/api/auth/sign-up/email", {
-		...json({ name, email, whatsapp: `08123450${String(whatsappBerikutnya).padStart(4, "0")}`, password: "kata-sandi-aman", persetujuan: "true" }),
+		...json({
+			name,
+			email,
+			whatsapp: `08123450${String(whatsappBerikutnya).padStart(4, "0")}`,
+			password: "kata-sandi-aman",
+			persetujuan: "true",
+			nia: `3020100${String(niaBerikutnya).padStart(4, "0")}`,
+		}),
 		headers: {
 			"content-type": "application/json",
 			origin: "https://kpu.kammi.id",

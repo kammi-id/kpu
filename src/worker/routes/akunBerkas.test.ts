@@ -49,6 +49,14 @@ function turnstileSelaluLolos() {
 	);
 }
 
+/** Penggerbangan NIA (tiket 04): sign-up/email sekarang memverifikasi ulang lewat kammi.id, jadi setiap registrasi uji butuh ini juga. */
+function kammiIdSelaluLolos() {
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama: "Bakal Calon", jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
+}
+
 /**
  * Better Auth menulis `session.createdAt`/`updatedAt` dari jam sungguhan, bukan
  * dari `sekarang()` yang disuntikkan ke Worker. Uji ini banyak melompat lintas
@@ -72,12 +80,14 @@ let whatsappBerikutnya = 0;
 async function daftarBacalon(email: string, password = "kata-sandi-aman") {
 	whatsappBerikutnya += 1;
 	const whatsapp = `08123450${String(whatsappBerikutnya).padStart(4, "0")}`;
+	const nia = `3020100${String(whatsappBerikutnya).padStart(4, "0")}`;
 	turnstileSelaluLolos();
+	kammiIdSelaluLolos();
 	const response = await kirim(
 		MASA_PENDAFTARAN,
 		"/api/auth/sign-up/email",
 		{
-			...json({ name: "Bakal Calon", email, whatsapp, password, persetujuan: "true" }),
+			...json({ name: "Bakal Calon", email, whatsapp, password, persetujuan: "true", nia }),
 			headers: {
 				"content-type": "application/json",
 				origin: "https://kpu.kammi.id",

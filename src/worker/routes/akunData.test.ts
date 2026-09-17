@@ -53,6 +53,16 @@ function turnstileSelaluLolos() {
 	);
 }
 
+/** Penggerbangan NIA (tiket 04): sign-up/email sekarang memverifikasi ulang lewat kammi.id, jadi setiap registrasi uji butuh ini juga. */
+function kammiIdSelaluLolos() {
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama: "Bakal Calon", jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
+}
+
+let niaBerikutnya = 0;
+
 /**
  * Mendaftarkan Bakal Calon lewat seam registrasi sungguhan (harus terjadi di
  * Masa Pendaftaran), lalu mengunci jam sesinya ke `waktu` supaya permintaan
@@ -60,12 +70,15 @@ function turnstileSelaluLolos() {
  */
 async function daftarBacalon(email: string, whatsapp: string, waktu = MASA_PENDAFTARAN) {
 	turnstileSelaluLolos();
+	kammiIdSelaluLolos();
+	niaBerikutnya += 1;
 	const permintaan = json({
 		name: "Bakal Calon",
 		email,
 		whatsapp,
 		password: "kata-sandi-aman",
 		persetujuan: "true",
+		nia: `3020100${String(niaBerikutnya).padStart(4, "0")}`,
 	});
 	const response = await kirim(MASA_PENDAFTARAN, "/api/auth/sign-up/email", {
 		...permintaan,
