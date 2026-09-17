@@ -16,6 +16,10 @@ _Avoid_: kandidat, calon tetap
 Penanda otomatis berupa status tiap kelompok, jumlah kelompok terpenuhi, dan hasil keseluruhan bahwa sepuluh kelompok berkas yang diwajibkan telah berada di sistem. Formulir A.3 dan A.4 berada dalam satu kelompok rekomendasi yang terpenuhi melalui salah satu Jalur Rekomendasi; status ini tidak menyatakan keabsahan isi atau kelulusan verifikasi KPU.
 _Avoid_: status verifikasi, berkas sah, lulus administrasi
 
+**Kelompok Berkas**:
+Salah satu dari sepuluh kategori berkas wajib yang diunggah Bakal Calon Ketua Umum agar Status Kelengkapan Berkas menyatakan lengkap. Kelompok 1 adalah Formulir A.1 Bacalon.
+_Avoid_: jenis berkas, kategori unggahan
+
 **Masa Pendaftaran**:
 Periode 17 September 2026 pukul 00.00 WIB sampai 26 September 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya.
 _Avoid_: masa verifikasi, masa perbaikan
@@ -111,6 +115,10 @@ _Avoid_: pengumuman, berita, jadwal
 **Berkas Publik**:
 Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKPU dan Formulir A.1 sampai A.6. Berkas ini tidak pernah memuat data Bakal Calon Ketua Umum.
 _Avoid_: berkas Bakal Calon, lampiran pendaftaran
+
+**Formulir A.1 Bacalon**:
+Salinan Formulir A.1 yang telah diisi dan ditandatangani oleh seorang Bakal Calon Ketua Umum, diunggah sebagai Kelompok Berkas pertama dari sepuluh yang diwajibkan. Berbeda dari Formulir A.1 kosong di bawah Berkas Publik, yang menjadi templat unduhan dan tidak pernah memuat data Bakal Calon.
+_Avoid_: Formulir A.1 (tanpa konteks), berkas A.1
 
 **Onboarding Admin**:
 Pembuatan satu-satunya akun Admin bersama melalui halaman bertoken rahasia yang hanya terbuka selama akun Admin belum ada. Onboarding ulang adalah satu-satunya jalan pemulihan akses Admin.
