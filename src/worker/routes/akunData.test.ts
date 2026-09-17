@@ -72,13 +72,14 @@ async function daftarBacalon(email: string, whatsapp: string, waktu = MASA_PENDA
 	turnstileSelaluLolos();
 	kammiIdSelaluLolos();
 	niaBerikutnya += 1;
+	const nia = `3020100${String(niaBerikutnya).padStart(4, "0")}`;
 	const permintaan = json({
 		name: "Bakal Calon",
 		email,
 		whatsapp,
 		password: "kata-sandi-aman",
 		persetujuan: "true",
-		nia: `3020100${String(niaBerikutnya).padStart(4, "0")}`,
+		nia,
 	});
 	const response = await kirim(MASA_PENDAFTARAN, "/api/auth/sign-up/email", {
 		...permintaan,
@@ -90,7 +91,7 @@ async function daftarBacalon(email: string, whatsapp: string, waktu = MASA_PENDA
 	await env.DB.prepare('UPDATE "session" SET "createdAt" = ?, "updatedAt" = ? WHERE "userId" = ?')
 		.bind(waktu.toISOString(), waktu.toISOString(), user?.id)
 		.run();
-	return { cookie, userId: user?.id as string };
+	return { cookie, userId: user?.id as string, nia };
 }
 
 async function setelWaktuSesi(userId: string, waktu: Date) {
@@ -99,9 +100,13 @@ async function setelWaktuSesi(userId: string, waktu: Date) {
 		.run();
 }
 
+// "Bakal Calon" persis: nama tersimpan bersumber dari hasil Verifikasi NIA
+// (kammiIdSelaluLolos di atas), bukan dari body.name klien — PUT sekarang
+// menolak name yang berbeda dari nilai ini (tiket 20), jadi payload uji harus
+// selalu mengirim nilai yang sama seperti akun sungguhan yang didaftarkan.
 function payloadLengkap(overrides: Record<string, unknown> = {}) {
 	return {
-		name: "Bakal Calon Satu",
+		name: "Bakal Calon",
 		whatsapp: "081234567890",
 		namaPanggilan: "Calon",
 		tempatLahir: "Jakarta",
@@ -141,8 +146,8 @@ describe("GET /api/akun/data (seam Worker)", () => {
 		expect((await bacaData("")).status).toBe(401);
 	});
 
-	it("membaca nama, whatsapp, email dari user dan kolom profil null sebelum pernah disimpan", async () => {
-		const { cookie } = await daftarBacalon("baca@example.test", "081111111111");
+	it("membaca nama, whatsapp, email, nia dari user dan kolom profil null sebelum pernah disimpan", async () => {
+		const { cookie, nia } = await daftarBacalon("baca@example.test", "081111111111");
 		const response = await bacaData(cookie);
 		expect(response.status).toBe(200);
 		const body = await response.json<Record<string, unknown>>();
@@ -150,6 +155,7 @@ describe("GET /api/akun/data (seam Worker)", () => {
 			name: "Bakal Calon",
 			whatsapp: "6281111111111",
 			email: "baca@example.test",
+			nia,
 			namaPanggilan: null,
 			tanggalLahir: null,
 			tahunLulusDm3: null,
@@ -262,22 +268,38 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		expect((await formatSalah.json<{ error: string }>()).error).toBe("whatsapp_tidak_valid");
 	});
 
-	it("nama tidak boleh kosong", async () => {
-		const { cookie } = await daftarBacalon("nama@example.test", "081111111118");
+	// Tiket 20: Nama lengkap terkonfirmasi lewat Verifikasi NIA saat registrasi,
+	// jadi PUT menolak perubahan (bukan mengabaikannya diam-diam seperti email).
+	it("menolak name yang berbeda dari nilai tersimpan, dengan kode galat jelas dan tanpa menyimpan apa pun", async () => {
+		const { cookie, userId } = await daftarBacalon("nama-terkunci@example.test", "081111111118");
+
 		const kosong = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "   " }));
 		expect(kosong.status).toBe(400);
-		expect((await kosong.json<{ error: string }>()).error).toBe("nama_wajib");
+		expect((await kosong.json<{ error: string }>()).error).toBe("nama_tidak_dapat_diubah");
+
+		const berbeda = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "Nama Lain" }));
+		expect(berbeda.status).toBe(400);
+		expect((await berbeda.json<{ error: string }>()).error).toBe("nama_tidak_dapat_diubah");
+
+		const pengguna = await env.DB.prepare('SELECT "name" FROM "user" WHERE "id" = ?').bind(userId).first<{ name: string }>();
+		expect(pengguna?.name).toBe("Bakal Calon");
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "profil" WHERE "userId" = ?').bind(userId).first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(0);
 	});
 
-	// Regresi tiket 17: name dan kolom teks bebas berakhir sebagai kolom CSV
-	// Ekspor Harian (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah
-	// dan merusak baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
-	it("menolak karakter kontrol (CR/LF) pada nama dan kolom teks bebas lain, tanpa menyimpan apa pun", async () => {
-		const { cookie, userId } = await daftarBacalon("kontrol@example.test", "081111111121");
+	it("menerima simpan ketika name persis sama dengan nilai tersimpan (form selalu mengirim balik nama yang sama)", async () => {
+		const { cookie } = await daftarBacalon("nama-sama@example.test", "081111111124");
+		const response = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap());
+		expect(response.status).toBe(200);
+	});
 
-		const namaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "Budi\r\nAdmin" }));
-		expect(namaBerisiBaris.status).toBe(400);
-		expect((await namaBerisiBaris.json<{ error: string }>()).error).toBe("nama_tidak_valid");
+	// Regresi tiket 17: kolom teks bebas berakhir sebagai kolom CSV Ekspor
+	// Harian (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah dan
+	// merusak baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
+	// "name" sendiri sudah dikecualikan dari serangan ini sejak tiket 20 (nilai
+	// selalu berasal dari Verifikasi NIA, tidak pernah ditulis dari body klien).
+	it("menolak karakter kontrol (CR/LF) pada kolom teks bebas, tanpa menyimpan apa pun", async () => {
+		const { cookie, userId } = await daftarBacalon("kontrol@example.test", "081111111121");
 
 		const bahasaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ bahasaAsing: "Inggris\r\nArab" }));
 		expect(bahasaBerisiBaris.status).toBe(400);

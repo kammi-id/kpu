@@ -8,6 +8,7 @@ type AkunDataApi = {
 	name: string;
 	whatsapp: string;
 	email: string;
+	nia: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
@@ -21,7 +22,6 @@ type AkunDataApi = {
 };
 
 type FormState = {
-	name: string;
 	whatsapp: string;
 	namaPanggilan: string;
 	tempatLahir: string;
@@ -36,7 +36,6 @@ type FormState = {
 };
 
 const FORM_KOSONG: FormState = {
-	name: "",
 	whatsapp: "",
 	namaPanggilan: "",
 	tempatLahir: "",
@@ -51,7 +50,7 @@ const FORM_KOSONG: FormState = {
 };
 
 const PESAN_GALAT: Record<string, string> = {
-	nama_wajib: "Nama lengkap wajib diisi.",
+	nama_tidak_dapat_diubah: "Nama lengkap terkonfirmasi lewat Verifikasi NIA dan tidak dapat diubah dari sini.",
 	whatsapp_tidak_valid: "Nomor WhatsApp tidak valid. Gunakan format 08…, +62…, atau 62….",
 	whatsapp_sudah_dipakai: "Nomor WhatsApp ini sudah dipakai akun lain.",
 	tanggal_lahir_tidak_valid: "Tanggal lahir bukan tanggal kalender yang sah.",
@@ -63,7 +62,6 @@ const PESAN_GALAT: Record<string, string> = {
 
 function formDari(data: AkunDataApi): FormState {
 	return {
-		name: data.name ?? "",
 		whatsapp: data.whatsapp ?? "",
 		namaPanggilan: data.namaPanggilan ?? "",
 		tempatLahir: data.tempatLahir ?? "",
@@ -86,6 +84,8 @@ function kosongkeNull(nilai: string): string | null {
 export function AkunData() {
 	const { data: tahap } = useTahap();
 	const [email, setEmail] = useState("");
+	const [name, setName] = useState("");
+	const [nia, setNia] = useState("");
 	const [form, setForm] = useState<FormState>(FORM_KOSONG);
 	const [memuat, setMemuat] = useState(true);
 	const [menyimpan, setMenyimpan] = useState(false);
@@ -99,6 +99,8 @@ export function AkunData() {
 			.then((data) => {
 				if (dibatalkan) return;
 				setEmail(data.email);
+				setName(data.name);
+				setNia(data.nia);
 				setForm(formDari(data));
 			})
 			.catch(() => {
@@ -125,7 +127,7 @@ export function AkunData() {
 		setBerhasil(false);
 
 		const payload = {
-			name: form.name.trim(),
+			name,
 			whatsapp: form.whatsapp.trim(),
 			namaPanggilan: kosongkeNull(form.namaPanggilan),
 			tempatLahir: kosongkeNull(form.tempatLahir),
@@ -173,16 +175,28 @@ export function AkunData() {
 				</p>
 			) : null}
 
+			<div className="mt-5 rounded-xl border border-border bg-muted/50 p-4">
+				<p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+					Identitas terkonfirmasi lewat Verifikasi NIA
+				</p>
+				<div className="mt-2 grid gap-3 sm:grid-cols-2">
+					<div>
+						<p className="text-xs text-muted-foreground">Nama lengkap</p>
+						<p className="font-semibold text-navy">{name}</p>
+					</div>
+					<div>
+						<p className="text-xs text-muted-foreground">NIA</p>
+						<p className="font-semibold text-navy">{nia}</p>
+					</div>
+				</div>
+			</div>
+
 			<form className="mt-5 flex flex-col gap-5" onSubmit={simpan}>
 				<fieldset disabled={!bolehUbah || menyimpan} className="flex flex-col gap-5">
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="flex flex-col gap-2">
 							<label htmlFor="email" className="text-sm font-semibold text-navy">Email</label>
 							<Input id="email" value={email} disabled readOnly />
-						</div>
-						<div className="flex flex-col gap-2">
-							<label htmlFor="name" className="text-sm font-semibold text-navy">Nama lengkap</label>
-							<Input id="name" value={form.name} onChange={(event) => ubah("name", event.target.value)} required />
 						</div>
 						<div className="flex flex-col gap-2">
 							<label htmlFor="whatsapp" className="text-sm font-semibold text-navy">WhatsApp</label>

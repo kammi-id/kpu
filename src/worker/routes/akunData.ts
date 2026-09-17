@@ -8,6 +8,7 @@ type BarisAkunData = {
 	name: string;
 	whatsapp: string;
 	email: string;
+	nia: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
@@ -84,7 +85,7 @@ export function buatRuteAkunData(sekarang: () => Date) {
 		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
 
 		const baris = await c.env.DB.prepare(
-			`SELECT u."name", u."whatsapp", u."email",
+			`SELECT u."name", u."whatsapp", u."email", u."nia",
 			        p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
 			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing"
 			 FROM "user" u LEFT JOIN "profil" p ON p."userId" = u."id"
@@ -129,9 +130,16 @@ export function buatRuteAkunData(sekarang: () => Date) {
 		const body: unknown = await c.req.json().catch(() => null);
 		if (!payloadAkunData(body)) return tolak("permintaan_tidak_valid", 400);
 
-		const name = body.name.trim();
-		if (name === "") return tolak("nama_wajib", 400);
-		if (!teksSatuBarisValid(name)) return tolak("nama_tidak_valid", 400);
+		// Tiket 20: Nama lengkap terkonfirmasi lewat Verifikasi NIA saat
+		// registrasi, jadi tidak lagi field yang dapat diubah Bakal Calon —
+		// permintaan yang menyertakan name berbeda dari nilai tersimpan ditolak
+		// (bukan diabaikan diam-diam, berbeda dari perlakuan "email" di bawah).
+		// `SesiAutentikasi.user` (lib/auth.ts) hanya membawa id dan role, jadi
+		// nama tersimpan dibaca terpisah alih-alih dari sesi.
+		const namaTersimpan = await c.env.DB.prepare('SELECT "name" FROM "user" WHERE "id" = ?')
+			.bind(sesi.user.id)
+			.first<{ name: string }>();
+		if (body.name.trim() !== namaTersimpan?.name) return tolak("nama_tidak_dapat_diubah", 400);
 
 		const whatsapp = whatsappTernormalisasi(body.whatsapp);
 		if (!whatsapp) return tolak("whatsapp_tidak_valid", 400);
@@ -155,8 +163,8 @@ export function buatRuteAkunData(sekarang: () => Date) {
 		// atomik, bukan dua tulis terpisah yang bisa timpang bila salah satunya gagal.
 		try {
 			await c.env.DB.batch([
-				c.env.DB.prepare('UPDATE "user" SET "name" = ?, "whatsapp" = ? WHERE "id" = ?')
-					.bind(name, whatsapp, sesi.user.id),
+				c.env.DB.prepare('UPDATE "user" SET "whatsapp" = ? WHERE "id" = ?')
+					.bind(whatsapp, sesi.user.id),
 				c.env.DB.prepare(
 					`INSERT INTO "profil"
 					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
