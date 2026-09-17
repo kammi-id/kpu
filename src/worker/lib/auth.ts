@@ -8,6 +8,7 @@ export type RahasiaEnv = {
 	HMAC_SECRET?: string;
 	TURNSTILE_SECRET_KEY?: string;
 	ONBOARD_TOKEN?: string;
+	KAMMI_ID_TOKEN?: string;
 };
 
 export type EnvDenganRahasia = Env & RahasiaEnv;
