@@ -26,6 +26,7 @@ import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRuteNia } from "./routes/nia";
+import { buatRuteStruktur } from "./routes/struktur";
 import { buatRutePengaturanAdmin } from "./routes/pengaturanAdmin";
 import { buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
@@ -185,6 +186,7 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
 	app.route("/api/nia", buatRuteNia(sekarang));
+	app.route("/api/struktur", buatRuteStruktur());
 	app.route("/", buatRuteMetaHalaman());
 	app.get("/api/konfigurasi-publik", async (c) => {
 		const onboardTersedia =
