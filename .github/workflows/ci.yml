@@ -30,8 +30,27 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # scripts/buatGambarResponsif.mjs and scripts/buatGambarOg.mjs regenerate
+      # src/react-app/assets/generated/ and public/og/ (both gitignored) from
+      # the fixed set of source illustrations/photos — keyed on those inputs
+      # plus the generator scripts and lockfile (image-library versions can
+      # change output bytes), so unrelated commits reuse the same cache entry
+      # and skip regenerating every run.
+      - name: Cache generated assets
+        id: cache-assets
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/react-app/assets/generated
+            public/og
+          key: assets-${{ hashFiles('scripts/buatGambarResponsif.mjs', 'scripts/buatGambarOg.mjs', 'src/react-app/assets/illustrations/**', 'src/react-app/assets/members/**', 'src/react-app/assets/brand/**', 'package-lock.json') }}
+
+      - name: Generate assets
+        if: steps.cache-assets.outputs.cache-hit != 'true'
+        run: npm run generate:assets
+
       - name: Build
-        run: npm run build
+        run: npm run build:app
 
       - name: Test
         run: npm test
@@ -65,11 +84,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache generated assets
+        id: cache-assets
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/react-app/assets/generated
+            public/og
+          key: assets-${{ hashFiles('scripts/buatGambarResponsif.mjs', 'scripts/buatGambarOg.mjs', 'src/react-app/assets/illustrations/**', 'src/react-app/assets/members/**', 'src/react-app/assets/brand/**', 'package-lock.json') }}
+
+      - name: Generate assets
+        if: steps.cache-assets.outputs.cache-hit != 'true'
+        run: npm run generate:assets
+
       # CLOUDFLARE_ENV selects which wrangler.json `env` the Cloudflare Vite
       # plugin builds for — this is what actually binds the Worker to the
       # preview D1/R2 resources, not the `wrangler deploy --env` flag.
       - name: Build (preview)
-        run: npm run build
+        run: npm run build:app
         env:
           CLOUDFLARE_ENV: preview
 
@@ -135,8 +167,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache generated assets
+        id: cache-assets
+        uses: actions/cache@v4
+        with:
+          path: |
+            src/react-app/assets/generated
+            public/og
+          key: assets-${{ hashFiles('scripts/buatGambarResponsif.mjs', 'scripts/buatGambarOg.mjs', 'src/react-app/assets/illustrations/**', 'src/react-app/assets/members/**', 'src/react-app/assets/brand/**', 'package-lock.json') }}
+
+      - name: Generate assets
+        if: steps.cache-assets.outputs.cache-hit != 'true'
+        run: npm run generate:assets
+
+      - name: Apply D1 migrations (production)
+        run: npx wrangler d1 migrations apply DB --remote
+
       - name: Build
-        run: npm run build
+        run: npm run build:app
 
       - name: Deploy
         run: npx wrangler deploy

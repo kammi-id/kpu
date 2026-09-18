@@ -56,7 +56,9 @@
   },
   "private": true,
   "scripts": {
-    "build": "node scripts/buatGambarResponsif.mjs && node scripts/buatGambarOg.mjs && tsc -b && vite build",
+    "build": "npm run generate:assets && npm run build:app",
+    "build:app": "tsc -b && vite build",
+    "generate:assets": "node scripts/buatGambarResponsif.mjs && node scripts/buatGambarOg.mjs",
     "cf-typegen": "wrangler types",
     "check": "tsc && vite build && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
