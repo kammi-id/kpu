@@ -15,6 +15,7 @@ const WAKTU_PEMERIKSAAN_28_SEP = new Date("2026-09-27T17:00:00.000Z");
 const WAKTU_SELESAI = new Date("2027-01-27T17:00:00.000Z");
 
 let whatsappBerikutnya = 0;
+let niaBerikutnya = 0;
 
 async function sha256(bytes: Uint8Array) {
 	const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -73,12 +74,24 @@ function entriZip(bytes: Uint8Array, nama: string): Uint8Array | null {
 
 async function buatBacalon(nama: string, email: string, waktu: Date, opts: { banned?: 0 | 1; banReason?: string | null } = {}) {
 	whatsappBerikutnya += 1;
+	niaBerikutnya += 1;
 	const id = crypto.randomUUID();
 	await env.DB.prepare(
-		`INSERT INTO "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt", "role", "whatsapp", "persetujuanVersi", "persetujuanPada", "banned", "banReason")
-		 VALUES (?, ?, ?, 1, ?, ?, 'bacalon', ?, 'persetujuan-v1', ?, ?, ?)`,
+		`INSERT INTO "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt", "role", "whatsapp", "persetujuanVersi", "persetujuanPada", "nia", "banned", "banReason")
+		 VALUES (?, ?, ?, 1, ?, ?, 'bacalon', ?, 'persetujuan-v1', ?, ?, ?, ?)`,
 	)
-		.bind(id, nama, email, waktu.toISOString(), waktu.toISOString(), `62812345${String(whatsappBerikutnya).padStart(4, "0")}`, waktu.toISOString(), opts.banned ?? 0, opts.banReason ?? null)
+		.bind(
+			id,
+			nama,
+			email,
+			waktu.toISOString(),
+			waktu.toISOString(),
+			`62812345${String(whatsappBerikutnya).padStart(4, "0")}`,
+			waktu.toISOString(),
+			`3020100${String(niaBerikutnya).padStart(4, "0")}`,
+			opts.banned ?? 0,
+			opts.banReason ?? null,
+		)
 		.run();
 	return id;
 }
@@ -113,6 +126,7 @@ async function buatBerkasHilang(userId: string, waktu: Date) {
 
 beforeEach(async () => {
 	whatsappBerikutnya = 0;
+	niaBerikutnya = 0;
 	const objects = await env.BERKAS.list();
 	await env.BERKAS.delete(objects.objects.map((object) => object.key));
 	await env.DB.batch([
@@ -160,6 +174,10 @@ describe("Ekspor Harian (acceptance 24, 31)", () => {
 		const teksCsv = await csv?.text();
 		expect(teksCsv).toContain("Nabila Putri");
 		expect(teksCsv).toContain("Minta ditutup");
+		const baris = (teksCsv ?? "").trim().split("\r\n");
+		expect(baris[0].split(",")).toContain("nia");
+		const niaTersimpan = await env.DB.prepare('SELECT "nia" FROM "user" WHERE "id" = ?').bind(userId).first<{ nia: string }>();
+		expect(teksCsv).toContain(niaTersimpan?.nia as string);
 		expect(teksCsv).not.toContain(TANDA_PASSWORD);
 		expect(teksCsv).not.toContain(TANDA_TOKEN);
 		expect(teksCsv).not.toContain(TANDA_VERIFIKASI);

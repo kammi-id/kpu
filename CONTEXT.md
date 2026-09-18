@@ -16,6 +16,10 @@ _Avoid_: kandidat, calon tetap
 Penanda otomatis berupa status tiap kelompok, jumlah kelompok terpenuhi, dan hasil keseluruhan bahwa sepuluh kelompok berkas yang diwajibkan telah berada di sistem. Formulir A.3 dan A.4 berada dalam satu kelompok rekomendasi yang terpenuhi melalui salah satu Jalur Rekomendasi; status ini tidak menyatakan keabsahan isi atau kelulusan verifikasi KPU.
 _Avoid_: status verifikasi, berkas sah, lulus administrasi
 
+**Kelompok Berkas**:
+Salah satu dari sepuluh kategori berkas wajib yang diunggah Bakal Calon Ketua Umum agar Status Kelengkapan Berkas menyatakan lengkap. Kelompok 1 adalah Formulir A.1 Bacalon.
+_Avoid_: jenis berkas, kategori unggahan
+
 **Masa Pendaftaran**:
 Periode 17 September 2026 pukul 00.00 WIB sampai 26 September 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya.
 _Avoid_: masa verifikasi, masa perbaikan
@@ -45,8 +49,24 @@ Instansi kepemimpinan KAMMI di tingkat kabupaten atau kota.
 _Avoid_: daerah, cabang
 
 **Anggota Biasa III (AB 3)**:
-Jenjang keanggotaan KAMMI yang menjadi syarat status keanggotaan Bakal Calon Ketua Umum.
+Jenjang keanggotaan tertinggi dalam struktur kaderisasi KAMMI, dan menjadi syarat status keanggotaan Bakal Calon Ketua Umum.
 _Avoid_: DM 3, anggota senior
+
+**Sistem Keanggotaan KAMMI (kammi.id)**:
+Sistem milik PP KAMMI yang menjadi satu-satunya sumber kebenaran untuk data keanggotaan seorang kader, termasuk NIA, jenjang kaderisasi, dan keadaan kader. Aplikasi KPU bukan pengelola data keanggotaan; ia hanya membaca data ini lewat Verifikasi NIA.
+_Avoid_: basis data anggota, sumber data eksternal
+
+**NIA (Nomor Induk Anggota)**:
+Identitas 11 digit seorang kader di Sistem Keanggotaan KAMMI, dipakai untuk memverifikasi status keanggotaannya sebelum akun Bakal Calon dibuat.
+_Avoid_: NIK, NIM, nomor anggota, ID pengguna
+
+**Verifikasi NIA**:
+Proses mencocokkan sebuah NIA ke Sistem Keanggotaan KAMMI untuk memastikan nama, jenjang kaderisasi Anggota Biasa III, dan Keadaan Kader aktif terpenuhi, sebagai syarat pembuatan akun Bakal Calon. Berbeda dari uji kualifikasi Calon Ketua Umum yang dilakukan KPU kemudian.
+_Avoid_: Cek NIA (label tombol UI, bukan istilah domain), validasi NIA
+
+**Keadaan Kader**:
+Status keaktifan seorang kader di Sistem Keanggotaan KAMMI. Hanya keadaan "aktif" yang meloloskan Verifikasi NIA; keadaan lain apa pun dianggap tidak memenuhi syarat.
+_Avoid_: status anggota, status akun
 
 **Muktamar**:
 Permusyawaratan tertinggi KAMMI yang antara lain berwenang memilih dan menetapkan Ketua Umum PP KAMMI.
@@ -95,6 +115,10 @@ _Avoid_: pengumuman, berita, jadwal
 **Berkas Publik**:
 Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKPU dan Formulir A.1 sampai A.6. Berkas ini tidak pernah memuat data Bakal Calon Ketua Umum.
 _Avoid_: berkas Bakal Calon, lampiran pendaftaran
+
+**Formulir A.1 Bacalon**:
+Salinan Formulir A.1 yang telah diisi dan ditandatangani oleh seorang Bakal Calon Ketua Umum, diunggah sebagai Kelompok Berkas pertama dari sepuluh yang diwajibkan. Berbeda dari Formulir A.1 kosong di bawah Berkas Publik, yang menjadi templat unduhan dan tidak pernah memuat data Bakal Calon.
+_Avoid_: Formulir A.1 (tanpa konteks), berkas A.1
 
 **Onboarding Admin**:
 Pembuatan satu-satunya akun Admin bersama melalui halaman bertoken rahasia yang hanya terbuka selama akun Admin belum ada. Onboarding ulang adalah satu-satunya jalan pemulihan akses Admin.

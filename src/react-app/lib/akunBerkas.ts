@@ -45,3 +45,24 @@ export async function ambilBerkasKelompok(nomor: number, signal?: AbortSignal): 
 export function urlUnduhBerkas(nomor: number, id: string) {
 	return `/api/akun/berkas/${nomor}/${encodeURIComponent(id)}/unduh`;
 }
+
+/** MIME dari ekstensi nama berkas — dipakai klien sebelum unggah (server tervalidasi ulang di lib/unggahBerkas.ts). */
+export function mimeDariNamaBerkas(namaAsli: string): string | null {
+	const ekstensi = namaAsli.toLowerCase().split(".").pop();
+	if (ekstensi === "pdf") return "application/pdf";
+	if (ekstensi === "jpg" || ekstensi === "jpeg") return "image/jpeg";
+	if (ekstensi === "png") return "image/png";
+	return null;
+}
+
+export async function unggahBerkasKelompok(nomor: number, file: File, mime: string, jenisRekomendasi?: JenisRekomendasi): Promise<{ id: string }> {
+	const query = new URLSearchParams({ namaAsli: file.name });
+	if (jenisRekomendasi) query.set("jenisRekomendasi", jenisRekomendasi);
+	const response = await fetch(`/api/akun/berkas/${nomor}?${query}`, {
+		method: "POST",
+		headers: { "content-type": mime },
+		body: file,
+	});
+	if (!response.ok) throw new Error("Berkas tidak dapat diunggah");
+	return (await response.json()) as { id: string };
+}

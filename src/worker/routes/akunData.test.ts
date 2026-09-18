@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
 import { beforeEach, describe, expect, it } from "vitest";
 import { buatWorker } from "../index";
+import type { EkstraksiA1, HasilEkstraksiA1 } from "../lib/ekstraksiA1";
 import { jaringan } from "../test/jaringan";
 import { http, HttpResponse } from "msw";
 
@@ -10,6 +11,7 @@ const RAHASIA_UJI = {
 	HMAC_SECRET: "h".repeat(32),
 	TURNSTILE_SECRET_KEY: "turnstile-test-key",
 	ONBOARD_TOKEN: "token-onboarding-uji",
+	KAMMI_ID_TOKEN: "token-kammi-id-uji",
 };
 
 type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
@@ -53,6 +55,16 @@ function turnstileSelaluLolos() {
 	);
 }
 
+/** Penggerbangan NIA (tiket 04): sign-up/email sekarang memverifikasi ulang lewat kammi.id, jadi setiap registrasi uji butuh ini juga. */
+function kammiIdSelaluLolos() {
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama: "Bakal Calon", jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
+}
+
+let niaBerikutnya = 0;
+
 /**
  * Mendaftarkan Bakal Calon lewat seam registrasi sungguhan (harus terjadi di
  * Masa Pendaftaran), lalu mengunci jam sesinya ke `waktu` supaya permintaan
@@ -60,12 +72,16 @@ function turnstileSelaluLolos() {
  */
 async function daftarBacalon(email: string, whatsapp: string, waktu = MASA_PENDAFTARAN) {
 	turnstileSelaluLolos();
+	kammiIdSelaluLolos();
+	niaBerikutnya += 1;
+	const nia = `3020100${String(niaBerikutnya).padStart(4, "0")}`;
 	const permintaan = json({
 		name: "Bakal Calon",
 		email,
 		whatsapp,
 		password: "kata-sandi-aman",
 		persetujuan: "true",
+		nia,
 	});
 	const response = await kirim(MASA_PENDAFTARAN, "/api/auth/sign-up/email", {
 		...permintaan,
@@ -77,7 +93,7 @@ async function daftarBacalon(email: string, whatsapp: string, waktu = MASA_PENDA
 	await env.DB.prepare('UPDATE "session" SET "createdAt" = ?, "updatedAt" = ? WHERE "userId" = ?')
 		.bind(waktu.toISOString(), waktu.toISOString(), user?.id)
 		.run();
-	return { cookie, userId: user?.id as string };
+	return { cookie, userId: user?.id as string, nia };
 }
 
 async function setelWaktuSesi(userId: string, waktu: Date) {
@@ -86,9 +102,13 @@ async function setelWaktuSesi(userId: string, waktu: Date) {
 		.run();
 }
 
+// "Bakal Calon" persis: nama tersimpan bersumber dari hasil Verifikasi NIA
+// (kammiIdSelaluLolos di atas), bukan dari body.name klien — PUT sekarang
+// menolak name yang berbeda dari nilai ini (tiket 20), jadi payload uji harus
+// selalu mengirim nilai yang sama seperti akun sungguhan yang didaftarkan.
 function payloadLengkap(overrides: Record<string, unknown> = {}) {
 	return {
-		name: "Bakal Calon Satu",
+		name: "Bakal Calon",
 		whatsapp: "081234567890",
 		namaPanggilan: "Calon",
 		tempatLahir: "Jakarta",
@@ -112,12 +132,62 @@ async function bacaData(cookie: string, waktu = MASA_PENDAFTARAN) {
 	return kirim(waktu, "/api/akun/data", { headers: { cookie } });
 }
 
+async function kirimIsiOtomatis(cookie: string, ekstraksiFake: (...args: Parameters<typeof import("../lib/ekstraksiA1").ekstraksiA1>) => Promise<HasilEkstraksiA1>, waktu = MASA_PENDAFTARAN) {
+	const ctx = createExecutionContext();
+	const response = await buatWorker(() => waktu, ekstraksiFake).fetch(
+		new Request("https://kpu.kammi.id/api/akun/data/isi-otomatis", { method: "POST", headers: { cookie } }),
+		envUji(),
+		ctx,
+	);
+	await waitOnExecutionContext(ctx);
+	return response;
+}
+
+function ekstraksiSukses(data: Partial<EkstraksiA1>): HasilEkstraksiA1 {
+	return {
+		sukses: true,
+		data: {
+			namaPanggilan: null,
+			tempatLahir: null,
+			tanggalLahir: null,
+			asalPw: null,
+			asalPd: null,
+			tahunLulusDm3: null,
+			tempatLulusDm3: null,
+			instruktur: null,
+			capaianHafalan: null,
+			bahasaAsing: null,
+			...data,
+		},
+	};
+}
+
+/** Menaruh baris "berkas" kelompok 1 langsung (melewati unggahBerkas.ts) + objek R2 yang cocok, supaya rute isi-otomatis punya berkas terbaca. */
+async function taruhBerkasA1(userId: string, { adaDiR2 = true }: { adaDiR2?: boolean } = {}) {
+	const r2Key = `berkas/${crypto.randomUUID()}`;
+	if (adaDiR2) await env.BERKAS.put(r2Key, new Uint8Array([1, 2, 3]));
+	await env.DB.prepare(
+		`INSERT INTO "berkas" ("id", "userId", "kelompok", "jenisRekomendasi", "r2Key", "namaAsli", "mime", "ukuranByte", "sha256", "diunggahPada")
+		 VALUES (?, ?, 1, NULL, ?, ?, ?, ?, ?, ?)`,
+	)
+		.bind(crypto.randomUUID(), userId, r2Key, "a1.png", "image/png", 3, "0".repeat(64), MASA_PENDAFTARAN.toISOString())
+		.run();
+	return r2Key;
+}
+
+const URL_STRUKTUR = "https://www.kammi.id/api/v1/struktur";
+
+function strukturUpstream(handler: (url: URL) => Response) {
+	jaringan.use(http.get(URL_STRUKTUR, ({ request }) => handler(new URL(request.url))));
+}
+
 beforeEach(async () => {
 	await env.DB.batch([
 		env.DB.prepare('DELETE FROM "audit"'),
 		env.DB.prepare('DELETE FROM "percobaanLogin"'),
 		env.DB.prepare('DELETE FROM "account"'),
 		env.DB.prepare('DELETE FROM "session"'),
+		env.DB.prepare('DELETE FROM "berkas"'),
 		env.DB.prepare('DELETE FROM "profil"'),
 		env.DB.prepare('DELETE FROM "user"'),
 	]);
@@ -128,8 +198,8 @@ describe("GET /api/akun/data (seam Worker)", () => {
 		expect((await bacaData("")).status).toBe(401);
 	});
 
-	it("membaca nama, whatsapp, email dari user dan kolom profil null sebelum pernah disimpan", async () => {
-		const { cookie } = await daftarBacalon("baca@example.test", "081111111111");
+	it("membaca nama, whatsapp, email, nia dari user dan kolom profil null sebelum pernah disimpan", async () => {
+		const { cookie, nia } = await daftarBacalon("baca@example.test", "081111111111");
 		const response = await bacaData(cookie);
 		expect(response.status).toBe(200);
 		const body = await response.json<Record<string, unknown>>();
@@ -137,6 +207,7 @@ describe("GET /api/akun/data (seam Worker)", () => {
 			name: "Bakal Calon",
 			whatsapp: "6281111111111",
 			email: "baca@example.test",
+			nia,
 			namaPanggilan: null,
 			tanggalLahir: null,
 			tahunLulusDm3: null,
@@ -174,6 +245,117 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		expect(jumlah?.jumlah).toBe(1);
 		baris = await env.DB.prepare('SELECT "namaPanggilan" FROM "profil" WHERE "userId" = ?').bind(userId).first<{ namaPanggilan: string }>();
 		expect(baris?.namaPanggilan).toBe("Panggilan Dua");
+	});
+
+	it("menyimpan referensi struktur (id + label) dan menandai manual saat teks diisi tanpa id (tiket 22)", async () => {
+		const { cookie, userId } = await daftarBacalon("struktur@example.test", "081111111125");
+
+		// 1. Pilihan resmi dari combobox (ada Id)
+		const dariCombobox = await simpanData(
+			cookie,
+			MASA_PENDAFTARAN,
+			payloadLengkap({
+				asalPw: "PW KAMMI Jawa Barat",
+				asalPwId: "pw-jabar",
+				asalPd: "PD KAMMI Bandung",
+				asalPdId: "pd-bdg",
+				tempatLulusDm3: "PW KAMMI DKI Jakarta",
+				tempatLulusDm3Id: "pw-dki",
+			}),
+		);
+		expect(dariCombobox.status).toBe(200);
+
+		let baris = await env.DB.prepare(
+			'SELECT "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual" FROM "profil" WHERE "userId" = ?',
+		)
+			.bind(userId)
+			.first<Record<string, unknown>>();
+		expect(baris).toMatchObject({
+			asalPw: "PW KAMMI Jawa Barat",
+			asalPwId: "pw-jabar",
+			asalPwManual: 0,
+			asalPd: "PD KAMMI Bandung",
+			asalPdId: "pd-bdg",
+			asalPdManual: 0,
+			tempatLulusDm3: "PW KAMMI DKI Jakarta",
+			tempatLulusDm3Id: "pw-dki",
+			tempatLulusDm3Manual: 0,
+		});
+
+		const baca = await bacaData(cookie);
+		expect(baca.status).toBe(200);
+		expect(await baca.json()).toMatchObject({
+			asalPw: "PW KAMMI Jawa Barat",
+			asalPwId: "pw-jabar",
+			asalPd: "PD KAMMI Bandung",
+			asalPdId: "pd-bdg",
+			tempatLulusDm3: "PW KAMMI DKI Jakarta",
+			tempatLulusDm3Id: "pw-dki",
+		});
+
+		// 2. Isian manual (teks ada, Id null)
+		const manual = await simpanData(
+			cookie,
+			MASA_PENDAFTARAN,
+			payloadLengkap({
+				asalPw: "PW Khusus Luar Negeri",
+				asalPwId: null,
+				asalPd: "PD Istimewa",
+				asalPdId: null,
+				tempatLulusDm3: "PW Khusus Luar Negeri",
+				tempatLulusDm3Id: null,
+			}),
+		);
+		expect(manual.status).toBe(200);
+
+		baris = await env.DB.prepare(
+			'SELECT "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual" FROM "profil" WHERE "userId" = ?',
+		)
+			.bind(userId)
+			.first<Record<string, unknown>>();
+		expect(baris).toMatchObject({
+			asalPw: "PW Khusus Luar Negeri",
+			asalPwId: null,
+			asalPwManual: 1,
+			asalPd: "PD Istimewa",
+			asalPdId: null,
+			asalPdManual: 1,
+			tempatLulusDm3: "PW Khusus Luar Negeri",
+			tempatLulusDm3Id: null,
+			tempatLulusDm3Manual: 1,
+		});
+
+		// 3. Kolom dikosongkan (null) -> manual flag kembali 0
+		const kosongkan = await simpanData(
+			cookie,
+			MASA_PENDAFTARAN,
+			payloadLengkap({
+				asalPw: null,
+				asalPwId: null,
+				asalPd: null,
+				asalPdId: null,
+				tempatLulusDm3: null,
+				tempatLulusDm3Id: null,
+			}),
+		);
+		expect(kosongkan.status).toBe(200);
+
+		baris = await env.DB.prepare(
+			'SELECT "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual" FROM "profil" WHERE "userId" = ?',
+		)
+			.bind(userId)
+			.first<Record<string, unknown>>();
+		expect(baris).toMatchObject({
+			asalPw: null,
+			asalPwId: null,
+			asalPwManual: 0,
+			asalPd: null,
+			asalPdId: null,
+			asalPdManual: 0,
+			tempatLulusDm3: null,
+			tempatLulusDm3Id: null,
+			tempatLulusDm3Manual: 0,
+		});
 	});
 
 	it("semua kolom profil boleh kosong (null) dan berhasil menghapus nilai sebelumnya", async () => {
@@ -249,22 +431,38 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		expect((await formatSalah.json<{ error: string }>()).error).toBe("whatsapp_tidak_valid");
 	});
 
-	it("nama tidak boleh kosong", async () => {
-		const { cookie } = await daftarBacalon("nama@example.test", "081111111118");
+	// Tiket 20: Nama lengkap terkonfirmasi lewat Verifikasi NIA saat registrasi,
+	// jadi PUT menolak perubahan (bukan mengabaikannya diam-diam seperti email).
+	it("menolak name yang berbeda dari nilai tersimpan, dengan kode galat jelas dan tanpa menyimpan apa pun", async () => {
+		const { cookie, userId } = await daftarBacalon("nama-terkunci@example.test", "081111111118");
+
 		const kosong = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "   " }));
 		expect(kosong.status).toBe(400);
-		expect((await kosong.json<{ error: string }>()).error).toBe("nama_wajib");
+		expect((await kosong.json<{ error: string }>()).error).toBe("nama_tidak_dapat_diubah");
+
+		const berbeda = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "Nama Lain" }));
+		expect(berbeda.status).toBe(400);
+		expect((await berbeda.json<{ error: string }>()).error).toBe("nama_tidak_dapat_diubah");
+
+		const pengguna = await env.DB.prepare('SELECT "name" FROM "user" WHERE "id" = ?').bind(userId).first<{ name: string }>();
+		expect(pengguna?.name).toBe("Bakal Calon");
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "profil" WHERE "userId" = ?').bind(userId).first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(0);
 	});
 
-	// Regresi tiket 17: name dan kolom teks bebas berakhir sebagai kolom CSV
-	// Ekspor Harian (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah
-	// dan merusak baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
-	it("menolak karakter kontrol (CR/LF) pada nama dan kolom teks bebas lain, tanpa menyimpan apa pun", async () => {
-		const { cookie, userId } = await daftarBacalon("kontrol@example.test", "081111111121");
+	it("menerima simpan ketika name persis sama dengan nilai tersimpan (form selalu mengirim balik nama yang sama)", async () => {
+		const { cookie } = await daftarBacalon("nama-sama@example.test", "081111111124");
+		const response = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap());
+		expect(response.status).toBe(200);
+	});
 
-		const namaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ name: "Budi\r\nAdmin" }));
-		expect(namaBerisiBaris.status).toBe(400);
-		expect((await namaBerisiBaris.json<{ error: string }>()).error).toBe("nama_tidak_valid");
+	// Regresi tiket 17: kolom teks bebas berakhir sebagai kolom CSV Ekspor
+	// Harian (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah dan
+	// merusak baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
+	// "name" sendiri sudah dikecualikan dari serangan ini sejak tiket 20 (nilai
+	// selalu berasal dari Verifikasi NIA, tidak pernah ditulis dari body klien).
+	it("menolak karakter kontrol (CR/LF) pada kolom teks bebas, tanpa menyimpan apa pun", async () => {
+		const { cookie, userId } = await daftarBacalon("kontrol@example.test", "081111111121");
 
 		const bahasaBerisiBaris = await simpanData(cookie, MASA_PENDAFTARAN, payloadLengkap({ bahasaAsing: "Inggris\r\nArab" }));
 		expect(bahasaBerisiBaris.status).toBe(400);
@@ -331,5 +529,109 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 		for (const baris of audit.results) {
 			expect(Object.keys(baris as object).sort()).toEqual(["aktor", "aktorUserId", "hasil", "sesiId", "tindakan"].sort());
 		}
+	});
+});
+
+describe("POST /api/akun/data/isi-otomatis (tiket 23, seam Worker)", () => {
+	it("menolak tanpa sesi", async () => {
+		const response = await kirimIsiOtomatis("", () => Promise.resolve({ sukses: false }));
+		expect(response.status).toBe(401);
+	});
+
+	it("berkas_a1_tidak_ada ketika Kelompok Berkas 1 belum diunggah", async () => {
+		const { cookie } = await daftarBacalon("tanpa-a1@example.test", "081122334401");
+		const response = await kirimIsiOtomatis(cookie, () => Promise.resolve(ekstraksiSukses({})));
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ error: "berkas_a1_tidak_ada" });
+	});
+
+	it("berkas_tidak_terbaca ketika baris berkas ada tapi objek R2-nya tidak", async () => {
+		const { cookie, userId } = await daftarBacalon("r2-hilang@example.test", "081122334402");
+		await taruhBerkasA1(userId, { adaDiR2: false });
+		const response = await kirimIsiOtomatis(cookie, () => Promise.resolve(ekstraksiSukses({})));
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: "berkas_tidak_terbaca" });
+	});
+
+	it("ekstraksi_gagal ketika pemanggilan model visi gagal, tanpa menggagalkan halaman", async () => {
+		const { cookie, userId } = await daftarBacalon("model-gagal@example.test", "081122334403");
+		await taruhBerkasA1(userId);
+		const response = await kirimIsiOtomatis(cookie, () => Promise.resolve({ sukses: false }));
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: "ekstraksi_gagal" });
+	});
+
+	it("mengembalikan field teks bebas apa adanya, tanpa mencocokkan struktur", async () => {
+		const { cookie, userId } = await daftarBacalon("teks-bebas@example.test", "081122334404");
+		await taruhBerkasA1(userId);
+		const response = await kirimIsiOtomatis(
+			cookie,
+			() => Promise.resolve(ekstraksiSukses({ namaPanggilan: "Budi", capaianHafalan: "Juz 30", instruktur: true })),
+		);
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ namaPanggilan: "Budi", capaianHafalan: "Juz 30", instruktur: true, asalPw: null, asalPd: null });
+	});
+
+	it("mencocokkan Asal PW dan Tempat Lulus AB 3 ke daftar struktur (jenis=pw)", async () => {
+		const { cookie, userId } = await daftarBacalon("cocok-pw@example.test", "081122334405");
+		await taruhBerkasA1(userId);
+		strukturUpstream(() => HttpResponse.json([{ id: "pw-1", nama: "PW KAMMI Jawa Barat", slug: "jabar", jenis: "pw" }]));
+
+		const response = await kirimIsiOtomatis(
+			cookie,
+			() => Promise.resolve(ekstraksiSukses({ asalPw: "pw kammi jawa barat", tempatLulusDm3: "PW KAMMI Jawa Barat" })),
+		);
+		expect(response.status).toBe(200);
+		const body = await response.json<Record<string, unknown>>();
+		expect(body.asalPw).toEqual({ id: "pw-1", label: "PW KAMMI Jawa Barat" });
+		expect(body.tempatLulusDm3).toEqual({ id: "pw-1", label: "PW KAMMI Jawa Barat" });
+	});
+
+	it("tanpa kecocokan struktur, kolom dibiarkan kosong (bukan diisi teks mentah)", async () => {
+		const { cookie, userId } = await daftarBacalon("tanpa-cocok@example.test", "081122334406");
+		await taruhBerkasA1(userId);
+		strukturUpstream(() => HttpResponse.json([{ id: "pw-1", nama: "PW KAMMI Jawa Barat", slug: "jabar", jenis: "pw" }]));
+
+		const response = await kirimIsiOtomatis(cookie, () => Promise.resolve(ekstraksiSukses({ asalPw: "PW KAMMI Sumatera Utara" })));
+		expect(response.status).toBe(200);
+		expect((await response.json<Record<string, unknown>>()).asalPw).toBeNull();
+	});
+
+	it("Asal PD hanya dicoba ketika Asal PW cocok (endpoint struktur mewajibkan ancestor)", async () => {
+		const { cookie, userId } = await daftarBacalon("pd-butuh-pw@example.test", "081122334407");
+		await taruhBerkasA1(userId);
+		let permintaanPdDikirim = false;
+		strukturUpstream((url) => {
+			if (url.searchParams.get("jenis") === "pd") permintaanPdDikirim = true;
+			return HttpResponse.json([]);
+		});
+
+		const response = await kirimIsiOtomatis(
+			cookie,
+			() => Promise.resolve(ekstraksiSukses({ asalPw: "PW tidak dikenal", asalPd: "PD KAMMI Jakarta Selatan" })),
+		);
+		expect(response.status).toBe(200);
+		expect((await response.json<Record<string, unknown>>()).asalPd).toBeNull();
+		expect(permintaanPdDikirim).toBe(false);
+	});
+
+	it("Asal PD dicocokkan dengan ancestor Id Asal PW yang cocok", async () => {
+		const { cookie, userId } = await daftarBacalon("pd-cocok@example.test", "081122334408");
+		await taruhBerkasA1(userId);
+		let ancestorDilihat: string | null = null;
+		strukturUpstream((url) => {
+			if (url.searchParams.get("jenis") === "pw") return HttpResponse.json([{ id: "pw-1", nama: "PW KAMMI DKI Jakarta", slug: "dki", jenis: "pw" }]);
+			ancestorDilihat = url.searchParams.get("ancestor");
+			return HttpResponse.json([{ id: "pd-1", nama: "PD KAMMI Jakarta Selatan", slug: "jaksel", jenis: "pd" }]);
+		});
+
+		const response = await kirimIsiOtomatis(
+			cookie,
+			() => Promise.resolve(ekstraksiSukses({ asalPw: "PW KAMMI DKI Jakarta", asalPd: "PD KAMMI Jakarta Selatan" })),
+		);
+		expect(response.status).toBe(200);
+		const body = await response.json<Record<string, unknown>>();
+		expect(body.asalPd).toEqual({ id: "pd-1", label: "PD KAMMI Jakarta Selatan" });
+		expect(ancestorDilihat).toBe("pw-1");
 	});
 });

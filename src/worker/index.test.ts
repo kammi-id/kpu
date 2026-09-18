@@ -73,6 +73,14 @@ function id() {
 	return crypto.randomUUID();
 }
 
+function nia() {
+	return crypto.getRandomValues(new Uint32Array(1))[0].toString().padStart(11, "0").slice(-11);
+}
+
+function whatsapp() {
+	return `62${crypto.getRandomValues(new Uint32Array(1))[0].toString().padStart(11, "1")}`;
+}
+
 async function sisipBacalon(overrides: Partial<Record<string, unknown>> = {}) {
 	const values = {
 		id: id(),
@@ -85,11 +93,12 @@ async function sisipBacalon(overrides: Partial<Record<string, unknown>> = {}) {
 		whatsapp: "6281234567890",
 		persetujuanVersi: "persetujuan-v1",
 		persetujuanPada: new Date().toISOString(),
+		nia: nia(),
 		...overrides,
 	};
 	await env.DB.prepare(
-		`INSERT INTO "user" ("id","name","email","emailVerified","createdAt","updatedAt","role","whatsapp","persetujuanVersi","persetujuanPada")
-		 VALUES (?,?,?,?,?,?,?,?,?,?)`,
+		`INSERT INTO "user" ("id","name","email","emailVerified","createdAt","updatedAt","role","whatsapp","persetujuanVersi","persetujuanPada","nia")
+		 VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
 	)
 		.bind(
 			values.id,
@@ -102,6 +111,7 @@ async function sisipBacalon(overrides: Partial<Record<string, unknown>> = {}) {
 			values.whatsapp as string | null,
 			values.persetujuanVersi as string | null,
 			values.persetujuanPada as string | null,
+			values.nia as string | null,
 		)
 		.run();
 	return values.id as string;
@@ -161,8 +171,27 @@ describe("migrasi 0001_init: integritas dasar", () => {
 		).rejects.toThrow();
 	});
 
-	it("Admin kedua ditolak indeks unik", async () => {
-		await sisipAdmin();
+	it("Admin kedua ditolak indeks unik, pertama diterima tanpa NIA", async () => {
+		await expect(sisipAdmin()).resolves.toBeDefined();
 		await expect(sisipAdmin()).rejects.toThrow();
+	});
+});
+
+describe("migrasi 0003_migrasi_skema_nia: integritas", () => {
+	it("Bakal Calon tanpa NIA ditolak", async () => {
+		await expect(sisipBacalon({ nia: null })).rejects.toThrow();
+	});
+
+	it.each(["1234567890", "123456789012", "1234567890a"])(
+		"NIA berformat salah ditolak (%s)",
+		async (nilai) => {
+			await expect(sisipBacalon({ nia: nilai })).rejects.toThrow();
+		},
+	);
+
+	it("NIA duplikat ditolak", async () => {
+		const nilai = nia();
+		await sisipBacalon({ nia: nilai, whatsapp: whatsapp() });
+		await expect(sisipBacalon({ nia: nilai, whatsapp: whatsapp() })).rejects.toThrow();
 	});
 });

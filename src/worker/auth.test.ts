@@ -28,6 +28,21 @@ function turnstileSelaluGagal() {
 	);
 }
 
+/** Penggerbangan NIA (tiket 04): sign-up/email sekarang memverifikasi ulang lewat kammi.id, jadi setiap registrasi uji butuh ini juga. */
+function kammiIdSelaluLolos(nama = "Bakal Calon") {
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama, jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
+}
+
+let niaBerikutnya = 0;
+/** NIA baru, 11 digit, berbeda tiap panggilan dalam satu berkas uji. */
+function niaBaru() {
+	niaBerikutnya += 1;
+	return `3020100${String(niaBerikutnya).padStart(4, "0")}`;
+}
+
 function envUji(overrides: Partial<typeof RAHASIA_UJI> = {}): EnvUji {
 	return { ...env, ...RAHASIA_UJI, ...overrides };
 }
@@ -100,10 +115,11 @@ async function masuk() {
 /** Mendaftarkan Bakal Calon lewat seam yang sama seperti klien, lalu mengembalikan cookie sesinya (autoSignIn). */
 async function daftarBacalon(email: string, password = "kata-sandi-aman", whatsapp = "081234567890") {
 	turnstileSelaluLolos();
+	kammiIdSelaluLolos();
 	const response = await kirimPada(
 		AWAL_PENDAFTARAN,
 		"/api/auth/sign-up/email",
-		jsonDenganTurnstile({ name: "Bakal Calon", email, whatsapp, password, persetujuan: "true" }),
+		jsonDenganTurnstile({ name: "Bakal Calon", email, whatsapp, password, persetujuan: "true", nia: niaBaru() }),
 	);
 	const cookie = response.headers.get("set-cookie")?.split(";", 1)[0];
 	expect(response.status).toBe(200);
@@ -112,6 +128,7 @@ async function daftarBacalon(email: string, password = "kata-sandi-aman", whatsa
 }
 
 beforeEach(async () => {
+	niaBerikutnya = 0;
 	await env.DB.batch([
 		env.DB.prepare('DELETE FROM "audit"'),
 		env.DB.prepare('DELETE FROM "percobaanLogin"'),
@@ -132,6 +149,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 				return HttpResponse.json({ success: true });
 			}),
 		);
+		kammiIdSelaluLolos();
 
 		const response = await kirimPada(
 			AWAL_PENDAFTARAN,
@@ -145,6 +163,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 				role: "admin",
 				persetujuanVersi: "palsu",
 				persetujuanPada: "2000-01-01T00:00:00.000Z",
+				nia: niaBaru(),
 			}),
 		);
 
@@ -169,7 +188,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 		const tanpaPersetujuan = await kirimPada(
 			AWAL_PENDAFTARAN,
 			"/api/auth/sign-up/email",
-			jsonDenganTurnstile({ name: "Bakal", email: "bakal@example.test", whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "false" }),
+			jsonDenganTurnstile({ name: "Bakal", email: "bakal@example.test", whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "false", nia: niaBaru() }),
 		);
 		expect(tanpaPersetujuan.status).toBe(400);
 		const auditDitolak = await env.DB.prepare('SELECT "aktor", "hasil" FROM "audit" WHERE "tindakan" = ?').bind("registrasi").first();
@@ -177,7 +196,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 
 		// Batas instan: BelumDibuka, Pemeriksaan, MasaPerbaikan, Terkunci, Selesai — tepat pada mulainya.
 		for (const waktu of ["2026-09-15T00:00:00.000Z", "2026-09-26T17:00:00.000Z", "2026-09-29T17:00:00.000Z", "2026-10-03T17:00:00.000Z", "2027-01-27T17:00:00.000Z"]) {
-			const response = await kirimPada(new Date(waktu), "/api/auth/sign-up/email", jsonDenganTurnstile({ name: "Bakal", email: `${waktu}@example.test`, whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true" }));
+			const response = await kirimPada(new Date(waktu), "/api/auth/sign-up/email", jsonDenganTurnstile({ name: "Bakal", email: `${waktu}@example.test`, whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true", nia: niaBaru() }));
 			expect(response.status).toBe(403);
 			expect(await response.json()).toMatchObject({ error: "registrasi_tidak_diizinkan" });
 		}
@@ -185,10 +204,11 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 
 	it("menolak WhatsApp yang sudah dipakai tanpa membalas 500 (email dan WhatsApp unik ternormalisasi, butir 7)", async () => {
 		turnstileSelaluLolos();
+		kammiIdSelaluLolos();
 		const pertama = await kirimPada(
 			AWAL_PENDAFTARAN,
 			"/api/auth/sign-up/email",
-			jsonDenganTurnstile({ name: "Bakal Satu", email: "satu@example.test", whatsapp: "081234567890", password: "kata-sandi-aman", persetujuan: "true" }),
+			jsonDenganTurnstile({ name: "Bakal Satu", email: "satu@example.test", whatsapp: "081234567890", password: "kata-sandi-aman", persetujuan: "true", nia: niaBaru() }),
 		);
 		expect(pertama.status).toBe(200);
 
@@ -196,7 +216,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 		const kedua = await kirimPada(
 			AWAL_PENDAFTARAN,
 			"/api/auth/sign-up/email",
-			jsonDenganTurnstile({ name: "Bakal Dua", email: "dua@example.test", whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true" }),
+			jsonDenganTurnstile({ name: "Bakal Dua", email: "dua@example.test", whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true", nia: niaBaru() }),
 		);
 		expect(kedua.status).toBeLessThan(500);
 		expect(kedua.status).not.toBe(200);
@@ -208,17 +228,148 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 	// Regresi tiket 17: name berakhir sebagai kolom CSV Ekspor Harian
 	// (lib/ekspor.ts). CR/LF di tengahnya memecah baris CSV mentah dan merusak
 	// baris berikutnya saat hapusBarisCsvBacalon menghapus satu baris.
+	//
+	// "name" di sini SENGAJA field milik klien (bukan hasil kammi.id): validasi
+	// ini terjadi SEBELUM verifikasi NIA (tiket 04) di handler, jadi belum ada
+	// panggilan kammi.id sama sekali di sini — lihat urutan pengecekan di index.ts.
 	it("menolak nama berisi karakter kontrol (CR/LF) tanpa membuat akun (regresi tiket 17)", async () => {
 		turnstileSelaluLolos();
 		const response = await kirimPada(
 			AWAL_PENDAFTARAN,
 			"/api/auth/sign-up/email",
-			jsonDenganTurnstile({ name: "Budi\r\nAdmin", email: "kontrol@example.test", whatsapp: "081234567890", password: "kata-sandi-aman", persetujuan: "true" }),
+			jsonDenganTurnstile({ name: "Budi\r\nAdmin", email: "kontrol@example.test", whatsapp: "081234567890", password: "kata-sandi-aman", persetujuan: "true", nia: niaBaru() }),
 		);
 		expect(response.status).toBe(400);
 		expect(await response.json()).toMatchObject({ error: "registrasi_tidak_valid" });
 		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user"').first<{ jumlah: number }>();
 		expect(jumlah?.jumlah).toBe(0);
+	});
+});
+
+describe("penggerbangan NIA di pendaftaran akhir (tiket 04, ADR 0001)", () => {
+	let whatsappBerikutnya = 0;
+
+	function daftarDenganNia(nia: string, overrides: Record<string, unknown> = {}) {
+		whatsappBerikutnya += 1;
+		return kirimPada(
+			AWAL_PENDAFTARAN,
+			"/api/auth/sign-up/email",
+			jsonDenganTurnstile({
+				name: "Nama Kiriman Klien — Tidak Boleh Tersimpan",
+				email: `nia-uji-${whatsappBerikutnya}@example.test`,
+				whatsapp: `6281234${String(whatsappBerikutnya).padStart(6, "0")}`,
+				password: "kata-sandi-aman",
+				persetujuan: "true",
+				nia,
+				...overrides,
+			}),
+		);
+	}
+
+	it("mengambil name dari respons kammi.id saat verifikasi, bukan dari body.name klien, dan menyimpan nia (butir 1, 2, 4, 5)", async () => {
+		turnstileSelaluLolos();
+		const nia = niaBaru();
+		kammiIdSelaluLolos("Nama Resmi Dari kammi.id");
+
+		const response = await daftarDenganNia(nia);
+
+		expect(response.status).toBe(200);
+		const pengguna = await env.DB.prepare('SELECT "name", "nia" FROM "user" WHERE "nia" = ?')
+			.bind(nia)
+			.first<{ name: string; nia: string }>();
+		expect(pengguna).toEqual({ name: "Nama Resmi Dari kammi.id", nia });
+	});
+
+	it("menolak dan tidak membuat akun untuk setiap alasan gagal verifikasi, dengan kode galat berbeda (butir 3)", async () => {
+		turnstileSelaluLolos();
+
+		// Format tidak valid: verifikasiNia menolak tanpa memanggil kammi.id sama sekali.
+		const formatSalah = await daftarDenganNia("bukan-11-digit");
+		expect(formatSalah.status).toBe(400);
+		expect(await formatSalah.json()).toMatchObject({ error: "nia_format_tidak_valid" });
+
+		// Duplikat lokal: NIA sudah dipakai akun bacalon lain.
+		const niaDuplikat = niaBaru();
+		kammiIdSelaluLolos();
+		await daftarDenganNia(niaDuplikat);
+		const duplikat = await daftarDenganNia(niaDuplikat, { email: "lain@example.test", whatsapp: "6281200099999" });
+		expect(duplikat.status).toBe(409);
+		expect(await duplikat.json()).toMatchObject({ error: "nia_sudah_terdaftar" });
+
+		// Tidak ditemukan di kammi.id.
+		const niaTidakDitemukan = niaBaru();
+		jaringan.use(http.get(`https://www.kammi.id/api/v1/members/${niaTidakDitemukan}`, () => new HttpResponse(null, { status: 404 })));
+		const tidakDitemukan = await daftarDenganNia(niaTidakDitemukan);
+		expect(tidakDitemukan.status).toBe(404);
+		expect(await tidakDitemukan.json()).toMatchObject({ error: "nia_tidak_ditemukan" });
+
+		// Tidak memenuhi syarat (bukan AB3 aktif).
+		const niaTidakLayak = niaBaru();
+		jaringan.use(
+			http.get(`https://www.kammi.id/api/v1/members/${niaTidakLayak}`, () =>
+				HttpResponse.json({ nia: niaTidakLayak, nama: "Kader Bukan AB3", jenjangKaderisasi: "AB2", keadaanKader: "aktif" })),
+		);
+		const tidakLayak = await daftarDenganNia(niaTidakLayak);
+		expect(tidakLayak.status).toBe(403);
+		expect(await tidakLayak.json()).toMatchObject({ error: "nia_tidak_memenuhi_syarat" });
+
+		// Kegagalan upstream kammi.id.
+		const niaUpstream = niaBaru();
+		jaringan.use(http.get(`https://www.kammi.id/api/v1/members/${niaUpstream}`, () => new HttpResponse(null, { status: 500 })));
+		const upstream = await daftarDenganNia(niaUpstream);
+		expect(upstream.status).toBe(502);
+		expect(await upstream.json()).toMatchObject({ error: "nia_gagal_upstream" });
+
+		// Tidak satu pun dari alasan gagal di atas boleh membuat akun (hanya yang duplikat: baris pertamanya sukses).
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user"').first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(1);
+	});
+
+	it("menggerbangi pendaftaran langsung ke sign-up/email walau tidak pernah lewat Cek NIA (tiket 03), untuk NIA lolos maupun ditolak (butir 7)", async () => {
+		turnstileSelaluLolos();
+
+		// NIA yang seharusnya LOLOS, langsung dipakai submit tanpa pernah memanggil
+		// endpoint /api/nia/cek — harus tetap diterima karena verifikasiNia dijalankan
+		// ulang penuh di handler ini sendiri, bukan mempercayai state klien.
+		const niaLolos = niaBaru();
+		kammiIdSelaluLolos("Bakal Calon Lolos");
+		const lolos = await daftarDenganNia(niaLolos);
+		expect(lolos.status).toBe(200);
+
+		// NIA yang seharusnya DITOLAK (tidak memenuhi syarat), juga langsung disubmit
+		// tanpa lewat Cek NIA — harus tetap ditolak, bukan lolos begitu saja.
+		const niaDitolak = niaBaru();
+		jaringan.use(
+			http.get(`https://www.kammi.id/api/v1/members/${niaDitolak}`, () =>
+				HttpResponse.json({ nia: niaDitolak, nama: "Kader Tidak Aktif", jenjangKaderisasi: "AB3", keadaanKader: "nonaktif" })),
+		);
+		const ditolak = await daftarDenganNia(niaDitolak);
+		expect(ditolak.status).toBe(403);
+		expect(await ditolak.json()).toMatchObject({ error: "nia_tidak_memenuhi_syarat" });
+
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user"').first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(1);
+	});
+
+	it("menolak duplikat NIA yang lolos pre-check lewat constraint UNIQUE D1, tanpa membalas 500 (race condition, butir 6)", async () => {
+		turnstileSelaluLolos();
+		kammiIdSelaluLolos();
+		const nia = niaBaru();
+
+		// Dua pendaftaran NIA sama ditembak bersamaan (sama seperti pola "onboarding
+		// tiba bersamaan" di describe onboarding di bawah): pre-check lokal
+		// verifikasiNia (SELECT sebelum INSERT) bisa lolos untuk KEDUANYA sebelum
+		// salah satu commit — persis skenario race yang harus tetap ditolak lewat
+		// UNIQUE di D1, bukan lolos dua-duanya atau membalas 500.
+		const hasil = await Promise.all([
+			daftarDenganNia(nia, { email: "lomba-satu@example.test", whatsapp: "6281234500001" }),
+			daftarDenganNia(nia, { email: "lomba-dua@example.test", whatsapp: "6281234500002" }),
+		]);
+
+		expect(hasil.map((response) => response.status).sort()).not.toContain(500);
+		expect(hasil.filter((response) => response.status === 200)).toHaveLength(1);
+		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "user" WHERE "nia" = ?').bind(nia).first<{ jumlah: number }>();
+		expect(jumlah?.jumlah).toBe(1);
 	});
 });
 

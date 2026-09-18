@@ -24,13 +24,17 @@ type BarisDetail = {
 	name: string;
 	email: string;
 	whatsapp: string;
+	nia: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
 	asalPw: string | null;
+	asalPwManual: number | null;
 	asalPd: string | null;
+	asalPdManual: number | null;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
+	tempatLulusDm3Manual: number | null;
 	instruktur: number | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
@@ -135,8 +139,10 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		if ("response" in akses) return akses.response;
 		const id = c.req.param("id");
 		const detail = await c.env.DB.prepare(
-			`SELECT u."id", u."name", u."email", u."whatsapp", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
-			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
+			`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", p."namaPanggilan", p."tempatLahir", p."tanggalLahir",
+			        p."asalPw", p."asalPwManual", p."asalPd", p."asalPdManual",
+			        p."tahunLulusDm3", p."tempatLulusDm3", p."tempatLulusDm3Manual",
+			        p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
 			 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ? AND u."role" = 'bacalon'`,
 		)
@@ -151,6 +157,9 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			.all<BarisBerkas>();
 		return c.json({
 			...detail,
+			asalPwManual: Boolean(detail.asalPwManual),
+			asalPdManual: Boolean(detail.asalPdManual),
+			tempatLulusDm3Manual: Boolean(detail.tempatLulusDm3Manual),
 			instruktur: detail.instruktur === null ? null : Boolean(detail.instruktur),
 			lengkap: Boolean(detail.lengkap),
 			mintaDitutup: Boolean(detail.mintaDitutup),

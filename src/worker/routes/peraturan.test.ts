@@ -62,10 +62,10 @@ async function sesiAdmin() {
 async function sesiBacalon() {
 	const cookie = await sesiAdmin();
 	await env.DB.prepare(
-		`UPDATE "user" SET "role" = 'bacalon', "whatsapp" = ?, "persetujuanVersi" = ?, "persetujuanPada" = ?
+		`UPDATE "user" SET "role" = 'bacalon', "whatsapp" = ?, "persetujuanVersi" = ?, "persetujuanPada" = ?, "nia" = ?
 		 WHERE "email" = ?`,
 	)
-		.bind("6281234567890", "persetujuan-v1", WAKTU_UJI.toISOString(), DATA_ADMIN.email)
+		.bind("6281234567890", "persetujuan-v1", WAKTU_UJI.toISOString(), "30201000001", DATA_ADMIN.email)
 		.run();
 	return cookie;
 }

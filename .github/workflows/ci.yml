@@ -36,13 +36,15 @@ jobs:
       - name: Test
         run: npm test
 
-  # Non-production: every push to a pull request deploys to the separate
-  # `kpu-preview` Worker (its own D1 database, R2 bucket, and secrets — see
-  # wrangler.json's `env.preview`), never the kpu.kammi.id production Worker.
+  # Non-production: every push to a pull request, AND every push to main
+  # (so preview never drifts stale after a PR merges), deploys to the
+  # separate `kpu-preview` Worker (its own D1 database, R2 bucket, and
+  # secrets — see wrangler.json's `env.preview`), never the kpu.kammi.id
+  # production Worker.
   deploy-preview:
     name: Deploy preview (non-production)
     needs: ci
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -78,6 +80,7 @@ jobs:
         run: npx wrangler deploy --env preview
 
       - name: Comment preview URL on PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |

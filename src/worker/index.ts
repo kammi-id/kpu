@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { catatAudit, pernyataanAudit } from "./lib/audit";
+import { ekstraksiA1 as ekstraksiA1Asli } from "./lib/ekstraksiA1";
 import { buatEksporHarian } from "./lib/ekspor";
 import { payloadKataSandi } from "./lib/konfirmasiAdmin";
 import { jalankanPenghapusanAkhir } from "./lib/penghapusanAkhir";
@@ -9,11 +10,14 @@ import {
 	buatAuth,
 	emailTernormalisasi,
 	hmacHex,
+	ipDari,
 	tokenSama,
 	rahasiaTersedia,
 	type EnvDenganRahasia,
+	verifikasiTurnstile,
 	whatsappTernormalisasi,
 } from "./lib/auth";
+import { verifikasiNia } from "./lib/nia";
 import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
 import { pendaftaranDitutupManual } from "./lib/pengaturan";
 import { teksSatuBarisValid } from "./lib/profil";
@@ -22,10 +26,13 @@ import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
 import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
+import { buatRuteNia } from "./routes/nia";
+import { buatRuteStruktur } from "./routes/struktur";
 import { buatRutePengaturanAdmin } from "./routes/pengaturanAdmin";
 import { buatRutePeraturanPublik, buatRuteUnduhan } from "./routes/peraturan";
 import { buatRuteTahap } from "./routes/tahap";
 import { buatRuteMetaHalaman } from "./routes/metaHalaman";
+import { pesanGalatVerifikasiNia } from "./lib/pesanGalatNia";
 
 const JALUR_AUTH = new Set([
 	"/api/auth/sign-up/email",
@@ -50,6 +57,7 @@ type PayloadRegistrasi = {
 	whatsapp: string;
 	password: string;
 	persetujuan: boolean | string;
+	nia: string;
 };
 
 type PayloadLogin = { email: string; password: string };
@@ -79,7 +87,7 @@ function payloadOnboarding(data: unknown): data is PayloadOnboarding {
 function payloadRegistrasi(data: unknown): data is PayloadRegistrasi {
 	if (!data || typeof data !== "object") return false;
 	const payload = data as Record<string, unknown>;
-	return ["name", "email", "whatsapp", "password"].every((kunci) => typeof payload[kunci] === "string") &&
+	return ["name", "email", "whatsapp", "password", "nia"].every((kunci) => typeof payload[kunci] === "string") &&
 		(typeof payload.persetujuan === "boolean" || typeof payload.persetujuan === "string");
 }
 
@@ -117,10 +125,6 @@ function requestJson(request: Request, body: Record<string, unknown>) {
 	return new Request(request.url, { method: request.method, headers, body: JSON.stringify(body) });
 }
 
-function ipDari(request: Request) {
-	return request.headers.get("cf-connecting-ip") ?? "tidak-diketahui";
-}
-
 async function kunciPercobaanLogin(env: EnvDenganRahasia, email: string, request: Request) {
 	return Promise.all([
 		hmacHex(`email:${email}`, env.HMAC_SECRET as string),
@@ -156,26 +160,6 @@ async function resetKegagalanLogin(env: EnvDenganRahasia, kunci: readonly string
 	await env.DB.prepare('DELETE FROM "percobaanLogin" WHERE "kunci" IN (?, ?)').bind(kunci[0], kunci[1]).run();
 }
 
-async function verifikasiTurnstile(token: string | null | undefined, env: EnvDenganRahasia, request: Request) {
-	if (!token || token.length > 2048) return false;
-	try {
-		const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({
-				secret: env.TURNSTILE_SECRET_KEY,
-				response: token,
-				remoteip: ipDari(request),
-			}),
-			signal: AbortSignal.timeout(10_000),
-		});
-		const hasil: unknown = await response.json();
-		return response.ok && Boolean(hasil && typeof hasil === "object" && "success" in hasil && hasil.success);
-	} catch {
-		return false;
-	}
-}
-
 async function responsDenganPenandaTurnstile(response: Response, wajib: boolean) {
 	if (!wajib) return response;
 	const body: unknown = await response.clone().json().catch(() => ({}));
@@ -192,16 +176,18 @@ async function responsDenganPenandaTurnstile(response: Response, wajib: boolean)
  * bersumber dari `sekarang`. Ekspor default memakai jam nyata; uji menyuntikkan
  * jam tetap lewat fungsi ini alih-alih membaca `Date.now()` langsung.
  */
-export function buatWorker(sekarang: () => Date = () => new Date()) {
+export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1: typeof ekstraksiA1Asli = ekstraksiA1Asli) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
 	app.route("/api/peraturan", buatRutePeraturanPublik(sekarang));
 	app.route("/api/unduhan", buatRuteUnduhan(sekarang));
 	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik(sekarang));
-	app.route("/api/akun/data", buatRuteAkunData(sekarang));
+	app.route("/api/akun/data", buatRuteAkunData(sekarang, ekstraksiA1));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
+	app.route("/api/nia", buatRuteNia(sekarang));
+	app.route("/api/struktur", buatRuteStruktur());
 	app.route("/", buatRuteMetaHalaman());
 	app.get("/api/konfigurasi-publik", async (c) => {
 		const onboardTersedia =
@@ -236,14 +222,27 @@ export function buatWorker(sekarang: () => Date = () => new Date()) {
 				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
 				return c.json({ error: "registrasi_tidak_valid" }, 400);
 			}
+			// Penggerbangan NIA (tiket 04, ADR 0001): verifikasi PENUH dijalankan
+			// ulang di sini, independen dari pengecekan interaktif "Cek NIA"
+			// (tiket 03) — memanggil endpoint itu saja tidak cukup untuk lolos,
+			// karena submit langsung ke sign-up/email tanpa lewatnya harus tetap
+			// digerbangi. "name" yang dipakai di bawah SENGAJA berasal dari hasil
+			// verifikasi ini (kammi.id), bukan dari body.name milik klien.
+			const verifikasi = await verifikasiNia(body.nia, c.env);
+			if (!verifikasi.sukses) {
+				await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "registrasi", hasil: "ditolak" }, waktu);
+				const { status, error } = pesanGalatVerifikasiNia(verifikasi.alasan);
+				return c.json({ error }, status);
+			}
 			let response: Response;
 			try {
 				response = await buatAuth(c.env).handler(
 					requestJson(c.req.raw, {
-						name: body.name,
+						name: verifikasi.nama,
 						email: emailTernormalisasi(body.email),
 						whatsapp,
 						password: body.password,
+						nia: body.nia,
 					}),
 				);
 			} catch {

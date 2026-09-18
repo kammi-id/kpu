@@ -8,6 +8,7 @@ export type RahasiaEnv = {
 	HMAC_SECRET?: string;
 	TURNSTILE_SECRET_KEY?: string;
 	ONBOARD_TOKEN?: string;
+	KAMMI_ID_TOKEN?: string;
 };
 
 export type EnvDenganRahasia = Env & RahasiaEnv;
@@ -33,6 +34,10 @@ export function buatAuth(env: EnvDenganRahasia) {
 				// auth.api.createUser) dan Admin tidak boleh punya data persetujuan.
 				persetujuanVersi: { type: "string", input: false, returned: false },
 				persetujuanPada: { type: "date", input: false, returned: false },
+				// Sama seperti whatsapp: input dari body permintaan, tapi nilainya
+				// sudah dipaksa berasal dari verifikasiNia (bukan mentah dari klien)
+				// di requestJson pada index.ts sebelum mencapai sini.
+				nia: { type: "string", required: false, returned: false },
 			},
 		},
 		databaseHooks: {
@@ -87,6 +92,36 @@ export function whatsappTernormalisasi(whatsapp: string): string | null {
 	if (digit.startsWith("08")) ternormalisasi = `62${digit.slice(1)}`;
 	else if (digit.startsWith("62")) ternormalisasi = digit;
 	return ternormalisasi && /^62[1-9][0-9]{6,12}$/.test(ternormalisasi) ? ternormalisasi : null;
+}
+
+export function ipDari(request: Request) {
+	return request.headers.get("cf-connecting-ip") ?? "tidak-diketahui";
+}
+
+/**
+ * Verifikasi token Turnstile langsung ke Cloudflare siteverify (bukan lewat
+ * plugin captcha Better Auth) — dipakai untuk rute di luar `auth.handler`
+ * (login setelah tiga kegagalan, dan endpoint Cek NIA tiket 03) yang butuh
+ * Turnstile tanpa melalui Better Auth.
+ */
+export async function verifikasiTurnstile(token: string | null | undefined, env: EnvDenganRahasia, request: Request) {
+	if (!token || token.length > 2048) return false;
+	try {
+		const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({
+				secret: env.TURNSTILE_SECRET_KEY,
+				response: token,
+				remoteip: ipDari(request),
+			}),
+			signal: AbortSignal.timeout(10_000),
+		});
+		const hasil: unknown = await response.json();
+		return response.ok && Boolean(hasil && typeof hasil === "object" && "success" in hasil && hasil.success);
+	} catch {
+		return false;
+	}
 }
 
 export async function hmacHex(teks: string, rahasia: string) {

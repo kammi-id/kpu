@@ -21,6 +21,7 @@ type BacalonEkspor = {
 	name: string;
 	email: string;
 	whatsapp: string;
+	nia: string;
 	dibuatPada: string;
 	namaPanggilan: string | null;
 	tempatLahir: string | null;
@@ -217,7 +218,7 @@ export const KOLOM_MINTA_DITUTUP = `CASE WHEN u."banned" = 1 AND u."banReason" =
 
 async function daftarBacalon(db: D1Database) {
 	return (await db.prepare(
-		`SELECT u."id", u."name", u."email", u."whatsapp", u."createdAt" AS "dibuatPada", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
+		`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", u."createdAt" AS "dibuatPada", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
 		        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap",
 		        ${KOLOM_MINTA_DITUTUP}
 		 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
@@ -225,7 +226,7 @@ async function daftarBacalon(db: D1Database) {
 	).all<BacalonEkspor>()).results;
 }
 
-const KOLOM_BACALON = ["id", "nama", "email", "whatsapp", "dibuatPada", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "jumlahHadir", "lengkap", "Minta ditutup"] as const;
+const KOLOM_BACALON = ["id", "nama", "email", "whatsapp", "nia", "dibuatPada", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "jumlahHadir", "lengkap", "Minta ditutup"] as const;
 
 function nilaiKolomBacalon(item: BacalonEkspor, kolom: (typeof KOLOM_BACALON)[number]): string | number | null {
 	if (kolom === "nama") return item.name;

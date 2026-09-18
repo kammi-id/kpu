@@ -17,6 +17,7 @@ type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
 const MASA_PENDAFTARAN = new Date("2026-09-20T00:00:00.000Z");
 const SELESAI = new Date("2027-01-27T17:00:00.000Z");
 let whatsappBerikutnya = 0;
+let niaBerikutnya = 0;
 
 function envUji(): EnvUji {
 	return { ...env, ...RAHASIA_UJI };
@@ -57,9 +58,22 @@ async function sesiAdmin() {
 
 async function sesiBacalon(email: string, name: string) {
 	whatsappBerikutnya += 1;
+	niaBerikutnya += 1;
 	jaringan.use(http.post("https://challenges.cloudflare.com/turnstile/v0/siteverify", () => HttpResponse.json({ success: true })));
+	// Penggerbangan NIA (tiket 04): sign-up/email memverifikasi ulang lewat kammi.id.
+	jaringan.use(
+		http.get("https://www.kammi.id/api/v1/members/:nia", ({ params }) =>
+			HttpResponse.json({ nia: params.nia, nama: name, jenjangKaderisasi: "AB3", keadaanKader: "aktif" })),
+	);
 	const response = await kirim(MASA_PENDAFTARAN, "/api/auth/sign-up/email", {
-		...json({ name, email, whatsapp: `08123450${String(whatsappBerikutnya).padStart(4, "0")}`, password: "kata-sandi-aman", persetujuan: "true" }),
+		...json({
+			name,
+			email,
+			whatsapp: `08123450${String(whatsappBerikutnya).padStart(4, "0")}`,
+			password: "kata-sandi-aman",
+			persetujuan: "true",
+			nia: `3020100${String(niaBerikutnya).padStart(4, "0")}`,
+		}),
 		headers: {
 			"content-type": "application/json",
 			origin: "https://kpu.kammi.id",
@@ -69,6 +83,34 @@ async function sesiBacalon(email: string, name: string) {
 	expect(response.status).toBe(200);
 	await pindahWaktuSesi(email, MASA_PENDAFTARAN);
 	return response.headers.get("set-cookie")?.split(";", 1)[0] as string;
+}
+
+/**
+ * Data uji disisipkan langsung ke database (bukan lewat sesiBacalon()/sign-up nyata):
+ * sign-up sungguhan masih patah karena constraint NOT NULL `nia` dari tiket 01 belum
+ * digerbangi klien sampai tiket 04 selesai (lihat tiket 05, Comments). Kolom di sini
+ * meniru pola buatBacalon() di ../ekspor.test.ts.
+ */
+async function buatBacalonLangsung(nama: string, email: string, waktu: Date) {
+	whatsappBerikutnya += 1;
+	niaBerikutnya += 1;
+	const id = crypto.randomUUID();
+	await env.DB.prepare(
+		`INSERT INTO "user" ("id", "name", "email", "emailVerified", "createdAt", "updatedAt", "role", "whatsapp", "persetujuanVersi", "persetujuanPada", "nia", "banned", "banReason")
+		 VALUES (?, ?, ?, 1, ?, ?, 'bacalon', ?, 'persetujuan-v1', ?, ?, 0, NULL)`,
+	)
+		.bind(
+			id,
+			nama,
+			email,
+			waktu.toISOString(),
+			waktu.toISOString(),
+			`62812345${String(whatsappBerikutnya).padStart(4, "0")}`,
+			waktu.toISOString(),
+			`3020100${String(niaBerikutnya).padStart(4, "0")}`,
+		)
+		.run();
+	return id;
 }
 
 async function simpanBerkas(userId: string, kelompok: number, namaAsli: string) {
@@ -89,6 +131,7 @@ async function simpanBerkas(userId: string, kelompok: number, namaAsli: string) 
 
 beforeEach(async () => {
 	whatsappBerikutnya = 0;
+	niaBerikutnya = 0;
 	const objek = await env.BERKAS.list();
 	if (objek.objects.length) await env.BERKAS.delete(objek.objects.map((satu) => satu.key));
 	await env.DB.batch([
@@ -248,6 +291,35 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		expect(unduh.headers.get("x-content-type-options")).toBe("nosniff");
 		expect(new Uint8Array(await unduh.arrayBuffer())).toEqual(berkas.bytes);
 		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/berkas/${berkas.id}/unduh`, { headers: { cookie: bacalon } })).status).toBe(401);
+	});
+
+	it("menampilkan nia pada detail Bakal Calon (tiket 05, data uji disisipkan langsung)", async () => {
+		const admin = await sesiAdmin();
+		const userId = await buatBacalonLangsung("Nabila Putri", "nabila-nia@example.test", MASA_PENDAFTARAN);
+		const dibuat = await env.DB.prepare('SELECT "nia" FROM "user" WHERE "id" = ?').bind(userId).first<{ nia: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${userId}`, { headers: { cookie: admin } });
+
+		expect(response.status).toBe(200);
+		const body = await response.json<{ nia: string }>();
+		expect(body.nia).toBe(dibuat?.nia);
+		expect(body.nia).toMatch(/^\d{11}$/);
+	});
+
+	it("menampilkan penanda manual struktur pada detail Bakal Calon (tiket 22)", async () => {
+		const admin = await sesiAdmin();
+		const userId = await buatBacalonLangsung("Citra Lestari", "citra-manual@example.test", MASA_PENDAFTARAN);
+		await env.DB.prepare(
+			`INSERT INTO "profil" ("userId", "asalPw", "asalPwManual", "asalPd", "asalPdManual", "tempatLulusDm3", "tempatLulusDm3Manual", "diubahPada")
+			 VALUES (?, 'PW Manual', 1, 'PD Manual', 1, 'PW Lulus Manual', 1, ?)`,
+		).bind(userId, MASA_PENDAFTARAN.toISOString()).run();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${userId}`, { headers: { cookie: admin } });
+		expect(response.status).toBe(200);
+		const body = await response.json<Record<string, unknown>>();
+		expect(body.asalPwManual).toBe(true);
+		expect(body.asalPdManual).toBe(true);
+		expect(body.tempatLulusDm3Manual).toBe(true);
 	});
 
 	it("tidak membocorkan nama, kontak, atau berkas Bakal Calon melalui rute API publik", async () => {

@@ -1,20 +1,13 @@
-import { Lock } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { kelompokBerkas, kelompokValid, type NomorKelompok } from "~/lib/kelompok";
-import { ambilBerkasKelompok, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
+import { ambilBerkasKelompok, mimeDariNamaBerkas, unggahBerkasKelompok, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
+import { ambilUnduhan, urlUnduhBerkasPublik, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
-
-function mimeDariNamaBerkas(namaAsli: string): string | null {
-	const ekstensi = namaAsli.toLowerCase().split(".").pop();
-	if (ekstensi === "pdf") return "application/pdf";
-	if (ekstensi === "jpg" || ekstensi === "jpeg") return "image/jpeg";
-	if (ekstensi === "png") return "image/png";
-	return null;
-}
 
 function ukuranTerformat(byte: number) {
 	return `${(byte / (1024 * 1024)).toFixed(2)} MB`;
@@ -34,6 +27,7 @@ export function AkunBerkasKelompok() {
 	const [jenisRekomendasi, setJenisRekomendasi] = useState<JenisRekomendasi>("A3_PW");
 	const [pesan, setPesan] = useState("");
 	const [menyimpan, setMenyimpan] = useState(false);
+	const [templat, setTemplat] = useState<BerkasPublik[] | null>(null);
 
 	const kelompok = kelompokValid(nomorMentah) ? kelompokBerkas(nomorMentah as NomorKelompok) : null;
 
@@ -52,9 +46,25 @@ export function AkunBerkasKelompok() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [kelompok?.nomor]);
 
+	// Templat Berkas Publik (/unduhan) yang relevan untuk kelompok ini — sama
+	// untuk semua kelompok, jadi cukup dimuat sekali dan disaring per kelompok.
+	useEffect(() => {
+		let dibatalkan = false;
+		void ambilUnduhan()
+			.then((data) => {
+				if (!dibatalkan) setTemplat(data);
+			})
+			.catch(() => undefined);
+		return () => {
+			dibatalkan = true;
+		};
+	}, []);
+
 	if (!kelompok) {
 		return <p className="text-marun">Kelompok berkas tidak ditemukan.</p>;
 	}
+
+	const templatKelompok = templat?.filter((item) => kelompok.templat.includes(item.judul)) ?? [];
 
 	const bolehUbah = tahap?.bolehUbahBacalon ?? false;
 
@@ -79,15 +89,8 @@ export function AkunBerkasKelompok() {
 		const form = event.currentTarget;
 		setMenyimpan(true);
 		setPesan("");
-		const query = new URLSearchParams({ namaAsli: file.name });
-		if (kelompok.nomor === 7) query.set("jenisRekomendasi", jenisRekomendasi);
 		try {
-			const response = await fetch(`/api/akun/berkas/${kelompok.nomor}?${query}`, {
-				method: "POST",
-				headers: { "content-type": mime },
-				body: file,
-			});
-			if (!response.ok) throw new Error();
+			await unggahBerkasKelompok(kelompok.nomor, file, mime, kelompok.nomor === 7 ? jenisRekomendasi : undefined);
 			form.reset();
 			setFile(null);
 			await muat(kelompok.nomor);
@@ -119,11 +122,23 @@ export function AkunBerkasKelompok() {
 		<div className="grid gap-6">
 			<div>
 				<h2 className="font-display text-3xl text-navy">
-					Kelompok {kelompok.nomor}: {kelompok.label}
+					Berkas {kelompok.nomor}: {kelompok.label}
 				</h2>
 				<p className="mt-2 text-muted-foreground">{kelompok.ketentuanFormat}</p>
 				{kelompok.catatan ? <p className="mt-1 text-sm text-muted-foreground">{kelompok.catatan}</p> : null}
 			</div>
+
+			{templatKelompok.length > 0 ? (
+				<div className="flex flex-wrap items-center gap-2 rounded-xl bg-muted/50 p-3">
+					<span className="text-sm text-muted-foreground">Templat:</span>
+					{templatKelompok.map((item) => (
+						<Button key={item.id} render={<a href={urlUnduhBerkasPublik(item.id)} />} type="button" variant="outline" size="sm">
+							<Download className="size-4" aria-hidden />
+							{item.judul}
+						</Button>
+					))}
+				</div>
+			) : null}
 
 			{pesan ? (
 				<p className="text-sm text-marun" aria-live="polite">
