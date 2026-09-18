@@ -2,6 +2,7 @@ type AktorAudit = "Admin bersama" | "Bakal Calon Ketua Umum" | "Anonim" | "Siste
 type TindakanAudit =
 	| "login"
 	| "registrasi"
+	| "cek_nia"
 	| "onboarding_admin"
 	| "ubah_data"
 	| "unggah_berkas_publik"

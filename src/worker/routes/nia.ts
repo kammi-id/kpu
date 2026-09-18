@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { catatAudit } from "../lib/audit";
 import { hmacHex, ipDari, rahasiaTersedia, verifikasiTurnstile, type EnvDenganRahasia } from "../lib/auth";
 import { verifikasiNia } from "../lib/nia";
 import { pesanGalatVerifikasiNia } from "../lib/pesanGalatNia";
@@ -67,6 +68,7 @@ export function buatRuteNia(sekarang: () => Date) {
 		const waktu = sekarang();
 		const kunci = await kunciLajuNia(c.env, c.req.raw);
 		if (await lajuNiaTerlampaui(c.env, kunci, waktu)) {
+			await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "cek_nia", hasil: "gagal" }, waktu);
 			return c.json({ error: "terlalu_banyak_permintaan" }, 429);
 		}
 		// Setiap panggilan yang lolos gerbang laju di atas dihitung di sini,
@@ -76,14 +78,29 @@ export function buatRuteNia(sekarang: () => Date) {
 		await catatPermintaanNia(c.env, kunci, waktu);
 
 		const body: unknown = await c.req.json().catch(() => null);
-		if (!payloadCekNia(body)) return c.json({ error: "permintaan_tidak_valid" }, 400);
+		if (!payloadCekNia(body)) {
+			await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "cek_nia", hasil: "gagal" }, waktu);
+			return c.json({ error: "permintaan_tidak_valid" }, 400);
+		}
 
 		const turnstileValid = await verifikasiTurnstile(c.req.header("x-captcha-response"), c.env, c.req.raw);
-		if (!turnstileValid) return c.json({ error: "turnstile_tidak_valid", turnstileDiperlukan: true }, 403);
+		if (!turnstileValid) {
+			await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" }, waktu);
+			return c.json({ error: "turnstile_tidak_valid", turnstileDiperlukan: true }, 403);
+		}
 
 		const hasil = await verifikasiNia(body.nia, c.env);
-		if (hasil.sukses) return c.json({ nama: hasil.nama });
+		if (hasil.sukses) {
+			await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "cek_nia", hasil: "berhasil" }, waktu);
+			return c.json({ nama: hasil.nama });
+		}
 
+		// Sama seperti penggerbangan pendaftaran akhir (index.ts): apa pun
+		// alasannya (format, duplikat, tidak ditemukan, tidak memenuhi syarat,
+		// upstream gagal), dicatat "ditolak" — bukan "gagal" — karena
+		// `verifikasiNia` sendiri yang menjawab, bukan galat infrastruktur di
+		// endpoint ini.
+		await catatAudit(c.env.DB, { aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" }, waktu);
 		const { status, error } = pesanGalatVerifikasiNia(hasil.alasan);
 		return c.json({ error }, status);
 	});

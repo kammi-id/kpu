@@ -93,10 +93,16 @@ async function sisipBacalonDenganNia(nia: string) {
 beforeEach(async () => {
 	niaBerikutnya = 0;
 	await env.DB.batch([
+		env.DB.prepare('DELETE FROM "audit"'),
 		env.DB.prepare('DELETE FROM "percobaanLogin"'),
 		env.DB.prepare('DELETE FROM "user"'),
 	]);
 });
+
+/** rowid implisit SQLite: baris terakhir yang dimasukkan, tidak bergantung pada "waktu" (sama di semua uji ini). */
+async function auditTerakhir() {
+	return env.DB.prepare('SELECT "aktor", "tindakan", "hasil" FROM "audit" ORDER BY rowid DESC LIMIT 1').first();
+}
 
 describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 	it("menolak permintaan tanpa Turnstile valid", async () => {
@@ -108,6 +114,15 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 		turnstileSelaluGagal();
 		const turnstileSalah = await kirim(jsonDenganTurnstile({ nia }));
 		expect(turnstileSalah.status).toBe(403);
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
+	});
+
+	it("mencatat audit 'gagal' pada payload tidak valid", async () => {
+		turnstileSelaluLolos();
+		const response = await kirim(jsonDenganTurnstile({ nia: 12345 }));
+		expect(response.status).toBe(400);
+		expect(await response.json()).toMatchObject({ error: "permintaan_tidak_valid" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "gagal" });
 	});
 
 	it("sukses membalas hanya nama terverifikasi, tidak field mentah lain dari kammi.id", async () => {
@@ -129,6 +144,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 		expect(response.status).toBe(200);
 		const body = await response.json();
 		expect(body).toEqual({ nama: "Nabila Putri Kader AB3" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "berhasil" });
 	});
 
 	it("format tidak valid menghasilkan kode galat berbeda dari alasan lain", async () => {
@@ -136,6 +152,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 		const response = await kirim(jsonDenganTurnstile({ nia: "salah" }));
 		expect(response.status).toBe(400);
 		expect(await response.json()).toMatchObject({ error: "nia_format_tidak_valid" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
 	});
 
 	it("NIA duplikat lokal menghasilkan kode galat berbeda", async () => {
@@ -147,6 +164,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 
 		expect(response.status).toBe(409);
 		expect(await response.json()).toMatchObject({ error: "nia_sudah_terdaftar" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
 	});
 
 	it("NIA tidak ditemukan di kammi.id menghasilkan kode galat berbeda", async () => {
@@ -158,6 +176,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 
 		expect(response.status).toBe(404);
 		expect(await response.json()).toMatchObject({ error: "nia_tidak_ditemukan" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
 	});
 
 	it("NIA tidak memenuhi syarat (bukan AB3 aktif) menghasilkan kode galat berbeda", async () => {
@@ -172,6 +191,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 
 		expect(response.status).toBe(403);
 		expect(await response.json()).toMatchObject({ error: "nia_tidak_memenuhi_syarat" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
 	});
 
 	it("kegagalan upstream kammi.id menghasilkan kode galat berbeda, ditandai bisa dicoba ulang", async () => {
@@ -183,6 +203,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 
 		expect(response.status).toBe(502);
 		expect(await response.json()).toMatchObject({ error: "nia_gagal_upstream" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "ditolak" });
 	});
 
 	it("membatasi laju permintaan per IP setelah dipanggil berulang kali", async () => {
@@ -198,6 +219,7 @@ describe("POST /api/nia/cek (tiket 03, seam Worker)", () => {
 		const setelahBatas = await kirim(jsonDenganTurnstile({ nia }));
 		expect(setelahBatas.status).toBe(429);
 		expect(await setelahBatas.json()).toMatchObject({ error: "terlalu_banyak_permintaan" });
+		expect(await auditTerakhir()).toEqual({ aktor: "Anonim", tindakan: "cek_nia", hasil: "gagal" });
 	});
 
 	it("menutup endpoint bila KAMMI_ID_TOKEN tidak tersedia", async () => {
