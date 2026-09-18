@@ -61,7 +61,7 @@ export function AkunBerkas() {
 							>
 								<span>
 									<span className="block text-[0.8125rem] font-bold tracking-[0.08em] text-muted-foreground uppercase">
-										Kelompok {kelompok.nomor}
+										Berkas {kelompok.nomor}
 									</span>
 									<span className="block font-medium text-navy">{kelompok.label}</span>
 								</span>

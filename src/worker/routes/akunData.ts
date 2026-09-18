@@ -83,6 +83,23 @@ function teksAtauNull(nilai: string | null | undefined): string | null {
 	return dipangkas === "" ? null : dipangkas;
 }
 
+type MedanStruktur = { label: string | null; id: string | null; manual: 0 | 1 };
+
+/**
+ * Triple (label, id, manual) untuk Asal PW/Asal PD/Tempat lulus AB 3 (tiket
+ * 22) — dipusatkan di sini alih-alih dihitung tiga kali terpisah di PUT.
+ */
+function medanStruktur(labelMentah: string | null | undefined, idMentah: string | null | undefined): MedanStruktur {
+	const label = teksAtauNull(labelMentah);
+	const id = label === null ? null : teksAtauNull(idMentah);
+	return { label, id, manual: label !== null && id === null ? 1 : 0 };
+}
+
+/** Hasil pencocokan struktur (lib/strukturCocok.ts) ke bentuk `{id,label}` respons isi-otomatis, atau null bila tidak cocok. */
+function strukturCocokJson(cocok: { id: string; nama: string } | null): { id: string; label: string } | null {
+	return cocok ? { id: cocok.id, label: cocok.nama } : null;
+}
+
 /**
  * Bakal Calon: baca dan simpan Data pribadi A.1 (`/akun/data`, tiket 12).
  * Baca mengikuti baris "baca data sendiri" (tahap × kemampuan): ditolak hanya
@@ -181,12 +198,9 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 		// tanpa label yang menyertainya dianggap tidak berlaku (dipaksa null)
 		// alih-alih ditolak keras, supaya klien yang membersihkan label tidak
 		// harus ingat membersihkan Id secara terpisah.
-		const asalPw = teksAtauNull(body.asalPw);
-		const asalPwId = asalPw === null ? null : teksAtauNull(body.asalPwId);
-		const asalPd = teksAtauNull(body.asalPd);
-		const asalPdId = asalPd === null ? null : teksAtauNull(body.asalPdId);
-		const tempatLulusDm3 = teksAtauNull(body.tempatLulusDm3);
-		const tempatLulusDm3Id = tempatLulusDm3 === null ? null : teksAtauNull(body.tempatLulusDm3Id);
+		const asalPw = medanStruktur(body.asalPw, body.asalPwId);
+		const asalPd = medanStruktur(body.asalPd, body.asalPdId);
+		const tempatLulusDm3 = medanStruktur(body.tempatLulusDm3, body.tempatLulusDm3Id);
 
 		// Satu `DB.batch` (transaksi implisit D1): user + profil menjadi satu simpan
 		// atomik, bukan dua tulis terpisah yang bisa timpang bila salah satunya gagal.
@@ -222,16 +236,16 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 						teksAtauNull(body.namaPanggilan),
 						teksAtauNull(body.tempatLahir),
 						tanggalLahir,
-						asalPw,
-						asalPwId,
-						asalPw !== null && asalPwId === null ? 1 : 0,
-						asalPd,
-						asalPdId,
-						asalPd !== null && asalPdId === null ? 1 : 0,
+						asalPw.label,
+						asalPw.id,
+						asalPw.manual,
+						asalPd.label,
+						asalPd.id,
+						asalPd.manual,
 						tahunLulusDm3,
-						tempatLulusDm3,
-						tempatLulusDm3Id,
-						tempatLulusDm3 !== null && tempatLulusDm3Id === null ? 1 : 0,
+						tempatLulusDm3.label,
+						tempatLulusDm3.id,
+						tempatLulusDm3.manual,
 						body.instruktur === null || body.instruktur === undefined ? null : Number(body.instruktur),
 						teksAtauNull(body.capaianHafalan),
 						teksAtauNull(body.bahasaAsing),
@@ -308,10 +322,10 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 			namaPanggilan: hasil.data.namaPanggilan,
 			tempatLahir: hasil.data.tempatLahir,
 			tanggalLahir: hasil.data.tanggalLahir,
-			asalPw: asalPwCocok ? { id: asalPwCocok.id, label: asalPwCocok.nama } : null,
-			asalPd: asalPdCocok ? { id: asalPdCocok.id, label: asalPdCocok.nama } : null,
+			asalPw: strukturCocokJson(asalPwCocok),
+			asalPd: strukturCocokJson(asalPdCocok),
 			tahunLulusDm3: hasil.data.tahunLulusDm3,
-			tempatLulusDm3: tempatLulusDm3Cocok ? { id: tempatLulusDm3Cocok.id, label: tempatLulusDm3Cocok.nama } : null,
+			tempatLulusDm3: strukturCocokJson(tempatLulusDm3Cocok),
 			instruktur: hasil.data.instruktur,
 			capaianHafalan: hasil.data.capaianHafalan,
 			bahasaAsing: hasil.data.bahasaAsing,

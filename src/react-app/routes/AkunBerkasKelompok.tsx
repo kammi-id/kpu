@@ -4,17 +4,9 @@ import { useParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { kelompokBerkas, kelompokValid, type NomorKelompok } from "~/lib/kelompok";
-import { ambilBerkasKelompok, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
+import { ambilBerkasKelompok, mimeDariNamaBerkas, unggahBerkasKelompok, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
 import { PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
-
-function mimeDariNamaBerkas(namaAsli: string): string | null {
-	const ekstensi = namaAsli.toLowerCase().split(".").pop();
-	if (ekstensi === "pdf") return "application/pdf";
-	if (ekstensi === "jpg" || ekstensi === "jpeg") return "image/jpeg";
-	if (ekstensi === "png") return "image/png";
-	return null;
-}
 
 function ukuranTerformat(byte: number) {
 	return `${(byte / (1024 * 1024)).toFixed(2)} MB`;
@@ -79,15 +71,8 @@ export function AkunBerkasKelompok() {
 		const form = event.currentTarget;
 		setMenyimpan(true);
 		setPesan("");
-		const query = new URLSearchParams({ namaAsli: file.name });
-		if (kelompok.nomor === 7) query.set("jenisRekomendasi", jenisRekomendasi);
 		try {
-			const response = await fetch(`/api/akun/berkas/${kelompok.nomor}?${query}`, {
-				method: "POST",
-				headers: { "content-type": mime },
-				body: file,
-			});
-			if (!response.ok) throw new Error();
+			await unggahBerkasKelompok(kelompok.nomor, file, mime, kelompok.nomor === 7 ? jenisRekomendasi : undefined);
 			form.reset();
 			setFile(null);
 			await muat(kelompok.nomor);
@@ -119,7 +104,7 @@ export function AkunBerkasKelompok() {
 		<div className="grid gap-6">
 			<div>
 				<h2 className="font-display text-3xl text-navy">
-					Kelompok {kelompok.nomor}: {kelompok.label}
+					Berkas {kelompok.nomor}: {kelompok.label}
 				</h2>
 				<p className="mt-2 text-muted-foreground">{kelompok.ketentuanFormat}</p>
 				{kelompok.catatan ? <p className="mt-1 text-sm text-muted-foreground">{kelompok.catatan}</p> : null}

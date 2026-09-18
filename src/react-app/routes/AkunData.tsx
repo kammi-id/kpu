@@ -1,9 +1,10 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { type NilaiComboboxSearchable, type OpsiCombobox, SearchableCombobox } from "~/components/ui/searchable-combobox";
+import { mimeDariNamaBerkas, unggahBerkasKelompok } from "~/react-app/lib/akunBerkas";
 import { LABEL_TAHAP } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
 
@@ -89,10 +90,12 @@ const PESAN_GALAT: Record<string, string> = {
 };
 
 const PESAN_GALAT_EKSTRAKSI: Record<string, string> = {
-	berkas_a1_tidak_ada: "Unggah Formulir A.1 (Kelompok Berkas 1) terlebih dahulu di /akun/berkas.",
+	berkas_a1_tidak_ada: "Unggah Formulir A.1 (Berkas 1) terlebih dahulu di /akun/berkas.",
 	berkas_tidak_terbaca: "Berkas A.1 tersimpan tidak dapat dibaca. Isi formulir secara manual.",
 	ekstraksi_gagal: "Formulir A.1 tidak dapat dibaca otomatis saat ini. Isi formulir secara manual.",
 };
+
+const PESAN_GALAT_UNGGAH_A1 = "Formulir A.1 tidak dapat diunggah. Periksa format (PDF, JPEG, atau PNG) dan ukuran (maksimum 20 MB).";
 
 function nilaiStruktur(label: string | null, id: string | null): NilaiComboboxSearchable {
 	if (id !== null && label !== null) return { id, label };
@@ -153,7 +156,9 @@ export function AkunData() {
 	const [opsiPd, setOpsiPd] = useState<OpsiCombobox[]>([]);
 	const [kelompok1Hadir, setKelompok1Hadir] = useState(false);
 	const [mengekstrak, setMengekstrak] = useState(false);
+	const [mengunggahA1, setMengunggahA1] = useState(false);
 	const [pesanEkstraksi, setPesanEkstraksi] = useState("");
+	const inputA1Ref = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		let dibatalkan = false;
@@ -249,6 +254,43 @@ export function AkunData() {
 		}
 	}
 
+	// Tombol A.1 berfungsi ganda: belum ada berkas kelompok 1 → buka pemilih
+	// berkas dan unggah ke /akun/berkas/1 (menandai Berkas 1 hadir di halaman
+	// berkas lewat endpoint yang sama), lalu langsung isi otomatis. Sudah ada →
+	// isi otomatis langsung, seperti sebelumnya.
+	function klikTombolA1() {
+		if (kelompok1Hadir) {
+			void isiOtomatis();
+		} else {
+			inputA1Ref.current?.click();
+		}
+	}
+
+	async function unggahA1(event: ChangeEvent<HTMLInputElement>) {
+		const file = event.target.files?.[0] ?? null;
+		event.target.value = "";
+		if (!file) return;
+
+		const mime = mimeDariNamaBerkas(file.name);
+		if (!mime) {
+			setPesanEkstraksi(PESAN_GALAT_UNGGAH_A1);
+			return;
+		}
+
+		setMengunggahA1(true);
+		setPesanEkstraksi("");
+		try {
+			await unggahBerkasKelompok(1, file, mime);
+			setKelompok1Hadir(true);
+		} catch {
+			setPesanEkstraksi(PESAN_GALAT_UNGGAH_A1);
+			return;
+		} finally {
+			setMengunggahA1(false);
+		}
+		await isiOtomatis();
+	}
+
 	async function simpan(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setMenyimpan(true);
@@ -329,6 +371,32 @@ export function AkunData() {
 				</CardContent>
 			</Card>
 
+			<Card className="mt-5">
+				<CardContent className="flex flex-col items-start gap-2">
+					<input
+						ref={inputA1Ref}
+						type="file"
+						className="hidden"
+						accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
+						onChange={(event) => void unggahA1(event)}
+					/>
+					<Button
+						type="button"
+						variant="secondary"
+						disabled={!bolehUbah || menyimpan || mengunggahA1 || mengekstrak}
+						onClick={klikTombolA1}
+					>
+						{mengunggahA1 ? "Mengunggah Formulir A.1…" : mengekstrak ? "Membaca Formulir A.1…" : kelompok1Hadir ? "Isi otomatis dari Formulir A.1" : "Unggah Formulir A.1"}
+					</Button>
+					{!kelompok1Hadir ? (
+						<p className="text-xs text-muted-foreground">Belum ada Formulir A.1 tersimpan. Unggah di sini, atau di /akun/berkas (Berkas 1).</p>
+					) : (
+						<p className="text-xs text-muted-foreground">Hanya mengisi kolom yang masih kosong di bawah — nilai yang sudah diisi tidak ditimpa.</p>
+					)}
+					{pesanEkstraksi ? <p className="text-xs text-destructive" aria-live="polite">{pesanEkstraksi}</p> : null}
+				</CardContent>
+			</Card>
+
 			<form className="mt-5 flex flex-col gap-5" onSubmit={simpan}>
 				<fieldset disabled={!bolehUbah || menyimpan} className="flex flex-col gap-5">
 					<Card>
@@ -364,18 +432,6 @@ export function AkunData() {
 							<CardTitle>Latar belakang KAMMI</CardTitle>
 						</CardHeader>
 						<CardContent className="flex flex-col gap-4">
-							<div className="flex flex-col items-start gap-2 rounded-xl bg-muted/50 p-3">
-								<Button type="button" variant="secondary" disabled={!kelompok1Hadir || mengekstrak} onClick={() => void isiOtomatis()}>
-									{mengekstrak ? "Membaca Formulir A.1…" : "Isi otomatis dari Formulir A.1"}
-								</Button>
-								{!kelompok1Hadir ? (
-									<p className="text-xs text-muted-foreground">Unggah Formulir A.1 (Kelompok Berkas 1) di /akun/berkas untuk mengaktifkan ini.</p>
-								) : (
-									<p className="text-xs text-muted-foreground">Hanya mengisi kolom yang masih kosong di bawah — nilai yang sudah diisi tidak ditimpa.</p>
-								)}
-								{pesanEkstraksi ? <p className="text-xs text-destructive" aria-live="polite">{pesanEkstraksi}</p> : null}
-							</div>
-
 							<div className="grid gap-4 sm:grid-cols-2">
 								<div className="flex flex-col gap-2">
 									<label htmlFor="asalPw" className="text-sm font-semibold text-navy">Asal PW</label>
