@@ -10,14 +10,18 @@ Rujukan: [spec](../spec.md) bagian Data pribadi dan Kelompok berkas dan unggahan
 
 **Blocked by:** 21 (daftar struktur untuk pencocokan). Bagian backend (panggilan LLM) dapat dikerjakan berdampingan dengan 22; pengait ke field combobox di frontend menunggu 22 selesai.
 
-**Status:** ready-for-agent
+**Status:** selesai
 
-- [ ] Tombol nonaktif dan menjelaskan alasannya ketika Kelompok Berkas 1 belum hadir.
-- [ ] Rute Worker baru mengambil berkas A.1 tersimpan (kelompok 1) dari R2, mengirimkannya ke model visi, dan mengembalikan kolom-kolom `profil` yang berhasil terbaca sebagai JSON terstruktur.
-- [ ] Ekstraksi hanya mengisi kolom yang kosong di state formulir saat itu; kolom yang sudah terisi (manual atau isi-otomatis sebelumnya) tidak pernah tertimpa.
-- [ ] Teks lokasi hasil ekstraksi dicocokkan ke daftar struktur (tiket 21) dengan normalisasi dasar; tanpa kecocokan → kolom tetap kosong, bukan diisi paksa dengan teks mentah.
-- [ ] Kegagalan pemanggilan LLM (timeout, berkas tidak terbaca, respons tidak valid) tidak menggagalkan halaman — formulir tetap dapat diisi manual seperti biasa.
-- [ ] Tidak ada penulisan ke `profil` di rute ini; penulisan tetap lewat `PUT /api/akun/data` yang sudah ada.
-- [ ] Butir server diuji lewat seam Worker, termasuk kasus berkas tidak terbaca dan respons LLM tidak lengkap/tidak valid.
+- [x] Tombol nonaktif dan menjelaskan alasannya ketika Kelompok Berkas 1 belum hadir.
+- [x] Rute Worker baru mengambil berkas A.1 tersimpan (kelompok 1) dari R2, mengirimkannya ke model visi, dan mengembalikan kolom-kolom `profil` yang berhasil terbaca sebagai JSON terstruktur.
+- [x] Ekstraksi hanya mengisi kolom yang kosong di state formulir saat itu; kolom yang sudah terisi (manual atau isi-otomatis sebelumnya) tidak pernah tertimpa.
+- [x] Teks lokasi hasil ekstraksi dicocokkan ke daftar struktur (tiket 21) dengan normalisasi dasar; tanpa kecocokan → kolom tetap kosong, bukan diisi paksa dengan teks mentah.
+- [x] Kegagalan pemanggilan LLM (timeout, berkas tidak terbaca, respons tidak valid) tidak menggagalkan halaman — formulir tetap dapat diisi manual seperti biasa.
+- [x] Tidak ada penulisan ke `profil` di rute ini; penulisan tetap lewat `PUT /api/akun/data` yang sudah ada.
+- [x] Butir server diuji lewat seam Worker, termasuk kasus berkas tidak terbaca dan respons LLM tidak lengkap/tidak valid.
 
 ## Comments
+
+- Model visi Workers AI (`@cf/google/gemma-4-26b-a4b-it`) dipanggil via binding `env.AI` dengan skema terstruktur.
+- Tidak ada penulisan ke database pada endpoint ekstraksi (`/api/akun/data/isi-otomatis`); penulisan tetap lewat `PUT /api/akun/data` sehingga pengguna selalu meninjau data sebelum menyimpannya.
+- Uji unit dan seam Worker mencakup semua skenario sukses, kegagalan AI, format rusak, berkas tak terbaca, dan pencocokan struktur bertingkat (PW & PD).

@@ -1,7 +1,10 @@
 import { Hono } from "hono";
 import { catatAudit } from "../lib/audit";
 import { ambilSesi, buatAuth, rahasiaTersedia, whatsappTernormalisasi, type EnvDenganRahasia } from "../lib/auth";
+import { base64Dari, ekstraksiA1 as ekstraksiA1Asli, type MimeBerkasA1 } from "../lib/ekstraksiA1";
 import { tanggalLahirValid, tahunLulusDm3Valid, teksSatuBarisValid } from "../lib/profil";
+import { ambilStruktur } from "../lib/struktur";
+import { cocokkanStruktur } from "../lib/strukturCocok";
 import { bolehUbahBacalon, layananAktif, tahapPada } from "../lib/tahap";
 
 type BarisAkunData = {
@@ -13,9 +16,12 @@ type BarisAkunData = {
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
 	asalPw: string | null;
+	asalPwId: string | null;
 	asalPd: string | null;
+	asalPdId: string | null;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
+	tempatLulusDm3Id: string | null;
 	instruktur: number | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
@@ -28,9 +34,12 @@ type PayloadAkunData = {
 	tempatLahir: string | null;
 	tanggalLahir: string | null;
 	asalPw: string | null;
+	asalPwId: string | null;
 	asalPd: string | null;
+	asalPdId: string | null;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
+	tempatLulusDm3Id: string | null;
 	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
@@ -47,12 +56,18 @@ const KOLOM_TEKS_OPSIONAL = [
 	"bahasaAsing",
 ] as const;
 
+/** Kolom Id struktur (tiket 22): opsional, string bila dipilih dari combobox, null bila kosong/manual. */
+const KOLOM_ID_STRUKTUR = ["asalPwId", "asalPdId", "tempatLulusDm3Id"] as const;
+
 /** Bentuk payload mentah, belum divalidasi kontennya (tanggal, tahun, dst). */
 function payloadAkunData(data: unknown): data is PayloadAkunData {
 	if (!data || typeof data !== "object") return false;
 	const payload = data as Record<string, unknown>;
 	if (typeof payload.name !== "string" || typeof payload.whatsapp !== "string") return false;
 	if (!KOLOM_TEKS_OPSIONAL.every((kunci) => payload[kunci] === null || payload[kunci] === undefined || typeof payload[kunci] === "string")) {
+		return false;
+	}
+	if (!KOLOM_ID_STRUKTUR.every((kunci) => payload[kunci] === null || payload[kunci] === undefined || typeof payload[kunci] === "string")) {
 		return false;
 	}
 	if (!(payload.tahunLulusDm3 === null || payload.tahunLulusDm3 === undefined || typeof payload.tahunLulusDm3 === "number")) {
@@ -74,7 +89,7 @@ function teksAtauNull(nilai: string | null | undefined): string | null {
  * pada Selesai. Simpan mengikuti `bolehUbahBacalon`: hanya Masa Pendaftaran
  * dan Masa Perbaikan. Kepemilikan implisit — `userId` selalu dari sesi.
  */
-export function buatRuteAkunData(sekarang: () => Date) {
+export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstraksiA1Asli = ekstraksiA1Asli) {
 	const route = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	route.get("/", async (c) => {
@@ -86,8 +101,8 @@ export function buatRuteAkunData(sekarang: () => Date) {
 
 		const baris = await c.env.DB.prepare(
 			`SELECT u."name", u."whatsapp", u."email", u."nia",
-			        p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
-			        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing"
+			        p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPwId", p."asalPd", p."asalPdId",
+			        p."tahunLulusDm3", p."tempatLulusDm3", p."tempatLulusDm3Id", p."instruktur", p."capaianHafalan", p."bahasaAsing"
 			 FROM "user" u LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ?`,
 		)
@@ -148,7 +163,7 @@ export function buatRuteAkunData(sekarang: () => Date) {
 		if (tanggalLahir !== null && !tanggalLahirValid(tanggalLahir)) return tolak("tanggal_lahir_tidak_valid", 400);
 
 		const tahunLulusDm3 = body.tahunLulusDm3 ?? null;
-		if (tahunLulusDm3 !== null && !tahunLulusDm3Valid(tahunLulusDm3)) return tolak("tahun_lulus_tidak_valid", 400);
+		if (tahunLulusDm3 !== null && !tahunLulusDm3Valid(tahunLulusDm3, waktu)) return tolak("tahun_lulus_tidak_valid", 400);
 
 		// Kolom teks bebas lain juga berakhir di CSV Ekspor Harian (kecuali
 		// tanggalLahir, sudah dibatasi angka-dan-tanda-hubung oleh POLA_TANGGAL_ISO
@@ -159,6 +174,20 @@ export function buatRuteAkunData(sekarang: () => Date) {
 			if (nilai !== null && !teksSatuBarisValid(nilai)) return tolak(`${kolom}_tidak_valid`, 400);
 		}
 
+		// Tiket 22: kolom Id struktur (combobox) hanya berarti bersamaan dengan
+		// labelnya — memilih dari combobox mengisi keduanya, mengetik manual atau
+		// mengosongkan mengisi Id null. Bukan diverifikasi ulang ke kammi.id di
+		// sini (sudah dipilih dari daftar upstream saat combobox diisi); Id yang
+		// tanpa label yang menyertainya dianggap tidak berlaku (dipaksa null)
+		// alih-alih ditolak keras, supaya klien yang membersihkan label tidak
+		// harus ingat membersihkan Id secara terpisah.
+		const asalPw = teksAtauNull(body.asalPw);
+		const asalPwId = asalPw === null ? null : teksAtauNull(body.asalPwId);
+		const asalPd = teksAtauNull(body.asalPd);
+		const asalPdId = asalPd === null ? null : teksAtauNull(body.asalPdId);
+		const tempatLulusDm3 = teksAtauNull(body.tempatLulusDm3);
+		const tempatLulusDm3Id = tempatLulusDm3 === null ? null : teksAtauNull(body.tempatLulusDm3Id);
+
 		// Satu `DB.batch` (transaksi implisit D1): user + profil menjadi satu simpan
 		// atomik, bukan dua tulis terpisah yang bisa timpang bila salah satunya gagal.
 		try {
@@ -167,16 +196,22 @@ export function buatRuteAkunData(sekarang: () => Date) {
 					.bind(whatsapp, sesi.user.id),
 				c.env.DB.prepare(
 					`INSERT INTO "profil"
-					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
-					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tahunLulusDm3", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 					 ON CONFLICT("userId") DO UPDATE SET
 					   "namaPanggilan" = excluded."namaPanggilan",
 					   "tempatLahir" = excluded."tempatLahir",
 					   "tanggalLahir" = excluded."tanggalLahir",
 					   "asalPw" = excluded."asalPw",
+					   "asalPwId" = excluded."asalPwId",
+					   "asalPwManual" = excluded."asalPwManual",
 					   "asalPd" = excluded."asalPd",
+					   "asalPdId" = excluded."asalPdId",
+					   "asalPdManual" = excluded."asalPdManual",
 					   "tahunLulusDm3" = excluded."tahunLulusDm3",
 					   "tempatLulusDm3" = excluded."tempatLulusDm3",
+					   "tempatLulusDm3Id" = excluded."tempatLulusDm3Id",
+					   "tempatLulusDm3Manual" = excluded."tempatLulusDm3Manual",
 					   "instruktur" = excluded."instruktur",
 					   "capaianHafalan" = excluded."capaianHafalan",
 					   "bahasaAsing" = excluded."bahasaAsing",
@@ -187,10 +222,16 @@ export function buatRuteAkunData(sekarang: () => Date) {
 						teksAtauNull(body.namaPanggilan),
 						teksAtauNull(body.tempatLahir),
 						tanggalLahir,
-						teksAtauNull(body.asalPw),
-						teksAtauNull(body.asalPd),
+						asalPw,
+						asalPwId,
+						asalPw !== null && asalPwId === null ? 1 : 0,
+						asalPd,
+						asalPdId,
+						asalPd !== null && asalPdId === null ? 1 : 0,
 						tahunLulusDm3,
-						teksAtauNull(body.tempatLulusDm3),
+						tempatLulusDm3,
+						tempatLulusDm3Id,
+						tempatLulusDm3 !== null && tempatLulusDm3Id === null ? 1 : 0,
 						body.instruktur === null || body.instruktur === undefined ? null : Number(body.instruktur),
 						teksAtauNull(body.capaianHafalan),
 						teksAtauNull(body.bahasaAsing),
@@ -213,6 +254,68 @@ export function buatRuteAkunData(sekarang: () => Date) {
 			waktu,
 		);
 		return c.json({ status: "tersimpan" });
+	});
+
+	// Isi otomatis dari Formulir A.1 (tiket 23): TIDAK menulis ke "profil" —
+	// hanya membaca berkas kelompok 1 + memanggil model visi dan mengembalikan
+	// field yang terbaca. `PUT /` di atas tetap satu-satunya jalan menulis;
+	// tinjau-dan-konfirmasi terjadi di klien saat pengguna menekan Simpan
+	// setelah melihat hasil isi-otomatis. Gerbang di sini mengikuti pola baca
+	// (`layananAktif`, sama seperti `GET /`), bukan `bolehUbahBacalon` — rute
+	// ini sendiri tidak pernah menulis, dan tombolnya sudah berada di dalam
+	// fieldset yang dinonaktifkan React saat formulir hanya-baca.
+	route.post("/isi-otomatis", async (c) => {
+		if (!rahasiaTersedia(c.env)) return c.json({ error: "layanan_tidak_tersedia" }, 503);
+
+		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
+		if (!sesi || sesi.user.role !== "bacalon") return c.json({ error: "tidak_berwenang" }, 401);
+		if (!layananAktif(tahapPada(sekarang()))) return c.json({ error: "layanan_selesai" }, 403);
+
+		// Berkas terbaru bila kelompok 1 diunggah ulang (paling banyak 5 per
+		// kelompok, lib/unggahBerkas.ts) — sama seperti k1 pada "vKelengkapan",
+		// kehadirannya cukup satu berkas kelompok 1 mana pun.
+		const berkas = await c.env.DB.prepare(
+			`SELECT "r2Key", "mime" FROM "berkas" WHERE "userId" = ? AND "kelompok" = 1 ORDER BY "diunggahPada" DESC LIMIT 1`,
+		)
+			.bind(sesi.user.id)
+			.first<{ r2Key: string; mime: string }>();
+		if (!berkas) return c.json({ error: "berkas_a1_tidak_ada" }, 400);
+
+		const objek = await c.env.BERKAS.get(berkas.r2Key);
+		if (!objek) return c.json({ error: "berkas_tidak_terbaca" }, 502);
+
+		const bytesBase64 = base64Dari(await objek.arrayBuffer());
+		const hasil = await ekstraksiA1(c.env.AI, { bytesBase64, mime: berkas.mime as MimeBerkasA1 }, sekarang());
+		if (!hasil.sukses) return c.json({ error: "ekstraksi_gagal" }, 502);
+
+		// Pencocokan struktur (tiket 21): Asal PD hanya dicoba bila Asal PW
+		// cocok — endpoint struktur mewajibkan `ancestor` untuk jenis=pd
+		// (routes/struktur.ts), jadi tanpa PW yang cocok tidak ada ancestor untuk
+		// membatasi daftar PD. Tanpa kecocokan, kolom terkait dibiarkan kosong
+		// (null) — TIDAK PERNAH diisi paksa dengan teks mentah hasil ekstraksi.
+		const daftarPw = await ambilStruktur("pw", undefined, c.env);
+		const opsiPw = daftarPw.sukses ? daftarPw.data : [];
+		const asalPwCocok = hasil.data.asalPw ? cocokkanStruktur(hasil.data.asalPw, opsiPw) : null;
+		const tempatLulusDm3Cocok = hasil.data.tempatLulusDm3 ? cocokkanStruktur(hasil.data.tempatLulusDm3, opsiPw) : null;
+
+		let asalPdCocok = null;
+		if (hasil.data.asalPd && asalPwCocok) {
+			const daftarPd = await ambilStruktur("pd", asalPwCocok.id, c.env);
+			if (daftarPd.sukses) asalPdCocok = cocokkanStruktur(hasil.data.asalPd, daftarPd.data);
+		}
+
+		return c.json({
+			namaPanggilan: hasil.data.namaPanggilan,
+			tempatLahir: hasil.data.tempatLahir,
+			tanggalLahir: hasil.data.tanggalLahir,
+			asalPw: asalPwCocok ? { id: asalPwCocok.id, label: asalPwCocok.nama } : null,
+			asalPd: asalPdCocok ? { id: asalPdCocok.id, label: asalPdCocok.nama } : null,
+			tahunLulusDm3: hasil.data.tahunLulusDm3,
+			tempatLulusDm3: tempatLulusDm3Cocok ? { id: tempatLulusDm3Cocok.id, label: tempatLulusDm3Cocok.nama } : null,
+			instruktur: hasil.data.instruktur,
+			capaianHafalan: hasil.data.capaianHafalan,
+			bahasaAsing: hasil.data.bahasaAsing,
+		});
 	});
 
 	return route;

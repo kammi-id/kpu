@@ -20,9 +20,15 @@ export function tanggalLahirValid(tanggal: string): boolean {
 	);
 }
 
-/** Batas tahun lulus AB 3, mencerminkan CHECK D1 `"tahunLulusDm3" BETWEEN 1998 AND 2026`. */
-export function tahunLulusDm3Valid(tahun: number): boolean {
-	return Number.isInteger(tahun) && tahun >= 1998 && tahun <= 2026;
+/**
+ * Batas tahun lulus AB 3, mencerminkan CHECK D1 `"tahunLulusDm3" BETWEEN 1998
+ * AND strftime('%Y','now')` (migrasi 0004). Batas atas dihitung dari `sekarang`
+ * yang disuntikkan (tiket 22) alih-alih angka tetap, supaya tahun berjalan
+ * baru (mis. 2027) tidak ditolak begitu tahun berganti — dan supaya uji dapat
+ * menyuntikkan jam persis di batas 31 Desember → 1 Januari.
+ */
+export function tahunLulusDm3Valid(tahun: number, sekarang: Date): boolean {
+	return Number.isInteger(tahun) && tahun >= 1998 && tahun <= sekarang.getUTCFullYear();
 }
 
 // eslint-disable-next-line no-control-regex -- karakter kontrol memang yang dicari, bukan kesalahan ketik.

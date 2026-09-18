@@ -42,6 +42,11 @@
 			"bucket_name": "kpu-kammi-2026-berkas"
 		}
 	],
+	// Isi otomatis Formulir A.1 (tiket 23): model visi gratis di Workers AI,
+	// tidak butuh rahasia terpisah — akses lewat token akun Cloudflare Worker itu sendiri.
+	"ai": {
+		"binding": "AI"
+	},
 	"vars": {
 		"BETTER_AUTH_URL": "https://kpu.kammi.id",
 		"TURNSTILE_SITE_KEY": "0x4AAAAAAE2vx2CfceqJZAVs"
@@ -81,6 +86,9 @@
 					"bucket_name": "kpu-kammi-2026-berkas-preview"
 				}
 			],
+			"ai": {
+				"binding": "AI"
+			},
 			"vars": {
 				"BETTER_AUTH_URL": "https://kpu-preview.ppkammi2045.workers.dev",
 				// Turnstile "always passes" test keys (Cloudflare-documented), so PR previews

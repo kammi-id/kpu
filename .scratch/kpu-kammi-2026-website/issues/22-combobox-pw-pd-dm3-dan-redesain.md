@@ -12,14 +12,17 @@ Rujukan: [spec](../spec.md) bagian Data pribadi dan Skema D1.
 
 **Blocked by:** 21. Disarankan berjalan setelah/berdampingan dengan 20 (menyentuh berkas yang sama, `AkunData.tsx`).
 
-**Status:** ready-for-agent
+**Status:** selesai
 
-- [ ] Migrasi menambah kolom referensi (mis. `asalPwId`, `asalPdId`, `tempatLulusDm3Id` — nullable) dan penanda manual per kolom pada `profil`; kolom teks lama tetap menyimpan label tampilan.
-- [ ] Asal PW dan Tempat Lulus DM3 memakai combobox `jenis=pw`; Asal PD memakai `jenis=pd`, dinonaktifkan sampai Asal PW terisi, dan terbatas pada `ancestor` PW terpilih.
-- [ ] Memilih dari combobox menyimpan `id` + label; mengetik bebas (tanpa match) menyimpan teks biasa dan menandai kolom sebagai manual, ditampilkan dengan lencana.
-- [ ] Tahun Lulus DM3 divalidasi 1998–tahun berjalan, di klien dan server, memakai tahun yang dihitung saat itu juga (bukan angka tetap).
-- [ ] Migrasi mengubah `CHECK` D1 `tahunLulusDm3` memakai `strftime('%Y','now')`.
-- [ ] Redesain formulir memakai komponen shadcn yang sudah ada di proyek (Input, dsb.) tanpa CSS custom di luar Tailwind.
-- [ ] Butir server (validasi, upsert kolom baru) diuji lewat seam Worker dengan jam yang disuntikkan (mencakup kasus 31 Desember → 1 Januari untuk batas tahun).
+- [x] Migrasi menambah kolom referensi (mis. `asalPwId`, `asalPdId`, `tempatLulusDm3Id` — nullable) dan penanda manual per kolom pada `profil`; kolom teks lama tetap menyimpan label tampilan.
+- [x] Asal PW dan Tempat Lulus DM3 memakai combobox `jenis=pw`; Asal PD memakai `jenis=pd`, dinonaktifkan sampai Asal PW terisi, dan terbatas pada `ancestor` PW terpilih.
+- [x] Memilih dari combobox menyimpan `id` + label; mengetik bebas (tanpa match) menyimpan teks biasa dan menandai kolom sebagai manual, ditampilkan dengan lencana (baik di formulir Bacalon maupun detail Admin).
+- [x] Tahun Lulus DM3 divalidasi 1998–tahun berjalan, di klien dan server, memakai tahun yang dihitung saat itu juga (bukan angka tetap).
+- [x] Migrasi mengubah `CHECK` D1 `tahunLulusDm3` (batas atas non-deterministik ditegakkan di aplikasi lewat jam tersuntik karena D1 menolak `strftime` di CHECK; D1 menegakkan batas bawah `>= 1998`).
+- [x] Redesain formulir memakai komponen shadcn yang sudah ada di proyek (Input, Card, Badge, dsb.) tanpa CSS custom di luar Tailwind.
+- [x] Butir server (validasi, upsert kolom baru) diuji lewat seam Worker dengan jam yang disuntikkan (mencakup kasus 31 Desember → 1 Januari untuk batas tahun).
 
 ## Comments
+
+- Migrasi 0004 menerapkan skema baru untuk referensi struktur dan tahun berjalan. Batas atas tahun berjalan ditegakkan di runtime server (`tahunLulusDm3Valid`) dan klien (`TAHUN_SEKARANG`), sementara D1 CHECK membatasi `>= 1998` karena keterbatasan fungsi non-deterministik di CHECK SQLite/D1.
+- Penanda manual ditampilkan dengan lencana baik di formulir Bacalon (`AkunData.tsx`) maupun di detail Admin (`AdminDetail.tsx`).

@@ -306,6 +306,22 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		expect(body.nia).toMatch(/^\d{11}$/);
 	});
 
+	it("menampilkan penanda manual struktur pada detail Bakal Calon (tiket 22)", async () => {
+		const admin = await sesiAdmin();
+		const userId = await buatBacalonLangsung("Citra Lestari", "citra-manual@example.test", MASA_PENDAFTARAN);
+		await env.DB.prepare(
+			`INSERT INTO "profil" ("userId", "asalPw", "asalPwManual", "asalPd", "asalPdManual", "tempatLulusDm3", "tempatLulusDm3Manual", "diubahPada")
+			 VALUES (?, 'PW Manual', 1, 'PD Manual', 1, 'PW Lulus Manual', 1, ?)`,
+		).bind(userId, MASA_PENDAFTARAN.toISOString()).run();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${userId}`, { headers: { cookie: admin } });
+		expect(response.status).toBe(200);
+		const body = await response.json<Record<string, unknown>>();
+		expect(body.asalPwManual).toBe(true);
+		expect(body.asalPdManual).toBe(true);
+		expect(body.tempatLulusDm3Manual).toBe(true);
+	});
+
 	it("tidak membocorkan nama, kontak, atau berkas Bakal Calon melalui rute API publik", async () => {
 		await sesiBacalon("nabila@example.test", "Nabila Putri");
 		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();

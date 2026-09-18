@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { catatAudit, pernyataanAudit } from "./lib/audit";
+import { ekstraksiA1 as ekstraksiA1Asli } from "./lib/ekstraksiA1";
 import { buatEksporHarian } from "./lib/ekspor";
 import { payloadKataSandi } from "./lib/konfirmasiAdmin";
 import { jalankanPenghapusanAkhir } from "./lib/penghapusanAkhir";
@@ -175,14 +176,14 @@ async function responsDenganPenandaTurnstile(response: Response, wajib: boolean)
  * bersumber dari `sekarang`. Ekspor default memakai jam nyata; uji menyuntikkan
  * jam tetap lewat fungsi ini alih-alih membaca `Date.now()` langsung.
  */
-export function buatWorker(sekarang: () => Date = () => new Date()) {
+export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1: typeof ekstraksiA1Asli = ekstraksiA1Asli) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
 	app.route("/api/peraturan", buatRutePeraturanPublik(sekarang));
 	app.route("/api/unduhan", buatRuteUnduhan(sekarang));
 	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik(sekarang));
-	app.route("/api/akun/data", buatRuteAkunData(sekarang));
+	app.route("/api/akun/data", buatRuteAkunData(sekarang, ekstraksiA1));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));
 	app.route("/api/akun/berkas", buatRuteAkunBerkas(sekarang));
 	app.route("/api/nia", buatRuteNia(sekarang));
