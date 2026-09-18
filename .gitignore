@@ -204,5 +204,9 @@ src/react-app/assets/generated/
 .dev.vars*
 !.dev.vars.example
 
+# Generated at test time by vitest.config.ts (wrangler.json without the `ai`
+# binding, which vitest-plugin can never simulate locally)
+.wrangler.vitest.json
+
 # Local PKPU document-splitting artifacts
 .scratch/pkpu-split/

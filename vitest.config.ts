@@ -1,6 +1,25 @@
+import fs from "node:fs";
 import path from "node:path";
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-plugin";
+import JSON5 from "json5";
 import { defineConfig } from "vitest/config";
+
+// The `ai` binding in wrangler.json (tiket 23) can never run against a local
+// simulator — the vitest-plugin unconditionally treats it as a remote
+// binding and tries to open a real Cloudflare proxy session for it before
+// *any* test file starts, which fails outside an interactive session unless
+// CLOUDFLARE_API_TOKEN is set (e.g. in CI). ekstraksiA1 is always
+// dependency-injected as a fake in tests (see ekstraksiA1.test.ts) and never
+// touches env.AI, so the binding can simply be omitted from the config the
+// test pool loads. Written next to wrangler.json (not os.tmpdir()) so its
+// relative paths (`main`, `assets.directory`) still resolve; gitignored.
+function konfigWranglerTanpaAi(): string {
+	const konfigurasi = JSON5.parse(fs.readFileSync(path.join(__dirname, "wrangler.json"), "utf-8"));
+	delete konfigurasi.ai;
+	const berkasSementara = path.join(__dirname, ".wrangler.vitest.json");
+	fs.writeFileSync(berkasSementara, JSON.stringify(konfigurasi));
+	return berkasSementara;
+}
 
 export default defineConfig({
 	resolve: {
@@ -13,7 +32,7 @@ export default defineConfig({
 			const migrationsPath = path.join(__dirname, "migrations");
 			const migrations = await readD1Migrations(migrationsPath);
 			return {
-				wrangler: { configPath: "./wrangler.json" },
+				wrangler: { configPath: konfigWranglerTanpaAi() },
 				miniflare: {
 					// Pinned so the suite is independent of a developer's local `.dev.vars`
 					// (e.g. BETTER_AUTH_URL overridden for `npm run dev`), which Miniflare
