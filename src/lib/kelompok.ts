@@ -16,25 +16,28 @@ export interface KelompokBerkas {
 	hanyaPdf: boolean;
 	/** Catatan tambahan, mis. ambang hadir kelompok 7. */
 	catatan?: string;
+	/** `judul` di Berkas Publik kategori formulir (/unduhan) yang jadi templat kelompok ini — kosong bila tidak ada. */
+	templat: readonly string[];
 }
 
 export const KELOMPOK_BERKAS: readonly KelompokBerkas[] = [
-	{ nomor: 1, label: "Formulir A.1 yang telah ditandatangani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 2, label: "KTA atau Sertifikat AB 3", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 3, label: "SK kepengurusan PD dan/atau PW", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 4, label: "Sertifikat atau SK Instruktur KAMMI", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 5, label: "Surat keterangan sehat jasmani dan rohani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 6, label: "Karya tulis ilmiah asli", ketentuanFormat: "PDF saja, maksimum 20 MB.", hanyaPdf: true },
+	{ nomor: 1, label: "Formulir A.1 yang telah ditandatangani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: ["Formulir A.1"] },
+	{ nomor: 2, label: "KTA atau Sertifikat AB 3", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: [] },
+	{ nomor: 3, label: "SK kepengurusan PD dan/atau PW", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: [] },
+	{ nomor: 4, label: "Sertifikat atau SK Instruktur KAMMI", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: [] },
+	{ nomor: 5, label: "Surat keterangan sehat jasmani dan rohani", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: [] },
+	{ nomor: 6, label: "Karya tulis ilmiah asli", ketentuanFormat: "PDF saja, maksimum 20 MB.", hanyaPdf: true, templat: [] },
 	{
 		nomor: 7,
 		label: "Rekomendasi A.3 dan/atau A.4",
 		ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB. Setiap unggahan memilih asal: A.3 dari PW atau A.4 dari PD.",
 		hanyaPdf: false,
 		catatan: "Hadir dengan 2 rekomendasi A.3 dari PW, atau 3 rekomendasi A.4 dari PD. Campuran keduanya tidak dihitung.",
+		templat: ["Formulir A.3", "Formulir A.4"],
 	},
-	{ nomor: 8, label: "Komitmen hafalan A.5", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 9, label: "Pernyataan tidak sedang dijatuhi sanksi A.6", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
-	{ nomor: 10, label: "Bukti transfer biaya pendaftaran", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false },
+	{ nomor: 8, label: "Komitmen hafalan A.5", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: ["Formulir A.5"] },
+	{ nomor: 9, label: "Pernyataan tidak sedang dijatuhi sanksi A.6", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: ["Formulir A.6"] },
+	{ nomor: 10, label: "Bukti transfer biaya pendaftaran", ketentuanFormat: "PDF, JPEG, atau PNG, maksimum 20 MB.", hanyaPdf: false, templat: [] },
 ] as const;
 
 export function kelompokValid(nilai: number): nilai is NomorKelompok {
