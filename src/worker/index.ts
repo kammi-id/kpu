@@ -22,6 +22,7 @@ import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
 import { pendaftaranDitutupManual } from "./lib/pengaturan";
 import { teksSatuBarisValid } from "./lib/profil";
 import { ambilKelengkapan } from "./lib/kelengkapan";
+import { ambilCangkang, jatuhKeCangkang } from "./lib/cangkang";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
@@ -178,6 +179,19 @@ async function responsDenganPenandaTurnstile(response: Response, wajib: boolean)
  */
 export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1: typeof ekstraksiA1Asli = ekstraksiA1Asli) {
 	const app = new Hono<{ Bindings: EnvDenganRahasia }>();
+
+	// Default aman untuk setiap jawaban yang dibuat Worker (JSON API, unduhan berkas
+	// pribadi, 404): jangan disimpan cache mana pun. `_headers` tidak berlaku untuk
+	// jawaban Worker, jadi tanpa ini yang tersisa hanya heuristik peramban. Rute yang
+	// memang boleh di-cache (cangkang SPA, halaman meta, struktur, unduhan publik)
+	// menetapkan `cache-control` sendiri dan tidak ditimpa.
+	app.use("*", async (c, next) => {
+		await next();
+		if (c.res.headers.has("cache-control")) return;
+		const headers = new Headers(c.res.headers);
+		headers.set("cache-control", "no-store");
+		c.res = new Response(c.res.body, { status: c.res.status, statusText: c.res.statusText, headers });
+	});
 
 	app.route("/api/tahap", buatRuteTahap(sekarang));
 	app.route("/api/peraturan", buatRutePeraturanPublik(sekarang));
@@ -426,7 +440,7 @@ export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1:
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
 		const sudahAda = await c.env.DB.prepare('SELECT 1 FROM "user" WHERE "role" = ?').bind("admin").first();
 		if (sudahAda || !c.env.ONBOARD_TOKEN || !layananAktif(tahapPada(sekarang()))) return c.notFound();
-		return c.env.ASSETS.fetch(c.req.raw);
+		return ambilCangkang(c.env.ASSETS, c.req.raw);
 	});
 
 	app.get("/api/admin/audit", async (c) => {
@@ -450,6 +464,15 @@ export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1:
 
 	// Rute statis Admin harus didaftarkan dahulu; detail tiket 14 memakai /:id.
 	app.route("/api/admin", buatRuteAdminBacalon(sekarang));
+
+	// Rute SPA (mis. /masuk, /akun/berkas) mendarat di sini karena not_found_handling
+	// "none"; berkas statis yang hilang (/assets/*.js, /logo.png) tetap 404 sungguhan.
+	// Sengaja rute biasa, bukan app.notFound: gerbang seperti GET /onboard memakai
+	// c.notFound() untuk menyembunyikan halamannya, dan itu harus tetap 404 JSON.
+	app.get("*", (c) => {
+		if (jatuhKeCangkang(c.req.method, new URL(c.req.url).pathname)) return ambilCangkang(c.env.ASSETS, c.req.raw);
+		return c.notFound();
+	});
 
 	app.notFound((c) => c.json({ error: "tidak_ditemukan" }, 404));
 

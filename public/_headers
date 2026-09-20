@@ -1,2 +1,11 @@
+# Keluaran Vite: nama berkas memuat hash isi, jadi isinya tak pernah berubah.
+# Aman immutable karena path /assets/* yang hilang dijawab Worker dengan 404
+# (assets.not_found_handling "none" di wrangler.json), bukan cangkang SPA —
+# jangan kembalikan ke "single-page-application" tanpa memindahkan aturan ini.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Gambar OG tidak ber-hash (nama tetap, dibuat ulang tiap build): cukup segar
+# sehari, boleh basi seminggu selagi diperbarui di latar belakang.
+/og/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

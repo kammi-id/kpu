@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { ambilCangkang } from "../lib/cangkang";
 
 type KontenMeta = { title: string; description: string; ogImage: string };
 
@@ -47,7 +48,14 @@ class GantiAtribut implements HTMLRewriterElementContentHandlers {
 }
 
 async function halamanDenganMeta(request: Request, assets: Fetcher, konten: KontenMeta) {
-	const asli = await assets.fetch(request);
+	// Badan hasil rewrite berbeda dari index.html per halaman, jadi validator
+	// index.html (ETag / If-None-Match) tidak boleh ikut: kalau tidak, halaman yang
+	// pernah di-cache peramban dijawab 304 selamanya, walau meta di Worker berubah
+	// sementara index.html tetap sama. Halaman kecil, jadi selalu 200 penuh.
+	const permintaan = new Headers(request.headers);
+	permintaan.delete("if-none-match");
+	permintaan.delete("if-modified-since");
+	const asli = await ambilCangkang(assets, new Request(request, { headers: permintaan }));
 	if (!asli.ok) return asli;
 
 	const url = new URL(request.url).toString();
@@ -65,6 +73,7 @@ async function halamanDenganMeta(request: Request, assets: Fetcher, konten: Kont
 
 	const headers = new Headers(hasil.headers);
 	headers.set("cache-control", "public, max-age=0, must-revalidate");
+	headers.delete("etag");
 	return new Response(hasil.body, { status: hasil.status, headers });
 }
 
