@@ -25,6 +25,8 @@ export function buatRuteStruktur() {
 
 		const hasil = await ambilStruktur(jenis, ancestor, c.env);
 		if (!hasil.sukses) return c.json({ error: "struktur_gagal_upstream" }, 502);
+		// Daftar organisasi jarang berubah; hanya jawaban sukses yang boleh di-cache peramban.
+		c.header("cache-control", "public, max-age=3600");
 		return c.json(hasil.data);
 	});
 

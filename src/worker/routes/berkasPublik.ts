@@ -30,16 +30,26 @@ export function buatRuteUnduhBerkasPublik(sekarang: () => Date) {
 			.first<BarisUnduh>();
 		if (!baris) return c.json({ error: "tidak_ditemukan" }, 404);
 
-		const objek = await c.env.BERKAS.get(baris.r2Key);
+		// Hanya validator GET; If-Match/If-Unmodified-Since yang gagal berarti 412, bukan 304.
+		const kondisi = new Headers();
+		for (const nama of ["if-none-match", "if-modified-since"]) {
+			const nilai = c.req.header(nama);
+			if (nilai) kondisi.set(nama, nilai);
+		}
+		const objek = await c.env.BERKAS.get(baris.r2Key, { onlyIf: kondisi });
 		if (!objek) return c.json({ error: "tidak_ditemukan" }, 404);
 
-		return new Response(objek.body, {
-			headers: {
-				"content-type": baris.mime,
-				"content-disposition": headerUnduh(baris.namaAsli),
-				"x-content-type-options": "nosniff",
-			},
+		// Selalu revalidasi (`no-cache`), bukan max-age: gerbang tahap di atas harus tetap
+		// dijalankan tiap unduhan, tetapi ETag R2 membuat unduhan ulang cukup 304 tanpa badan.
+		const headers = new Headers({
+			"content-type": baris.mime,
+			"content-disposition": headerUnduh(baris.namaAsli),
+			"x-content-type-options": "nosniff",
+			"cache-control": "no-cache",
+			etag: objek.httpEtag,
 		});
+		if (!("body" in objek)) return new Response(null, { status: 304, headers });
+		return new Response(objek.body, { headers });
 	});
 
 	return route;
