@@ -22,10 +22,13 @@ export function Tentang() {
 					</p>
 				</div>
 				<div className="mx-auto mt-10 max-w-[60rem] px-6 sm:mt-14 sm:px-10 lg:mt-16">
+					{/* `w-full` di dalam wadah max-w-[60rem] dengan padding px-6/px-10. */}
 					<ResponsiveImage
 						gambar={kpu}
 						alt="Ilustrasi lima anggota Komisi Penjaringan Umum Muktamar XIV KAMMI"
 						loading="eager"
+						sizes="(min-width: 960px) 912px, calc(100vw - 48px)"
+						fetchPriority="high"
 						className="mx-auto h-auto w-full"
 					/>
 				</div>
@@ -42,9 +45,12 @@ export function Tentang() {
 							className="flex flex-col overflow-hidden rounded-2xl bg-muted px-6 pt-6 sm:px-8 sm:pt-7"
 						>
 							<span className="text-xl leading-snug font-bold text-navy sm:text-2xl">{orang.nama}</span>
+							{/* Tinggi tetap h-64 / sm:h-72 dengan w-auto — lebar tampilnya
+							    sekitar 220px, jadi 480px sudah cukup bahkan di layar 2x. */}
 							<ResponsiveImage
 								gambar={orang.foto}
 								alt=""
+								sizes="(min-width: 640px) 248px, 220px"
 								className="mt-auto h-64 w-auto self-center object-contain object-bottom filter-[drop-shadow(2px_0_0_white)_drop-shadow(-2px_0_0_white)_drop-shadow(0_2px_0_white)_drop-shadow(0_-2px_0_white)_drop-shadow(1.5px_1.5px_0_white)_drop-shadow(-1.5px_-1.5px_0_white)_drop-shadow(1.5px_-1.5px_0_white)_drop-shadow(-1.5px_1.5px_0_white)_drop-shadow(0_10px_12px_rgb(70_0_8/0.22))] sm:h-72"
 							/>
 						</li>

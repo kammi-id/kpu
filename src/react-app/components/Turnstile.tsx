@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ambilKonfigurasiPublik } from "~/react-app/lib/konfigurasiPublik";
 
 type TurnstileApi = { render: (container: HTMLElement, options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void }) => void };
 
@@ -23,8 +24,7 @@ export function Turnstile({ onToken }: { onToken: (token: string | null) => void
 			});
 		};
 
-		void fetch("/api/konfigurasi-publik")
-			.then((response) => response.json() as Promise<{ turnstileSiteKey?: string }>)
+		void ambilKonfigurasiPublik()
 			.then(({ turnstileSiteKey }) => {
 				if (!turnstileSiteKey) return setPesan("Verifikasi Turnstile belum tersedia.");
 				const ada = document.querySelector<HTMLScriptElement>('script[src^="https://challenges.cloudflare.com/turnstile/v0/api.js"]');

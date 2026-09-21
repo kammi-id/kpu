@@ -3,7 +3,7 @@ import { FileText, CalendarDays, Download, Lock } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
-import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
+import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO, SIZES_ILUSTRASI_HERO } from "~/react-app/components/PublicPageHero";
 import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
@@ -30,6 +30,8 @@ export function Beranda() {
 						gambar={ketum}
 						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
 						loading="eager"
+						sizes={SIZES_ILUSTRASI_HERO}
+						fetchPriority="high"
 						className={`relative z-0 -mb-8 sm:-mb-10 lg:-mb-12 ${KELAS_ILUSTRASI_HERO}`}
 					/>
 				</div>

@@ -36,6 +36,14 @@ export const KELAS_JUDUL_HERO =
 // object-contain melenceng dari kotak yang seharusnya.
 export const KELAS_ILUSTRASI_HERO =
 	"h-[46vh] w-auto max-w-[90vw] shrink-0 justify-self-center self-end object-contain lg:h-[calc(75vh-4rem)] lg:max-w-none";
+/**
+ * Pasangan `sizes` untuk KELAS_ILUSTRASI_HERO — wajib diperbarui bersamanya.
+ * Tingginya yang dikunci (46vh, lalu 75vh-4rem), jadi lebar tampilnya adalah
+ * kelipatan `vh` sebesar rasio gambar (~0.8 untuk ilustrasi potret), dibatasi
+ * `max-w-[90vw]` di ponsel. Dibulatkan ke atas: `sizes` yang kekecilan membuat
+ * browser memilih varian buram, yang kebesaran cuma memboroskan sedikit byte.
+ */
+export const SIZES_ILUSTRASI_HERO = "(min-width: 1024px) min(50vw, 60vh), min(90vw, 40vh)";
 
 /**
  * Bingkai hero merah, sama seperti Beranda (DESIGN.md "Beranda publik") tapi
@@ -56,6 +64,8 @@ export function PublicPageHero({ judul, ilustrasi, children }: Props) {
 							alt={ilustrasi.alt}
 							className={KELAS_ILUSTRASI_HERO}
 							loading="eager"
+							sizes={SIZES_ILUSTRASI_HERO}
+							fetchPriority="high"
 						/>
 					) : null}
 				</div>

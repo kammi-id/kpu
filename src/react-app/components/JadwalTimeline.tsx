@@ -88,7 +88,9 @@ export function JadwalTimeline({ jadwal }: { jadwal: JadwalItemApi[] }) {
 										{LABEL_STATUS[item.status]}
 									</span>
 								</div>
-								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>
+								{/* `text-white` penuh, bukan `text-white/90`: di atas --merah rasio
+								    kontrasnya 4.29:1, di bawah ambang AA 4.5:1 untuk teks 14px. */}
+								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white" : "text-muted-foreground"}`}>
 									{item.rentangWib} WIB
 								</p>
 							</div>

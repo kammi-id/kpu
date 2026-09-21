@@ -2,6 +2,7 @@ import { Download, Home, ScrollText, Settings, UploadCloud } from "lucide-react"
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { DashboardShell, type DashboardNavItem } from "~/react-app/components/DashboardShell";
+import { ambilKonfigurasiPublik } from "~/react-app/lib/konfigurasiPublik";
 
 const NAV_ADMIN: readonly DashboardNavItem[] = [
 	{ ke: "/admin", label: "Beranda", ikon: Home, end: true },
@@ -20,9 +21,8 @@ export function AdminLayout() {
 		async function tanpaSesi() {
 			// Belum ada sesi Admin: bila Admin bersama belum pernah dibuat, langsung
 			// ke onboarding alih-alih menyuruh pengguna login ke akun yang tidak ada.
-			const onboardTersedia = await fetch("/api/konfigurasi-publik")
-				.then((response) => response.json())
-				.then((body: { onboardTersedia?: boolean }) => Boolean(body.onboardTersedia))
+			const onboardTersedia = await ambilKonfigurasiPublik()
+				.then((body) => Boolean(body.onboardTersedia))
 				.catch(() => false);
 			if (!dibatalkan) navigate(onboardTersedia ? "/onboard" : "/masuk", { replace: true });
 		}

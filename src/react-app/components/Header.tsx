@@ -20,8 +20,19 @@ export function Header() {
 	return (
 		<header className="bg-merah text-white">
 			<div className="mx-auto flex max-w-[76rem] flex-col px-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-				<NavLink to="/" className="flex items-center gap-3 py-3" aria-label="Beranda KPU Muktamar XIV KAMMI">
-					<img src={muktamarLockupPutih} alt="Muktamar KAMMI XIV" className="h-16 w-auto" />
+				<NavLink to="/" className="flex items-center gap-3 py-3">
+					{/* `alt=""` dan tanpa `aria-label`: teks di sebelahnya sudah menjadi nama
+					    tautan ini. Sebelumnya `aria-label` menimpa teks yang terlihat sehingga
+					    nama aksesibelnya tidak memuat teks itu (label-content-name-mismatch),
+					    yang mematahkan perintah suara "klik Komisi Penjaringan Umum".
+					    `width`/`height` mencegah pergeseran tata letak sebelum gambar termuat. */}
+					<img
+						src={muktamarLockupPutih}
+						alt=""
+						width={230}
+						height={240}
+						className="h-16 w-auto"
+					/>
 					<span className="text-xs leading-tight font-semibold sm:text-sm">
 						Komisi Penjaringan Umum
 						<br />

@@ -22,7 +22,11 @@ const KELUARAN = path.join(ASET, "generated");
 // (mis. bendum.png 1024px vs target 1600px) yang cuma bikin buram, bukan
 // tambah detail asli.
 const KATEGORI = {
-	ilustrasi: { dir: "illustrations", lebar: [960, 1600] },
+	// 480 ada di tangga ilustrasi karena hero dikunci lewat tinggi (`h-[46vh]`,
+	// lihat KELAS_ILUSTRASI_HERO): di ponsel lebar tampilnya hanya ~300px CSS,
+	// jadi 960 pun sudah kelewat besar. Tanpa anak tangga ini Lighthouse
+	// mencatat ~40KB terbuang hanya untuk ilustrasi Beranda.
+	ilustrasi: { dir: "illustrations", lebar: [480, 960, 1600] },
 	anggota: { dir: "members", lebar: [480, 960] },
 };
 
@@ -60,44 +64,58 @@ async function main() {
 		const sumber = path.join(ASET, dir, `${nama}.png`);
 		const { width: lebarAsli, height: tinggiAsli } = await sharp(sumber).metadata();
 
-		// slotVar[ekstensi][0 | 1] = nama variabel import untuk 1x / 2x.
-		const slotVar = {};
-		for (const [slot, w] of lebar.entries()) {
+		// `withoutEnlargement` memangkas target yang lebih lebar dari sumbernya,
+		// jadi lebar *nyata* berkaslah yang dicatat — itu yang dipakai sebagai
+		// deskriptor `w` di srcSet, dan deskriptor yang bohong membuat browser
+		// salah pilih varian. Target yang jatuh ke lebar sama (mis. sumber 1024
+		// untuk target 960 dan 1600) hanya disimpan sekali.
+		const lebarNyata = [...new Set(lebar.map((w) => Math.min(w, lebarAsli)))].sort((a, b) => a - b);
+
+		// varian[ekstensi] = daftar { namaVar, lebar } urut dari yang terkecil.
+		const varian = {};
+		for (const w of lebarNyata) {
 			for (const { ekstensi, opsi } of FORMAT) {
 				const namaBerkas = `${nama}-${w}.${ekstensi}`;
 				await sharp(sumber)
 					.resize({ width: w, withoutEnlargement: true })
 					.toFormat(ekstensi, opsi)
 					.toFile(path.join(KELUARAN, namaBerkas));
-				const namaVar = `${nama}_${ekstensi}_${slot === 0 ? "1x" : "2x"}`;
+				const namaVar = `${nama}_${ekstensi}_${w}`;
 				baris.push(`import ${namaVar} from "./${namaBerkas}";`);
-				(slotVar[ekstensi] ??= [])[slot] = namaVar;
+				(varian[ekstensi] ??= []).push({ namaVar, lebar: w });
 			}
 		}
+
+		const daftar = (ekstensi) =>
+			`[${varian[ekstensi].map(({ namaVar, lebar: w }) => `{ url: ${namaVar}, lebar: ${w} }`).join(", ")}]`;
 
 		definisi.push(
 			`export const ${nama}: GambarResponsif = {`,
 			`\twidth: ${lebar[0]},`,
 			`\tintrinsicWidth: ${lebarAsli},`,
 			`\tintrinsicHeight: ${tinggiAsli},`,
-			`\tavif: { x1: ${slotVar.avif[0]}, x2: ${slotVar.avif[1]} },`,
-			`\twebp: { x1: ${slotVar.webp[0]}, x2: ${slotVar.webp[1]} },`,
-			`\tpng: { x1: ${slotVar.png[0]}, x2: ${slotVar.png[1]} },`,
+			`\tavif: ${daftar("avif")},`,
+			`\twebp: ${daftar("webp")},`,
+			`\tpng: ${daftar("png")},`,
 			`};`,
 			"",
 		);
-		console.log(`generated/${nama}-{${lebar.join(",")}}.{avif,webp,png}`);
+		console.log(`generated/${nama}-{${lebarNyata.join(",")}}.{avif,webp,png}`);
 	}
 
 	baris.push(
 		"",
+		"export type VarianGambar = { url: string; lebar: number };",
+		"",
 		"export type GambarResponsif = {",
+		"\t/** Lebar tata letak acuan, dipakai sebagai atribut `width` <img>. */",
 		"\twidth: number;",
 		"\tintrinsicWidth: number;",
 		"\tintrinsicHeight: number;",
-		"\tavif: { x1: string; x2: string };",
-		"\twebp: { x1: string; x2: string };",
-		"\tpng: { x1: string; x2: string };",
+		"\t/** Urut dari lebar terkecil; `lebar` adalah lebar nyata berkas (deskriptor `w`). */",
+		"\tavif: VarianGambar[];",
+		"\twebp: VarianGambar[];",
+		"\tpng: VarianGambar[];",
 		"};",
 		"",
 		...definisi,

@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Turnstile } from "~/react-app/components/Turnstile";
+import { ambilKonfigurasiPublik } from "~/react-app/lib/konfigurasiPublik";
 
 export function Masuk() {
 	const navigate = useNavigate();
@@ -16,9 +17,8 @@ export function Masuk() {
 		let dibatalkan = false;
 		// Belum ada Admin bersama: tidak ada gunanya menampilkan formulir login,
 		// arahkan langsung ke onboarding.
-		void fetch("/api/konfigurasi-publik")
-			.then((response) => response.json())
-			.then((body: { onboardTersedia?: boolean }) => {
+		void ambilKonfigurasiPublik()
+			.then((body) => {
 				if (!dibatalkan && body.onboardTersedia) navigate("/onboard", { replace: true });
 			})
 			.catch(() => undefined);
