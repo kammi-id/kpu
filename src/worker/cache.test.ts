@@ -78,10 +78,14 @@ describe("cangkang SPA vs berkas hilang (assets.not_found_handling = none)", () 
 	});
 
 	it("cangkang mendukung request bersyarat: ETag index.html asli → 304", async () => {
-		const pertama = await kirim("/masuk");
+		// Sengaja rute SPA yang cangkangnya tidak ditulis ulang. /masuk, /daftar, dan
+		// /onboard kini disisipi modulepreload (lib/pramuatRute.ts), jadi badannya
+		// berbeda dari index.html dan ETag-nya dibuang — aturan yang sama dengan
+		// metaHalaman.ts; lihat pramuatRute.test.ts.
+		const pertama = await kirim("/bacalon/data");
 		const etag = pertama.headers.get("etag");
 		expect(etag).toBeTruthy();
-		const kedua = await kirim("/masuk", { headers: { "if-none-match": etag as string } });
+		const kedua = await kirim("/bacalon/data", { headers: { "if-none-match": etag as string } });
 		expect(kedua.status).toBe(304);
 	});
 

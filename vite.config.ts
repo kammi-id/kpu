@@ -50,6 +50,67 @@ function pramuatFont(): Plugin {
 }
 
 /**
+ * Rute yang dipecah (React.lazy di App.tsx) dan modul sumbernya. Tanpa pramuat,
+ * chunk rute ini baru diminta setelah bundel utama selesai diunduh dan
+ * dijalankan — satu perjalanan bolak-balik penuh yang berderet, bukan paralel.
+ * Audit staging mengukurnya di /peraturan: bundel utama selesai 1417 ms, chunk
+ * rute baru mulai 1462 ms dan SafeMarkdown selesai 1917 ms.
+ *
+ * Hanya rute yang dijawab Worker (bukan langsung oleh Assets) yang bisa
+ * disisipi pramuat — lihat src/worker/lib/pramuatRute.ts. Beranda tidak ada
+ * di sini karena memang tidak dipecah.
+ */
+const MODUL_RUTE_TERPECAH: Record<string, string> = {
+	"/peraturan": "src/react-app/routes/Peraturan.tsx",
+	"/daftar": "src/react-app/routes/Daftar.tsx",
+	"/masuk": "src/react-app/routes/Masuk.tsx",
+	"/onboard": "src/react-app/routes/Onboard.tsx",
+};
+
+/**
+ * Menulis dist/client/pramuat-rute.json: rute → chunk yang dibutuhkannya
+ * (beserta impor statisnya, rekursif), untuk dibaca Worker saat runtime.
+ *
+ * Kenapa lewat berkas dan bukan konstanta build: environment Worker dibangun
+ * LEBIH DULU daripada client (terlihat langsung dari urutan log `vite build`),
+ * jadi nama chunk ber-hash belum ada saat kode Worker dikompilasi.
+ */
+function petaPramuatRute(): Plugin {
+	return {
+		name: "peta-pramuat-rute",
+		apply: "build",
+		generateBundle(_opsi, bundle) {
+			if (this.environment.name !== "client") return;
+			const chunk = Object.values(bundle).filter((b) => b.type === "chunk");
+			const menurutNama = new Map(chunk.map((c) => [c.fileName, c]));
+			// Bundel utama sudah dimuat lewat <script> di index.html; mempramuatnya
+			// lagi cuma menambah baris tanpa guna.
+			const entri = new Set(chunk.filter((c) => c.isEntry).map((c) => c.fileName));
+
+			const peta: Record<string, string[]> = {};
+			for (const [rute, sumber] of Object.entries(MODUL_RUTE_TERPECAH)) {
+				const target = chunk.find((c) => c.facadeModuleId === path.resolve(__dirname, sumber));
+				if (!target) {
+					// Rute itu mungkin sudah tidak lagi di-lazy. Bukan alasan menggagalkan
+					// build demi sebuah petunjuk kinerja — cukup diperingatkan.
+					this.warn(`${sumber} tidak punya chunk sendiri; ${rute} dilewati dari pramuat-rute.json`);
+					continue;
+				}
+				const hasil = new Set<string>();
+				const kunjungi = (nama: string) => {
+					if (entri.has(nama) || hasil.has(nama)) return;
+					hasil.add(nama);
+					menurutNama.get(nama)?.imports.forEach(kunjungi);
+				};
+				kunjungi(target.fileName);
+				peta[rute] = [...hasil].map((nama) => `/${nama}`);
+			}
+			this.emitFile({ type: "asset", fileName: "pramuat-rute.json", source: JSON.stringify(peta) });
+		},
+	};
+}
+
+/**
  * Rute yang TIDAK boleh dijawab cangkang dari service worker, karena Worker
  * yang harus menjawabnya sendiri. Dua sebab berbeda, dua-duanya nyata:
  *
@@ -72,6 +133,7 @@ export default defineConfig({
 		tailwindcss(),
 		cloudflare(),
 		pramuatFont(),
+		petaPramuatRute(),
 		VitePWA({
 			registerType: "autoUpdate",
 			// Ikon + tautan <head> digenerate dari pwa-assets.config.ts saat build,

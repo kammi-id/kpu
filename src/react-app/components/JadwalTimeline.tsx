@@ -88,12 +88,16 @@ export function JadwalTimeline({ jadwal }: { jadwal: JadwalItemApi[] }) {
 										{LABEL_STATUS[item.status]}
 									</span>
 								</div>
-								{/* `text-white` penuh, bukan `text-white/90`: di atas --merah rasio
-								    kontrasnya 4.29:1, di bawah ambang AA 4.5:1 untuk teks 14px. */}
+								{/* Dua baris di bawah ini `text-white` penuh, bukan `text-white/90`:
+								    putih 90% di atas --merah menghasilkan #fbe6e6 dengan rasio kontras
+								    4.29:1, di bawah ambang AA 4.5:1 untuk teks 14px. Keduanya pernah
+								    gagal audit — yang pertama diperbaiki lebih dulu, yang kedua ikut
+								    masuk lewat PR #13 dengan kelas yang sama. Kalau menambah baris
+								    ketiga di dalam blok `berjalan`, pakai `text-white` juga. */}
 								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white" : "text-muted-foreground"}`}>
 									{item.rentangWib} WIB
 								</p>
-								<p className={`mt-0.5 text-sm ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>{item.keterangan}</p>
+								<p className={`mt-0.5 text-sm ${berjalan ? "text-white" : "text-muted-foreground"}`}>{item.keterangan}</p>
 							</div>
 						</li>
 					);
