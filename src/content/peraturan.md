@@ -71,7 +71,7 @@ Dalam Peraturan ini yang dimaksud dengan:
 
 ### Bagian Kesatu Umum
 
-#### Pasal 4
+### Pasal 4
 
 Kader yang dapat dicalonkan dan mendaftarkan diri sebagai Bakal Calon Ketua Umum PP KAMMI wajib memenuhi persyaratan berdasarkan AD/ART serta ketentuan khusus dalam Peraturan ini, yang meliputi:
 
@@ -82,7 +82,7 @@ Kader yang dapat dicalonkan dan mendaftarkan diri sebagai Bakal Calon Ketua Umum
 
 ### Bagian Kedua Persyaratan Ketakwaan dan Keagamaan
 
-#### Pasal 5
+### Pasal 5
 
 Persyaratan ketakwaan dan keagamaan sebagaimana dimaksud dalam Pasal 4 huruf a meliputi:
 
@@ -92,7 +92,7 @@ Persyaratan ketakwaan dan keagamaan sebagaimana dimaksud dalam Pasal 4 huruf a m
 
 ### Bagian Ketiga Persyaratan Integritas Organisasi
 
-#### Pasal 6
+### Pasal 6
 
 Persyaratan integritas organisasi sebagaimana dimaksud dalam Pasal 4 huruf b meliputi:
 
@@ -103,7 +103,7 @@ Persyaratan integritas organisasi sebagaimana dimaksud dalam Pasal 4 huruf b mel
 
 ### Bagian Keempat Persyaratan Kapasitas Diri dan Intelektual
 
-#### Pasal 7
+### Pasal 7
 
 Persyaratan kapasitas diri dan intelektual sebagaimana dimaksud dalam Pasal 4 huruf c meliputi:
 
@@ -113,7 +113,7 @@ Persyaratan kapasitas diri dan intelektual sebagaimana dimaksud dalam Pasal 4 hu
 
 ### Bagian Kelima Persyaratan Dukungan Keorganisasian
 
-#### Pasal 8
+### Pasal 8
 
 1. Bakal Calon Ketua Umum wajib memperoleh Rekomendasi tertulis dari PW dan/atau PD dengan salah satu ketentuan sebagai berikut:
 
