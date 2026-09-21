@@ -3,8 +3,7 @@ import { FileText, CalendarDays, Download, Lock } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
-import { KELAS_GRID_HERO, KELAS_ILUSTRASI_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO, SIZES_ILUSTRASI_HERO } from "~/react-app/components/PublicPageHero";
-import { ResponsiveImage } from "~/react-app/components/ResponsiveImage";
+import { IlustrasiHero, KELAS_GRID_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import { ketum } from "~/react-app/assets/generated";
@@ -26,13 +25,10 @@ export function Beranda() {
 						<h1 className={KELAS_JUDUL_HERO}>Pendaftaran Bakal Calon Ketua Umum PP KAMMI</h1>
 						<p className="mt-4 text-lg font-semibold">Muktamar KAMMI XIV Ambon</p>
 					</div>
-					<ResponsiveImage
+					<IlustrasiHero
 						gambar={ketum}
 						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
-						loading="eager"
-						sizes={SIZES_ILUSTRASI_HERO}
-						fetchPriority="high"
-						className={`relative z-0 -mb-8 sm:-mb-10 lg:-mb-12 ${KELAS_ILUSTRASI_HERO}`}
+						className="relative z-0 -mb-8 sm:-mb-10 lg:-mb-12"
 					/>
 				</div>
 			</section>
