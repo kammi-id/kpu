@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { ambilCangkang } from "../lib/cangkang";
+import { hrefPramuat, PenyisipPramuat } from "../lib/pramuatRute";
 
 type KontenMeta = { title: string; description: string; ogImage: string };
 
@@ -59,7 +60,11 @@ async function halamanDenganMeta(request: Request, assets: Fetcher, konten: Kont
 	if (!asli.ok) return asli;
 
 	const url = new URL(request.url).toString();
+	// Kosong untuk rute yang tidak dipecah (/jadwal, /tentang, /unduhan); handler
+	// tetap dipasang karena tanpa href ia tidak menambahkan apa pun.
+	const hrefs = await hrefPramuat(assets, request);
 	const hasil = new HTMLRewriter()
+		.on("head", new PenyisipPramuat(hrefs))
 		.on("title", new GantiIsiTeks(konten.title))
 		.on('meta[name="description"]', new GantiAtribut("content", konten.description))
 		.on('meta[property="og:title"]', new GantiAtribut("content", konten.title))

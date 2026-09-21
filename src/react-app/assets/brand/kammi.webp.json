@@ -1,4 +1,4 @@
 {
-  "prompt": "Sourced: public/logo-kammi.png supplied by the product owner (logo PP KAMMI); trimmed and resized to 240px tall WebP.",
+  "prompt": "Sourced: public/logo-kammi.png supplied by the product owner (logo PP KAMMI); trimmed and resized to 240px tall WebP. Diperkecil ke 120px tinggi (93×120, WebP quality 80, effort 6) dari versi 240px itu: logo ini hanya tampil di Footer pada h-9 (36px CSS), jadi 108px sudah cukup untuk layar DPR 3.",
   "createdAt": "2026-09-14T22:40:54.377Z"
 }

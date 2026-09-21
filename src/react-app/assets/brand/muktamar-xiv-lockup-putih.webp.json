@@ -1,4 +1,4 @@
 {
-  "prompt": "Sourced: public/logo-white.png supplied by the product owner; cropped above the Ambon/date line to the mark plus 'Muktamar KAMMI XIV' lockup as used in campaign posts, resized to 240px tall WebP.",
+  "prompt": "Sourced: public/logo-white.png supplied by the product owner; cropped above the Ambon/date line to the mark plus 'Muktamar KAMMI XIV' lockup as used in campaign posts, resized to 240px tall WebP. Dikompres ulang pada dimensi yang sama (WebP quality 72, effort 6, alphaQuality 90) setelah audit Lighthouse menandai image-delivery; dimensi 240px tinggi sengaja dipertahankan karena Lighthouse menghitung pemborosan terhadap DPR 1.75, sedangkan logo ini tampil di header pada h-16 yang butuh 192px pada layar DPR 3.",
   "createdAt": "2026-09-14T22:40:54.450Z"
 }

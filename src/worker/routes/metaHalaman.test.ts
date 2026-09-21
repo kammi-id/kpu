@@ -39,9 +39,8 @@ describe("Meta OpenGraph per halaman publik (seam Worker)", () => {
 	});
 
 	// Beranda ("/") dan rute tertutup (masuk/daftar/onboard/admin/bacalon) sengaja
-	// TIDAK didaftarkan di buatRuteMetaHalaman() — keduanya tak pernah masuk
-	// Worker sama sekali di produksi (lihat run_worker_first di wrangler.json),
-	// jadi index.html disajikan Assets binding apa adanya dengan OG default.
-	// Tak bisa diuji lewat buatWorker().fetch() langsung (harness ini hanya
-	// mensimulasikan tabel rute Worker, bukan lapisan Assets+run_worker_first).
+	// TIDAK didaftarkan di buatRuteMetaHalaman(), jadi memakai OG default
+	// index.html. Beranda disajikan Assets langsung; rute tertutup lain mendarat
+	// di cangkang Worker lewat not_found_handling "none" (lihat cache.test.ts dan
+	// pramuatRute.test.ts), tapi tanpa penimpaan meta.
 });

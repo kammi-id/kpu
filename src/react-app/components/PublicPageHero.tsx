@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { ResponsiveImage, type GambarResponsif } from "~/react-app/components/ResponsiveImage";
 
@@ -34,8 +35,34 @@ export const KELAS_JUDUL_HERO =
 // `max-w-none` di atas mengalahkan reset Tailwind (`img { max-width: 100% }`)
 // yang kalau tidak akan menyempitkan lebar ke kolom grid dan membuat
 // object-contain melenceng dari kotak yang seharusnya.
-export const KELAS_ILUSTRASI_HERO =
+const KELAS_ILUSTRASI_HERO =
 	"h-[46vh] w-auto max-w-[90vw] shrink-0 justify-self-center self-end object-contain lg:h-[calc(75vh-4rem)] lg:max-w-none";
+/**
+ * Pasangan `sizes` untuk KELAS_ILUSTRASI_HERO. Tingginya yang dikunci (46vh, lalu 75vh-4rem), jadi lebar tampilnya adalah
+ * kelipatan `vh` sebesar rasio gambar (~0.8 untuk ilustrasi potret), dibatasi
+ * `max-w-[90vw]` di ponsel. Dibulatkan ke atas: `sizes` yang kekecilan membuat
+ * browser memilih varian buram, yang kebesaran cuma memboroskan sedikit byte.
+ */
+const SIZES_ILUSTRASI_HERO = "(min-width: 1024px) min(50vw, 60vh), min(90vw, 40vh)";
+
+/**
+ * Ilustrasi hero publik — satu-satunya tempat kelas, `sizes`, dan prioritas
+ * muatnya dirakit, karena ketiganya harus berubah bersama. Selalu gambar LCP
+ * di halamannya, jadi `eager` + `fetchPriority="high"`. `className` hanya untuk
+ * tambahan letak (mis. Beranda menumpangkannya ke panel papan).
+ */
+export function IlustrasiHero({ gambar, alt, className }: { gambar: GambarResponsif; alt: string; className?: string }) {
+	return (
+		<ResponsiveImage
+			gambar={gambar}
+			alt={alt}
+			loading="eager"
+			fetchPriority="high"
+			sizes={SIZES_ILUSTRASI_HERO}
+			className={cn(className, KELAS_ILUSTRASI_HERO)}
+		/>
+	);
+}
 
 /**
  * Bingkai hero merah, sama seperti Beranda (DESIGN.md "Beranda publik") tapi
@@ -50,14 +77,7 @@ export function PublicPageHero({ judul, ilustrasi, children }: Props) {
 					<div>
 						<h1 className={KELAS_JUDUL_HERO}>{judul}</h1>
 					</div>
-					{ilustrasi ? (
-						<ResponsiveImage
-							gambar={ilustrasi.gambar}
-							alt={ilustrasi.alt}
-							className={KELAS_ILUSTRASI_HERO}
-							loading="eager"
-						/>
-					) : null}
+					{ilustrasi ? <IlustrasiHero gambar={ilustrasi.gambar} alt={ilustrasi.alt} /> : null}
 				</div>
 			</section>
 			<section className="mx-auto max-w-[76rem] px-4 py-10 text-navy sm:px-8 sm:py-14">{children}</section>

@@ -20,8 +20,16 @@ export function Header() {
 	return (
 		<header className="bg-merah text-white">
 			<div className="mx-auto flex max-w-[76rem] flex-col px-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-				<NavLink to="/" className="flex items-center gap-3 py-3" aria-label="Beranda KPU Muktamar XIV KAMMI">
-					<img src={muktamarLockupPutih} alt="Muktamar KAMMI XIV" className="h-16 w-auto" />
+				<NavLink to="/" className="flex items-center gap-3 py-3">
+					{/* `alt=""` dan tanpa `aria-label`: teks di sebelahnya yang menjadi nama
+					    tautan, supaya perintah suara "klik Komisi Penjaringan Umum" cocok. */}
+					<img
+						src={muktamarLockupPutih}
+						alt=""
+						width={230}
+						height={240}
+						className="h-16 w-auto"
+					/>
 					<span className="text-xs leading-tight font-semibold sm:text-sm">
 						Komisi Penjaringan Umum
 						<br />

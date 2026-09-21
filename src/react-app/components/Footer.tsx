@@ -32,7 +32,14 @@ export function Footer() {
 			<div className="mx-auto max-w-[76rem] px-4 py-6 sm:px-8">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex items-center gap-3">
-						<img src={kammi} alt="Logo Pengurus Pusat KAMMI" className="h-9 w-auto" />
+						<img
+							src={kammi}
+							alt="Logo Pengurus Pusat KAMMI"
+							width={93}
+							height={120}
+							loading="lazy"
+							className="h-9 w-auto"
+						/>
 						<span className="text-sm font-semibold">
 							Kesatuan Aksi
 							<br />

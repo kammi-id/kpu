@@ -1,0 +1,4 @@
+{
+  "prompt": "Sourced: public/logo-colours.png supplied by the product owner (logo Muktamar KAMMI XIV, 3375x3375), dipulihkan dari riwayat git (commit 2e1b0ed, dulu src/react-app/assets/logo-colours.png). Dipotong ke tanda saja — atap, XIV, dan ombak — tanpa wordmark dan baris Ambon/tanggal, karena teks itu tidak terbaca pada favicon 32px. Dibujursangkarkan dengan latar transparan dan diperkecil ke 512px, persis ikon terbesar yang digenerate preset minimal-2023 (pwa-512/maskable-512), jadi tidak ada upscale. Letaknya di public/ karena @vite-pwa/assets-generator menulis keluaran relatif terhadap letak sumber — lihat pwa-assets.config.ts.",
+  "createdAt": "2026-09-21T02:58:00.000Z"
+}

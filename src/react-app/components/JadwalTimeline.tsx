@@ -88,10 +88,12 @@ export function JadwalTimeline({ jadwal }: { jadwal: JadwalItemApi[] }) {
 										{LABEL_STATUS[item.status]}
 									</span>
 								</div>
-								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>
+								{/* Teks di atas --merah selalu `text-white` penuh: `text-white/90`
+								    hanya 4.29:1, di bawah AA 4.5:1 (DESIGN.md, Colors). */}
+								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white" : "text-muted-foreground"}`}>
 									{item.rentangWib} WIB
 								</p>
-								<p className={`mt-0.5 text-sm ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>{item.keterangan}</p>
+								<p className={`mt-0.5 text-sm ${berjalan ? "text-white" : "text-muted-foreground"}`}>{item.keterangan}</p>
 							</div>
 						</li>
 					);

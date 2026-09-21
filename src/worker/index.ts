@@ -22,7 +22,8 @@ import { bolehRegistrasi, layananAktif, tahapPada } from "./lib/tahap";
 import { pendaftaranDitutupManual } from "./lib/pengaturan";
 import { teksSatuBarisValid } from "./lib/profil";
 import { ambilKelengkapan } from "./lib/kelengkapan";
-import { ambilCangkang, jatuhKeCangkang } from "./lib/cangkang";
+import { jatuhKeCangkang } from "./lib/cangkang";
+import { cangkangDenganPramuat } from "./lib/pramuatRute";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
@@ -440,7 +441,7 @@ export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1:
 		if (!rahasiaTersedia(c.env)) return gagalTertutup();
 		const sudahAda = await c.env.DB.prepare('SELECT 1 FROM "user" WHERE "role" = ?').bind("admin").first();
 		if (sudahAda || !c.env.ONBOARD_TOKEN || !layananAktif(tahapPada(sekarang()))) return c.notFound();
-		return ambilCangkang(c.env.ASSETS, c.req.raw);
+		return cangkangDenganPramuat(c.env.ASSETS, c.req.raw);
 	});
 
 	app.get("/api/admin/audit", async (c) => {
@@ -470,7 +471,7 @@ export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1:
 	// Sengaja rute biasa, bukan app.notFound: gerbang seperti GET /onboard memakai
 	// c.notFound() untuk menyembunyikan halamannya, dan itu harus tetap 404 JSON.
 	app.get("*", (c) => {
-		if (jatuhKeCangkang(c.req.method, new URL(c.req.url).pathname)) return ambilCangkang(c.env.ASSETS, c.req.raw);
+		if (jatuhKeCangkang(c.req.method, new URL(c.req.url).pathname)) return cangkangDenganPramuat(c.env.ASSETS, c.req.raw);
 		return c.notFound();
 	});
 
