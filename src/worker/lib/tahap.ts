@@ -44,6 +44,8 @@ export function layananAktif(tahap: Tahap): boolean {
 export interface JadwalItem {
 	nama: string;
 	rentangWib: string;
+	/** Kolom "Keterangan" Lampiran I PKPU 01/2026 (mis. tema debat). */
+	keterangan: string;
 	mulai: number;
 	/** null berarti tidak berakhir (Forum Muktamar seterusnya). */
 	akhirEksklusif: number | null;
@@ -54,60 +56,70 @@ export const JADWAL_SEPULUH: readonly JadwalItem[] = [
 	{
 		nama: "Pengumuman dan sosialisasi",
 		rentangWib: "13–16 September 2026",
+		keterangan: "Sosialisasi berkas ke seluruh PW/PD KAMMI",
 		mulai: Date.UTC(2026, 8, 12, 17, 0, 0),
 		akhirEksklusif: MULAI_MASA_PENDAFTARAN,
 	},
 	{
 		nama: "Pengambilan dan pengembalian berkas",
 		rentangWib: "17–26 September 2026",
+		keterangan: "Penyerahan berkas dan biaya pendaftaran Rp3.000.000,-",
 		mulai: MULAI_MASA_PENDAFTARAN,
 		akhirEksklusif: MULAI_PEMERIKSAAN,
 	},
 	{
 		nama: "Verifikasi administrasi dan uji kualifikasi",
 		rentangWib: "27–29 September 2026",
+		keterangan: "Verifikasi oleh KPU",
 		mulai: MULAI_PEMERIKSAAN,
 		akhirEksklusif: MULAI_MASA_PERBAIKAN,
 	},
 	{
 		nama: "Perbaikan kelengkapan",
 		rentangWib: "30 September–3 Oktober 2026",
+		keterangan: "Masa sanggah dan perbaikan kelengkapan berkas",
 		mulai: MULAI_MASA_PERBAIKAN,
 		akhirEksklusif: MULAI_TERKUNCI,
 	},
 	{
 		nama: "Penetapan",
 		rentangWib: "4 Oktober 2026",
+		keterangan: "Penetapan resmi oleh KPU",
 		mulai: MULAI_TERKUNCI,
 		akhirEksklusif: Date.UTC(2026, 9, 4, 17, 0, 0),
 	},
 	{
 		nama: "Visi-misi dan kampanye",
 		rentangWib: "5–27 Oktober 2026",
+		keterangan: "Sosialisasi gagasan kandidat",
 		mulai: Date.UTC(2026, 9, 4, 17, 0, 0),
 		akhirEksklusif: Date.UTC(2026, 9, 27, 17, 0, 0),
 	},
 	{
 		nama: "Debat I",
 		rentangWib: "13 Oktober 2026",
+		keterangan: "Tema: Kepemimpinan, Keorganisasian, dan Kebangsaan",
 		mulai: Date.UTC(2026, 9, 12, 17, 0, 0),
 		akhirEksklusif: Date.UTC(2026, 9, 13, 17, 0, 0),
 	},
 	{
 		nama: "Debat II",
 		rentangWib: "20 Oktober 2026",
+		keterangan: "Tema: Isu Strategis Internasional, Keislaman, dan Arah Gerak KAMMI",
 		mulai: Date.UTC(2026, 9, 19, 17, 0, 0),
 		akhirEksklusif: Date.UTC(2026, 9, 20, 17, 0, 0),
 	},
 	{
 		nama: "Masa tenang",
 		rentangWib: "28–29 Oktober 2026",
+		keterangan: "Penghentian seluruh kegiatan kampanye",
 		mulai: Date.UTC(2026, 9, 27, 17, 0, 0),
 		akhirEksklusif: Date.UTC(2026, 9, 29, 17, 0, 0),
 	},
 	{
 		nama: "Forum Muktamar",
 		rentangWib: "mulai 30 Oktober 2026",
+		keterangan: "Musyawarah dan pemilihan Ketua Umum PP KAMMI",
 		mulai: Date.UTC(2026, 9, 29, 17, 0, 0),
 		akhirEksklusif: null,
 	},

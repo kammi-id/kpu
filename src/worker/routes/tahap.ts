@@ -34,6 +34,7 @@ export function buatRuteTahap(sekarang: () => Date) {
 			jadwal: JADWAL_SEPULUH.map((item) => ({
 				nama: item.nama,
 				rentangWib: item.rentangWib,
+				keterangan: item.keterangan,
 				status: statusJadwal(item, now),
 			})),
 		});
