@@ -158,6 +158,15 @@ public/og/
 # Varian avif/webp/png digenerate saat build/dev (scripts/buatGambarResponsif.mjs)
 src/react-app/assets/generated/
 
+# Ikon PWA digenerate saat build oleh vite-plugin-pwa dari public/ikon-muktamar-xiv.png
+# (lihat pwa-assets.config.ts). Sumbernya di-commit, keluarannya tidak.
+public/favicon.ico
+public/apple-touch-icon-180x180.png
+public/maskable-icon-512x512.png
+public/pwa-64x64.png
+public/pwa-192x192.png
+public/pwa-512x512.png
+
 # vuepress v2.x temp and cache directory
 .temp
 
