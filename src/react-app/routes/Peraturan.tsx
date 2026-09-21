@@ -23,7 +23,7 @@ export function Peraturan() {
 			ilustrasi={{ gambar: sekjend, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}
 		>
 			<div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-10">
-				<div className="order-2 lg:order-1"><SafeMarkdown>{peraturanKpu}</SafeMarkdown></div>
+				<div className="order-2 lg:order-1"><SafeMarkdown variant="prose">{peraturanKpu}</SafeMarkdown></div>
 				<div className="order-1 lg:sticky lg:top-8 lg:order-2"><KartuUnduhanBerkas judul="Dokumen Peraturan" berkas={dokumen} /></div>
 			</div>
 		</PublicPageHero>

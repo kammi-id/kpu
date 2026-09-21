@@ -11,6 +11,7 @@ export type StatusJadwal = "selesai" | "berjalan" | "terjadwal";
 export interface JadwalItemApi {
 	nama: string;
 	rentangWib: string;
+	keterangan: string;
 	status: StatusJadwal;
 }
 
