@@ -1,7 +1,8 @@
 import { Download, Home, ScrollText, Settings, UploadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { DashboardShell, type DashboardNavItem } from "~/react-app/components/DashboardShell";
+import { OutletBerjeda } from "~/react-app/components/OutletBerjeda";
 import { ambilKonfigurasiPublik } from "~/react-app/lib/konfigurasiPublik";
 
 const NAV_ADMIN: readonly DashboardNavItem[] = [
@@ -56,7 +57,7 @@ export function AdminLayout() {
 			logoutDeskripsi="Sesi ini akan diakhiri di perangkat ini. Komisioner KPU lain tetap dapat masuk kembali dengan kredensial yang sama."
 			onLogout={() => void keluar()}
 		>
-			<Outlet />
+			<OutletBerjeda />
 		</DashboardShell>
 	);
 }

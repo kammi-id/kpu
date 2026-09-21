@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react";
-import { Link, Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
 import muktamarLockupWarna from "~/react-app/assets/brand/muktamar-xiv-lockup-warna.webp";
+import { OutletBerjeda } from "~/react-app/components/OutletBerjeda";
 
 /**
  * Gerbang akun: /masuk, /daftar, /onboard. Tanpa Header publik — halaman ini
@@ -32,7 +33,7 @@ export function GerbangLayout() {
 				    ditulis di sini — tanpa ini /masuk, /daftar dan /onboard adalah
 				    satu-satunya halaman tanpa titik lompat "ke konten utama". */}
 				<main className="flex w-full flex-1 items-center justify-center">
-					<Outlet />
+					<OutletBerjeda />
 				</main>
 				<Link
 					to="/"

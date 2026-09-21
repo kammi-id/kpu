@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { GerbangLayout } from "~/react-app/components/GerbangLayout";
 import { Layout } from "~/react-app/components/Layout";
+import { JedaRute } from "~/react-app/components/OutletBerjeda";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { Beranda } from "~/react-app/routes/Beranda";
 import { Jadwal } from "~/react-app/routes/Jadwal";
@@ -46,12 +47,6 @@ const AkunPengaturan = lazy(() =>
 	import("~/react-app/routes/AkunPengaturan").then((m) => ({ default: m.AkunPengaturan })),
 );
 
-/**
- * Jeda pemuatan potongan rute. Sengaja kosong, bukan pemintal: potongannya
- * kecil dan rangka halaman (Header/Footer atau gerbang) sudah tergambar di
- * sekelilingnya, jadi pemintal sekejap justru terbaca sebagai kedipan.
- */
-const JEDA_RUTE = <div className="min-h-[50vh]" aria-busy="true" />;
 
 function App() {
 	// Tahap Selesai (tiket 18): satu-satunya isi seluruh situs, tanpa memandang
@@ -69,7 +64,9 @@ function App() {
 
 	return (
 		<BrowserRouter>
-			<Suspense fallback={JEDA_RUTE}>
+			{/* Hanya untuk layout yang di-lazy (AdminLayout, BacalonLayout). Rute di
+			    dalam layout punya batasnya sendiri lewat OutletBerjeda. */}
+			<Suspense fallback={<JedaRute />}>
 				<Routes>
 					<Route element={<Layout />}>
 						<Route index element={<Beranda />} />

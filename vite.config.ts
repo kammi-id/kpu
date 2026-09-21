@@ -23,7 +23,6 @@ function pramuatFont(): Plugin {
 	return {
 		name: "pramuat-font",
 		apply: "build",
-		enforce: "post",
 		transformIndexHtml: {
 			order: "post",
 			handler(_html, ctx) {
@@ -136,6 +135,11 @@ export default defineConfig({
 		petaPramuatRute(),
 		VitePWA({
 			registerType: "autoUpdate",
+			// Bawaannya `<script src="/registerSW.js">` biasa di <head>, yang memblokir
+			// parser di setiap halaman demi sesuatu yang baru berjalan saat `load`.
+			// Catatan: di luar "auto", plugin tidak lagi menyalakan skipWaiting dan
+			// clientsClaim sendiri, jadi keduanya ditulis eksplisit di `workbox`.
+			injectRegister: "script-defer",
 			// Ikon + tautan <head> digenerate dari pwa-assets.config.ts saat build,
 			// jadi tidak ada berkas ikon yang di-commit (pola yang sama dengan
 			// public/og/ dan assets/generated/, dua-duanya di .gitignore).
@@ -147,12 +151,8 @@ export default defineConfig({
 				description:
 					"Pendaftaran Bakal Calon Ketua Umum PP KAMMI, Muktamar KAMMI XIV Ambon — jadwal, peraturan, dan berkas resmi dari Komisi Penjaringan Umum.",
 				lang: "id",
-				start_url: "/",
-				scope: "/",
-				display: "standalone",
 				// Merah Muktamar, sama dengan --merah di index.css.
 				theme_color: "#dc0a0a",
-				background_color: "#ffffff",
 			},
 			workbox: {
 				// Hanya berkas ber-hash yang dipracache. PNG ilustrasi sengaja di luar
@@ -170,7 +170,7 @@ export default defineConfig({
 				// apa adanya. Penting untuk /api/* yang Worker-nya menetapkan no-store
 				// dan untuk tahap yang sensitif waktu — service worker ini mempercepat
 				// muat ulang cangkang, bukan menyimpan data.
-				cleanupOutdatedCaches: true,
+				skipWaiting: true,
 				clientsClaim: true,
 			},
 		}),

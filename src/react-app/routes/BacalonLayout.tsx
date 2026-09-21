@@ -1,7 +1,8 @@
 import { FileText, Home, IdCard, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { DashboardShell, type DashboardNavItem } from "~/react-app/components/DashboardShell";
+import { OutletBerjeda } from "~/react-app/components/OutletBerjeda";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
 
 const NAV_BACALON: readonly DashboardNavItem[] = [
@@ -64,7 +65,7 @@ export function BacalonLayout() {
 			logoutDeskripsi="Sesi ini akan diakhiri di perangkat ini. Anda dapat masuk kembali kapan pun dengan kredensial yang sama."
 			onLogout={() => void keluar()}
 		>
-			<Outlet />
+			<OutletBerjeda />
 		</DashboardShell>
 	);
 }

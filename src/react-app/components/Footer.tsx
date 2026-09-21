@@ -35,8 +35,9 @@ export function Footer() {
 						<img
 							src={kammi}
 							alt="Logo Pengurus Pusat KAMMI"
-							width={186}
-							height={240}
+							width={93}
+							height={120}
+							loading="lazy"
 							className="h-9 w-auto"
 						/>
 						<span className="text-sm font-semibold">
