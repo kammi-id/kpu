@@ -91,6 +91,7 @@ export function JadwalTimeline({ jadwal }: { jadwal: JadwalItemApi[] }) {
 								<p className={`mt-1 text-sm tabular-nums ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>
 									{item.rentangWib} WIB
 								</p>
+								<p className={`mt-0.5 text-sm ${berjalan ? "text-white/90" : "text-muted-foreground"}`}>{item.keterangan}</p>
 							</div>
 						</li>
 					);

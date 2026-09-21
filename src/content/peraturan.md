@@ -21,7 +21,7 @@ Komisi Penjaringan Umum Muktamar XIV KAMMI,
 
 1. Anggaran Dasar Kesatuan Aksi Mahasiswa Muslim Indonesia;
 2. Anggaran Rumah Tangga Kesatuan Aksi Mahasiswa Muslim Indonesia;
-3. Surat Keputusan Pengurus Pusat KAMMI tentang Susunan dan Personalia Komisi Penjaringan Umum Muktamar KAMMI 2026 Nomor: …;
+3. Surat Keputusan Pengurus Pusat KAMMI tentang Susunan dan Personalia Komisi Penjaringan Umum Muktamar KAMMI 2026 Nomor: 179/SK/KU-i/KAMMI/IX/2026 tentang Penetapan Komisioner Penjaringan Umum Muktamar KAMMI XIV;
 
 **MEMUTUSKAN:**
 
@@ -39,7 +39,7 @@ Dalam Peraturan ini yang dimaksud dengan:
 4. Komisi Penjaringan Umum Muktamar, selanjutnya disingkat KPU, adalah badan/penyelenggara teknis yang dibentuk dan diberi mandat untuk mengelola dan melaksanakan tahapan penjaringan, verifikasi, hingga penetapan Calon Ketua Umum PP KAMMI.
 5. Anggaran Dasar dan Anggaran Rumah Tangga, selanjutnya disingkat AD/ART, adalah konstitusi tertinggi organisasi KAMMI yang menjadi dasar penyusunan Peraturan ini.
 6. Bakal Calon Ketua Umum adalah Anggota Biasa III KAMMI yang telah mendaftarkan diri kepada KPU namun belum dinyatakan memenuhi seluruh persyaratan administrasi dan kualifikasi.
-7. Calon Ketua Umum adalah Bakal Calon Ketua Umum yang telah dinyatakan lulus verifikasi administrasi dan uji kualifikasi serta ditetapkan secara resmi oleh KPU untuk mengikuti forum Muktamar.
+7. Calon Ketua Umum adalah Bakal Calon Ketua Umum yang telah dinyatakan lulus verifikasi administrasi dan uji kualifikasi serta ditetapkan secara resmi oleh KPU untuk mengikuti dan ditetapkan dalam forum Muktamar.
 8. Anggota Biasa III, selanjutnya disingkat AB 3, adalah jenjang keanggotaan KAMMI sebagaimana diatur dalam AD/ART yang menjadi salah satu syarat status keanggotaan Calon Ketua Umum.
 9. Pengurus Wilayah, selanjutnya disingkat PW, adalah instansi kepemimpinan KAMMI di tingkat provinsi.
 10. Pengurus Daerah, selanjutnya disingkat PD, adalah instansi kepemimpinan KAMMI di tingkat kabupaten/kota.
@@ -98,9 +98,8 @@ Persyaratan integritas organisasi sebagaimana dimaksud dalam Pasal 4 huruf b mel
 
 - a. tidak sedang dijatuhi sanksi organisasi dalam bentuk apa pun, dibuktikan dengan surat pernyataan sebagaimana Formulir A.6;
 - b. berstatus sebagai Anggota Biasa III (AB 3);
-- c. pernah menjadi Pengurus Daerah dan/atau Pengurus Wilayah KAMMI;
-- d. telah menjadi Instruktur KAMMI; dan
-- e. tidak sedang diperpanjang masa keanggotaannya karena sedang menjabat sebagai pengurus.
+- c. pernah menjadi Pengurus Daerah dan/atau Pengurus Wilayah KAMMI; dan
+- d. tidak sedang diperpanjang masa keanggotaannya karena sedang menjabat sebagai pengurus.
 
 ### Bagian Keempat Persyaratan Kapasitas Diri dan Intelektual
 
@@ -214,7 +213,7 @@ KPU berwenang melakukan verifikasi berkas administrasi dan uji kualifikasi terha
 
 2. Pengguguran sebagaimana dimaksud pada ayat (1) ditetapkan oleh KPU melalui keputusan tertulis.
 
-## BAB IX Ketentuan Lain Lain
+## BAB IX Ketentuan Lain-Lain
 
 ### Pasal 19
 
@@ -227,7 +226,10 @@ Hal-hal yang belum diatur dalam Peraturan ini akan diatur lebih lanjut oleh KPU 
 Peraturan ini mulai berlaku sejak tanggal ditetapkan.
 
 Ditetapkan di: Jakarta  
-Pada tanggal: 1 September 2026
+Pada tanggal: 8 September 2026
 
 Komisi Penjaringan Umum  
 Muktamar KAMMI 2026
+
+Ketua: Khaidir Ali  
+Sekretaris: Rafika Afriyanti
