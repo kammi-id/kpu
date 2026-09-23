@@ -65,7 +65,7 @@ export function AdminDetail() {
 					<StatusBadge terbuka={data.lengkap}>{data.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge>
 					{data.mintaDitutup ? <StatusBadge terbuka={false}>Minta ditutup</StatusBadge> : null}
 					<ResetPasswordDialog userId={data.id} nama={data.name} />
-					{data.mintaDitutup ? <HapusDataAkunDialog userId={data.id} nama={data.name} /> : null}
+					<HapusDataAkunDialog userId={data.id} nama={data.name} mintaDitutup={data.mintaDitutup} />
 				</div>
 			</div>
 			<section aria-labelledby="ekspor-akun">

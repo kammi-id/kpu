@@ -218,15 +218,15 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		return c.json({ password });
 	});
 
-	// Hapus data akun (tiket 17): hanya untuk akun berpenanda Minta ditutup, dengan
-	// konfirmasi kata sandi Admin yang sama (dan penghitung kegagalan yang sama)
-	// dengan Reset Password di atas.
+	// Hapus data akun (tiket 17): untuk Bakal Calon mana pun, berpenanda Minta ditutup
+	// atau tidak, dengan konfirmasi kata sandi Admin yang sama (dan penghitung
+	// kegagalan yang sama) dengan Reset Password di atas.
 	route.post("/:id/hapus-data", async (c) => {
 		const akses = await adminAtauTolak(c, sekarang);
 		if ("response" in akses) return akses.response;
 		const sasaranUserId = c.req.param("id");
 		const sasaran = await c.env.DB.prepare(
-			`SELECT "id" FROM "user" WHERE "id" = ? AND "role" = 'bacalon' AND "banned" = 1 AND "banReason" = 'penutupan_akun'`,
+			`SELECT "id" FROM "user" WHERE "id" = ? AND "role" = 'bacalon'`,
 		)
 			.bind(sasaranUserId)
 			.first<{ id: string }>();
