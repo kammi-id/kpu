@@ -30,7 +30,6 @@ type BacalonEkspor = {
 	asalPd: string | null;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
-	instruktur: number | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 	jumlahHadir: number;
@@ -219,14 +218,14 @@ export const KOLOM_MINTA_DITUTUP = `CASE WHEN u."banned" = 1 AND u."banReason" =
 async function daftarBacalon(db: D1Database) {
 	return (await db.prepare(
 		`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", u."createdAt" AS "dibuatPada", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
-		        p."tahunLulusDm3", p."tempatLulusDm3", p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap",
+		        p."tahunLulusDm3", p."tempatLulusDm3", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap",
 		        ${KOLOM_MINTA_DITUTUP}
 		 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 		 WHERE u."role" = 'bacalon' ORDER BY u."createdAt", u."id"`,
 	).all<BacalonEkspor>()).results;
 }
 
-const KOLOM_BACALON = ["id", "nama", "email", "whatsapp", "nia", "dibuatPada", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "instruktur", "capaianHafalan", "bahasaAsing", "jumlahHadir", "lengkap", "Minta ditutup"] as const;
+const KOLOM_BACALON = ["id", "nama", "email", "whatsapp", "nia", "dibuatPada", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "capaianHafalan", "bahasaAsing", "jumlahHadir", "lengkap", "Minta ditutup"] as const;
 
 function nilaiKolomBacalon(item: BacalonEkspor, kolom: (typeof KOLOM_BACALON)[number]): string | number | null {
 	if (kolom === "nama") return item.name;
@@ -254,7 +253,7 @@ async function tulisZip(bucket: R2Bucket, bacalon: BacalonEkspor, berkas: Berkas
 			id: bacalon.id, name: bacalon.name, email: bacalon.email, whatsapp: bacalon.whatsapp, dibuatPada: bacalon.dibuatPada,
 			profil: {
 				namaPanggilan: bacalon.namaPanggilan, tempatLahir: bacalon.tempatLahir, tanggalLahir: bacalon.tanggalLahir, asalPw: bacalon.asalPw, asalPd: bacalon.asalPd,
-				tahunLulusDm3: bacalon.tahunLulusDm3, tempatLulusDm3: bacalon.tempatLulusDm3, instruktur: Boolean(bacalon.instruktur), capaianHafalan: bacalon.capaianHafalan, bahasaAsing: bacalon.bahasaAsing,
+				tahunLulusDm3: bacalon.tahunLulusDm3, tempatLulusDm3: bacalon.tempatLulusDm3, capaianHafalan: bacalon.capaianHafalan, bahasaAsing: bacalon.bahasaAsing,
 			},
 			statusKelengkapanBerkas: { jumlahHadir: bacalon.jumlahHadir, lengkap: Boolean(bacalon.lengkap) }, mintaDitutup: Boolean(bacalon.mintaDitutup),
 		})));

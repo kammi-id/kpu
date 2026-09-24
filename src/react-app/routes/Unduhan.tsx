@@ -20,7 +20,7 @@ const FORMULIR_UTAMA: EntriFormulir = {
 const FORMULIR_PELENGKAP: EntriFormulir = {
 	judul: "Formulir A.2",
 	nomor: "A.2",
-	deskripsi: "Checklist kelengkapan sepuluh kelompok berkas pendaftaran.",
+	deskripsi: "Checklist kelengkapan sembilan kelompok berkas pendaftaran.",
 };
 
 const JALUR_REKOMENDASI: EntriFormulir[] = [

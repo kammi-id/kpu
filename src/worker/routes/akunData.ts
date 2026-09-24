@@ -22,7 +22,6 @@ type BarisAkunData = {
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
 	tempatLulusDm3Id: string | null;
-	instruktur: number | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 };
@@ -40,7 +39,6 @@ type PayloadAkunData = {
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
 	tempatLulusDm3Id: string | null;
-	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 };
@@ -70,10 +68,7 @@ function payloadAkunData(data: unknown): data is PayloadAkunData {
 	if (!KOLOM_ID_STRUKTUR.every((kunci) => payload[kunci] === null || payload[kunci] === undefined || typeof payload[kunci] === "string")) {
 		return false;
 	}
-	if (!(payload.tahunLulusDm3 === null || payload.tahunLulusDm3 === undefined || typeof payload.tahunLulusDm3 === "number")) {
-		return false;
-	}
-	return payload.instruktur === null || payload.instruktur === undefined || typeof payload.instruktur === "boolean";
+	return payload.tahunLulusDm3 === null || payload.tahunLulusDm3 === undefined || typeof payload.tahunLulusDm3 === "number";
 }
 
 /** String kosong dianggap "kosongkan kolom" (null), sesuai "semua kolom boleh kosong". */
@@ -119,7 +114,7 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 		const baris = await c.env.DB.prepare(
 			`SELECT u."name", u."whatsapp", u."email", u."nia",
 			        p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPwId", p."asalPd", p."asalPdId",
-			        p."tahunLulusDm3", p."tempatLulusDm3", p."tempatLulusDm3Id", p."instruktur", p."capaianHafalan", p."bahasaAsing"
+			        p."tahunLulusDm3", p."tempatLulusDm3", p."tempatLulusDm3Id", p."capaianHafalan", p."bahasaAsing"
 			 FROM "user" u LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ?`,
 		)
@@ -127,10 +122,7 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 			.first<BarisAkunData>();
 
 		if (!baris) return c.json({ error: "tidak_ditemukan" }, 404);
-		return c.json({
-			...baris,
-			instruktur: baris.instruktur === null ? null : Boolean(baris.instruktur),
-		});
+		return c.json(baris);
 	});
 
 	route.put("/", async (c) => {
@@ -210,8 +202,8 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 					.bind(whatsapp, sesi.user.id),
 				c.env.DB.prepare(
 					`INSERT INTO "profil"
-					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tahunLulusDm3", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual", "instruktur", "capaianHafalan", "bahasaAsing", "diubahPada")
-					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+					   ("userId", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPwId", "asalPwManual", "asalPd", "asalPdId", "asalPdManual", "tahunLulusDm3", "tempatLulusDm3", "tempatLulusDm3Id", "tempatLulusDm3Manual", "capaianHafalan", "bahasaAsing", "diubahPada")
+					 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 					 ON CONFLICT("userId") DO UPDATE SET
 					   "namaPanggilan" = excluded."namaPanggilan",
 					   "tempatLahir" = excluded."tempatLahir",
@@ -226,7 +218,6 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 					   "tempatLulusDm3" = excluded."tempatLulusDm3",
 					   "tempatLulusDm3Id" = excluded."tempatLulusDm3Id",
 					   "tempatLulusDm3Manual" = excluded."tempatLulusDm3Manual",
-					   "instruktur" = excluded."instruktur",
 					   "capaianHafalan" = excluded."capaianHafalan",
 					   "bahasaAsing" = excluded."bahasaAsing",
 					   "diubahPada" = excluded."diubahPada"`,
@@ -246,7 +237,6 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 						tempatLulusDm3.label,
 						tempatLulusDm3.id,
 						tempatLulusDm3.manual,
-						body.instruktur === null || body.instruktur === undefined ? null : Number(body.instruktur),
 						teksAtauNull(body.capaianHafalan),
 						teksAtauNull(body.bahasaAsing),
 						waktu.toISOString(),
@@ -326,7 +316,6 @@ export function buatRuteAkunData(sekarang: () => Date, ekstraksiA1: typeof ekstr
 			asalPd: strukturCocokJson(asalPdCocok),
 			tahunLulusDm3: hasil.data.tahunLulusDm3,
 			tempatLulusDm3: strukturCocokJson(tempatLulusDm3Cocok),
-			instruktur: hasil.data.instruktur,
 			capaianHafalan: hasil.data.capaianHafalan,
 			bahasaAsing: hasil.data.bahasaAsing,
 		});

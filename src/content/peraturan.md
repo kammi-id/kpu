@@ -43,9 +43,8 @@ Dalam Peraturan ini yang dimaksud dengan:
 8. Anggota Biasa III, selanjutnya disingkat AB 3, adalah jenjang keanggotaan KAMMI sebagaimana diatur dalam AD/ART yang menjadi salah satu syarat status keanggotaan Calon Ketua Umum.
 9. Pengurus Wilayah, selanjutnya disingkat PW, adalah instansi kepemimpinan KAMMI di tingkat provinsi.
 10. Pengurus Daerah, selanjutnya disingkat PD, adalah instansi kepemimpinan KAMMI di tingkat kabupaten/kota.
-11. Instruktur KAMMI adalah kader KAMMI yang telah memenuhi kualifikasi dan disahkan sebagai pemandu jenjang kaderisasi berdasarkan ketentuan buku pedoman kaderisasi KAMMI.
-12. Rekomendasi adalah surat dukungan tertulis dari PW dan/atau PD kepada Bakal Calon Ketua Umum sebagai bentuk dukungan keorganisasian sebagaimana diatur dalam Peraturan ini.
-13. Hari adalah hari kalender, kecuali ditentukan lain secara tegas dalam Peraturan ini.
+11. Rekomendasi adalah surat dukungan tertulis dari PW dan/atau PD kepada Bakal Calon Ketua Umum sebagai bentuk dukungan keorganisasian sebagaimana diatur dalam Peraturan ini.
+12. Hari adalah hari kalender, kecuali ditentukan lain secara tegas dalam Peraturan ini.
 
 ## BAB II Asas dan Nilai Perjuangan
 
@@ -170,14 +169,13 @@ Setiap Bakal Calon Ketua Umum wajib melengkapi berkas administrasi pendaftaran y
 - a. Formulir Pendaftaran Bakal Calon Ketua Umum (Formulir A.1);
 - b. salinan Kartu Tanda Anggota/Sertifikat Dauroh Marhalah 3 sebagai bukti status AB 3;
 - c. Surat Keputusan kepengurusan sebagai bukti pernah menjadi Pengurus PD dan/atau PW;
-- d. sertifikat/Surat Keputusan Instruktur KAMMI;
-- e. surat keterangan sehat jasmani dan rohani dari rumah sakit/puskesmas;
-- f. naskah karya tulis ilmiah asli;
-- g. surat Rekomendasi tertulis dari PW (Formulir A.3);
-- h. surat Rekomendasi tertulis dari PD (Formulir A.4);
-- i. surat pernyataan komitmen hafalan Al-Qur’an (Formulir A.5);
-- j. surat pernyataan tidak sedang dijatuhi sanksi organisasi (Formulir A.6); dan
-- k. bukti transfer biaya pendaftaran sebagaimana dimaksud dalam Pasal 12.
+- d. surat keterangan sehat jasmani dan rohani dari rumah sakit/puskesmas;
+- e. naskah karya tulis ilmiah asli;
+- f. surat Rekomendasi tertulis dari PW (Formulir A.3);
+- g. surat Rekomendasi tertulis dari PD (Formulir A.4);
+- h. surat pernyataan komitmen hafalan Al-Qur’an (Formulir A.5);
+- i. surat pernyataan tidak sedang dijatuhi sanksi organisasi (Formulir A.6); dan
+- j. bukti transfer biaya pendaftaran sebagaimana dimaksud dalam Pasal 12.
 
 ### Pasal 14
 

@@ -34,7 +34,6 @@ describe("ekstraksiA1 (tiket 23)", () => {
 								asalPd: "PD KAMMI Bandung",
 								tahunLulusDm3: 2022,
 								tempatLulusDm3: "PW KAMMI Jawa Barat",
-								instruktur: true,
 								capaianHafalan: "5 Juz",
 								bahasaAsing: "Arab, Inggris",
 							}),
@@ -55,7 +54,6 @@ describe("ekstraksiA1 (tiket 23)", () => {
 			asalPd: "PD KAMMI Bandung",
 			tahunLulusDm3: 2022,
 			tempatLulusDm3: "PW KAMMI Jawa Barat",
-			instruktur: true,
 			capaianHafalan: "5 Juz",
 			bahasaAsing: "Arab, Inggris",
 		});
@@ -75,7 +73,6 @@ describe("ekstraksiA1 (tiket 23)", () => {
 								asalPd: null,
 								tahunLulusDm3: 1990, // di bawah batas 1998
 								tempatLulusDm3: null,
-								instruktur: "bukan boolean", // tipe salah
 								capaianHafalan: null,
 								bahasaAsing: "",
 							}),
@@ -91,7 +88,6 @@ describe("ekstraksiA1 (tiket 23)", () => {
 		expect(hasil.data.namaPanggilan).toBeNull();
 		expect(hasil.data.tanggalLahir).toBeNull();
 		expect(hasil.data.tahunLulusDm3).toBeNull();
-		expect(hasil.data.instruktur).toBeNull();
 		expect(hasil.data.bahasaAsing).toBeNull();
 		expect(hasil.data.tempatLahir).toBe("Jakarta");
 	});

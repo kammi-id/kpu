@@ -57,7 +57,7 @@ function kelompokDariParam(nilai: string): NomorKelompok | null {
 }
 
 /**
- * `/api/akun/berkas`: rute Bakal Calon untuk sepuluh kelompok berkas (tiket 13).
+ * `/api/akun/berkas`: rute Bakal Calon untuk sembilan kelompok berkas (tiket 13).
  * Urutan tetap setiap rute non-baca: sesi → peran (bacalon) → kepemilikan → tahap.
  * Unduhan (pemilik atau Admin) per spec "Kelompok berkas dan unggahan" adalah
  * pengecualian yang disengaja: lebih luas dari rute lain di sini.

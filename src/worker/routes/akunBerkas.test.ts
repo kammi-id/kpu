@@ -166,20 +166,25 @@ beforeEach(async () => {
 });
 
 describe("unggah berkas: format dan validasi (acceptance 14, 15)", () => {
-	it("kelompok 6 hanya menerima PDF, menolak JPEG/PNG", async () => {
-		const cookie = await daftarBacalon("k6@example.test");
-		expect((await unggah(cookie, 6, { mime: "application/pdf", namaAsli: "kti.pdf" })).status).toBe(201);
-		expect((await unggah(cookie, 6, { mime: "image/jpeg", namaAsli: "kti.jpg" })).status).toBe(400);
-		expect((await unggah(cookie, 6, { mime: "image/png", namaAsli: "kti.png" })).status).toBe(400);
+	it("kelompok 5 hanya menerima PDF, menolak JPEG/PNG", async () => {
+		const cookie = await daftarBacalon("k5@example.test");
+		expect((await unggah(cookie, 5, { mime: "application/pdf", namaAsli: "kti.pdf" })).status).toBe(201);
+		expect((await unggah(cookie, 5, { mime: "image/jpeg", namaAsli: "kti.jpg" })).status).toBe(400);
+		expect((await unggah(cookie, 5, { mime: "image/png", namaAsli: "kti.png" })).status).toBe(400);
 	});
 
-	it("sembilan kelompok lain menerima PDF, JPEG, dan PNG", async () => {
+	it("tujuh kelompok lain menerima PDF, JPEG, dan PNG", async () => {
 		const cookie = await daftarBacalon("sembilan@example.test");
-		for (const kelompok of [1, 2, 3, 4, 5, 8, 9, 10]) {
+		for (const kelompok of [1, 2, 3, 4, 7, 8, 9]) {
 			expect((await unggah(cookie, kelompok, { mime: "application/pdf", namaAsli: `berkas${kelompok}.pdf` })).status).toBe(201);
 		}
 		expect((await unggah(cookie, 1, { mime: "image/jpeg", namaAsli: "b.jpg" })).status).toBe(201);
 		expect((await unggah(cookie, 2, { mime: "image/png", namaAsli: "b.png" })).status).toBe(201);
+	});
+
+	it("kelompok 10 tidak ada lagi sejak berkas instruktur dihapus (ADR 0003)", async () => {
+		const cookie = await daftarBacalon("k10@example.test");
+		expect((await unggah(cookie, 10, { namaAsli: "bukti.pdf" })).status).toBe(400);
 	});
 
 	it("menolak berkas > 20 MiB dan berkas tanpa Content-Length", async () => {
@@ -270,39 +275,39 @@ describe("R2 dan integritas (acceptance terkait sha256/r2Key)", () => {
 	});
 });
 
-describe("kelompok 7: jenisRekomendasi dan ambang hadir (acceptance 13)", () => {
-	it("menolak unggahan kelompok 7 tanpa jenisRekomendasi, dan menolak jenisRekomendasi di kelompok lain", async () => {
-		const cookie = await daftarBacalon("k7@example.test");
-		expect((await unggah(cookie, 7, { namaAsli: "a3.pdf" })).status).toBe(400);
+describe("kelompok 6: jenisRekomendasi dan ambang hadir (acceptance 13)", () => {
+	it("menolak unggahan kelompok 6 tanpa jenisRekomendasi, dan menolak jenisRekomendasi di kelompok lain", async () => {
+		const cookie = await daftarBacalon("k6@example.test");
+		expect((await unggah(cookie, 6, { namaAsli: "a3.pdf" })).status).toBe(400);
 		expect((await unggah(cookie, 1, { namaAsli: "a.pdf", jenisRekomendasi: "A3_PW" })).status).toBe(400);
-		expect((await unggah(cookie, 7, { namaAsli: "a3.pdf", jenisRekomendasi: "A3_PW" })).status).toBe(201);
+		expect((await unggah(cookie, 6, { namaAsli: "a3.pdf", jenisRekomendasi: "A3_PW" })).status).toBe(201);
 	});
 
 	it("hadir dengan 2 A3_PW atau 3 A4_PD, tapi campuran 1 A3_PW + 2 A4_PD belum hadir", async () => {
 		const dua_a3 = await daftarBacalon("dua-a3@example.test");
-		await unggah(dua_a3, 7, { namaAsli: "a.pdf", jenisRekomendasi: "A3_PW" });
-		await unggah(dua_a3, 7, { namaAsli: "b.pdf", jenisRekomendasi: "A3_PW" });
-		const kelengkapanDuaA3 = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: dua_a3 } })).json<{ k7: number }>();
-		expect(kelengkapanDuaA3.k7).toBe(1);
+		await unggah(dua_a3, 6, { namaAsli: "a.pdf", jenisRekomendasi: "A3_PW" });
+		await unggah(dua_a3, 6, { namaAsli: "b.pdf", jenisRekomendasi: "A3_PW" });
+		const kelengkapanDuaA3 = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: dua_a3 } })).json<{ k6: number }>();
+		expect(kelengkapanDuaA3.k6).toBe(1);
 
 		const tiga_a4 = await daftarBacalon("tiga-a4@example.test");
-		await unggah(tiga_a4, 7, { namaAsli: "a.pdf", jenisRekomendasi: "A4_PD" });
-		await unggah(tiga_a4, 7, { namaAsli: "b.pdf", jenisRekomendasi: "A4_PD" });
-		await unggah(tiga_a4, 7, { namaAsli: "c.pdf", jenisRekomendasi: "A4_PD" });
-		const kelengkapanTigaA4 = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: tiga_a4 } })).json<{ k7: number }>();
-		expect(kelengkapanTigaA4.k7).toBe(1);
+		await unggah(tiga_a4, 6, { namaAsli: "a.pdf", jenisRekomendasi: "A4_PD" });
+		await unggah(tiga_a4, 6, { namaAsli: "b.pdf", jenisRekomendasi: "A4_PD" });
+		await unggah(tiga_a4, 6, { namaAsli: "c.pdf", jenisRekomendasi: "A4_PD" });
+		const kelengkapanTigaA4 = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: tiga_a4 } })).json<{ k6: number }>();
+		expect(kelengkapanTigaA4.k6).toBe(1);
 
 		const campuran = await daftarBacalon("campuran@example.test");
-		await unggah(campuran, 7, { namaAsli: "a.pdf", jenisRekomendasi: "A3_PW" });
-		await unggah(campuran, 7, { namaAsli: "b.pdf", jenisRekomendasi: "A4_PD" });
-		await unggah(campuran, 7, { namaAsli: "c.pdf", jenisRekomendasi: "A4_PD" });
-		const kelengkapanCampuran = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: campuran } })).json<{ k7: number }>();
-		expect(kelengkapanCampuran.k7).toBe(0);
+		await unggah(campuran, 6, { namaAsli: "a.pdf", jenisRekomendasi: "A3_PW" });
+		await unggah(campuran, 6, { namaAsli: "b.pdf", jenisRekomendasi: "A4_PD" });
+		await unggah(campuran, 6, { namaAsli: "c.pdf", jenisRekomendasi: "A4_PD" });
+		const kelengkapanCampuran = await (await kirim(MASA_PENDAFTARAN, "/api/akun/berkas", { headers: { cookie: campuran } })).json<{ k6: number }>();
+		expect(kelengkapanCampuran.k6).toBe(0);
 	});
 });
 
 describe("Status Kelengkapan Berkas: sumber tunggal vKelengkapan (acceptance 12)", () => {
-	it("x/10 dan label sama antara /api/akun dan /api/akun/berkas", async () => {
+	it("x/9 dan label sama antara /api/akun dan /api/akun/berkas", async () => {
 		const cookie = await daftarBacalon("konsisten@example.test");
 		await unggah(cookie, 1, { namaAsli: "a.pdf" });
 		await unggah(cookie, 2, { namaAsli: "b.pdf" });
@@ -447,7 +452,7 @@ describe("Audit unggah_berkas tanpa nama berkas", () => {
 	it("mencatat berhasil dan ditolak tanpa menyimpan nama berkas di audit", async () => {
 		const cookie = await daftarBacalon("audit-unggah@example.test");
 		await unggah(cookie, 1, { namaAsli: "nama-rahasia-pemohon.pdf" });
-		await unggah(cookie, 6, { namaAsli: "b.jpg", mime: "image/jpeg" }); // ditolak: kelompok 6 PDF saja
+		await unggah(cookie, 5, { namaAsli: "b.jpg", mime: "image/jpeg" }); // ditolak: kelompok 5 PDF saja
 
 		const audit = await env.DB.prepare('SELECT "aktor", "tindakan", "hasil" FROM "audit" WHERE "tindakan" = ? ORDER BY "hasil"')
 			.bind("unggah_berkas")

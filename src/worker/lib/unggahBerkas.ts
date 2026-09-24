@@ -1,4 +1,4 @@
-import { mimeDiizinkan, type JenisRekomendasi, type NomorKelompok } from "../../lib/kelompok";
+import { KELOMPOK_REKOMENDASI, mimeDiizinkan, type JenisRekomendasi, type NomorKelompok } from "../../lib/kelompok";
 
 // Kontrak unggah berkas Bakal Calon (spec "Kelompok berkas dan unggahan"): body
 // mentah, `Content-Length` wajib, metadata (namaAsli, dan untuk kelompok 7
@@ -70,11 +70,11 @@ function bacaMeta(url: URL, headers: Headers, kelompok: NomorKelompok): MetaUngg
 	if (!namaAsli || !mimeValid(mime)) return null;
 	if (!mimeDiizinkan(kelompok).includes(mime)) return null;
 
-	if (kelompok === 7) {
+	if (kelompok === KELOMPOK_REKOMENDASI) {
 		if (jenisRekomendasiMentah !== "A3_PW" && jenisRekomendasiMentah !== "A4_PD") return null;
 		return { namaAsli, mime, jenisRekomendasi: jenisRekomendasiMentah };
 	}
-	if (jenisRekomendasiMentah !== null) return null; // dilarang di luar kelompok 7
+	if (jenisRekomendasiMentah !== null) return null; // dilarang di luar kelompok rekomendasi
 	return { namaAsli, mime, jenisRekomendasi: null };
 }
 

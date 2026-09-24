@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { KELOMPOK_BERKAS } from "~/lib/kelompok";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
@@ -65,7 +66,7 @@ export function AdminBeranda() {
 								<td className="px-3 py-3 font-medium text-navy">{item.name}</td>
 								<td className="px-3 py-3">{item.whatsapp}</td>
 								<td className="px-3 py-3">{waktuTerformat(item.dibuatPada)}</td>
-								<td className="px-3 py-3">{item.jumlahHadir}/10</td>
+								<td className="px-3 py-3">{item.jumlahHadir}/{KELOMPOK_BERKAS.length}</td>
 								<td className="px-3 py-3"><StatusBadge terbuka={item.lengkap}>{item.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge></td>
 								<td className="px-3 py-3">{item.mintaDitutup ? <StatusBadge terbuka={false}>Minta ditutup</StatusBadge> : null}</td>
 								<td className="px-3 py-3 text-right"><Link to={`/admin/${item.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>Detail</Link></td>
