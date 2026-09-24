@@ -9,7 +9,7 @@ Data yang Anda serahkan diproses semata-mata untuk keperluan penjaringan Bakal C
 ## Jenis data
 
 - Nama lengkap, email, dan nomor WhatsApp.
-- Data pribadi lain pada formulir (tempat dan tanggal lahir, asal PW/PD, riwayat AB 3, status instruktur, capaian hafalan, bahasa asing).
+- Data pribadi lain pada formulir (tempat dan tanggal lahir, asal PW/PD, riwayat AB 3, capaian hafalan, bahasa asing).
 - Berkas pendaftaran yang Anda unggah (formulir A.1–A.6 dan lampirannya).
 
 ## Pihak yang mengakses

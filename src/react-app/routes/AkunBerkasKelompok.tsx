@@ -3,7 +3,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { kelompokBerkas, kelompokValid, type NomorKelompok } from "~/lib/kelompok";
+import { KELOMPOK_REKOMENDASI, kelompokBerkas, kelompokValid, type NomorKelompok } from "~/lib/kelompok";
 import { ambilBerkasKelompok, mimeDariNamaBerkas, unggahBerkasKelompok, urlPratinjauBerkas, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
 import { ambilUnduhan, urlUnduhBerkasPublik, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { PratinjauBerkasSheet } from "~/react-app/components/PratinjauBerkasSheet";
@@ -92,7 +92,7 @@ export function AkunBerkasKelompok() {
 		setMenyimpan(true);
 		setPesan("");
 		try {
-			await unggahBerkasKelompok(kelompok.nomor, file, mime, kelompok.nomor === 7 ? jenisRekomendasi : undefined);
+			await unggahBerkasKelompok(kelompok.nomor, file, mime, kelompok.nomor === KELOMPOK_REKOMENDASI ? jenisRekomendasi : undefined);
 			form.reset();
 			setFile(null);
 			await muat(kelompok.nomor);
@@ -149,7 +149,7 @@ export function AkunBerkasKelompok() {
 			) : null}
 
 			<form className="grid gap-4 rounded-2xl border border-border bg-white p-5" onSubmit={unggah}>
-				{kelompok.nomor === 7 ? (
+				{kelompok.nomor === KELOMPOK_REKOMENDASI ? (
 					<fieldset className="flex flex-col gap-2">
 						<label htmlFor="jenisRekomendasi" className="font-semibold">
 							Asal rekomendasi

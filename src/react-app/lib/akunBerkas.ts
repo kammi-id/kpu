@@ -14,7 +14,6 @@ export type KelengkapanBerkas = {
 	k7: number;
 	k8: number;
 	k9: number;
-	k10: number;
 	jumlahHadir: number;
 	lengkap: number;
 };

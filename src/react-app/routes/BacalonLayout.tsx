@@ -1,6 +1,7 @@
 import { FileText, Home, IdCard, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { KELOMPOK_BERKAS } from "~/lib/kelompok";
 import { DashboardShell, type DashboardNavItem } from "~/react-app/components/DashboardShell";
 import { OutletBerjeda } from "~/react-app/components/OutletBerjeda";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
@@ -56,7 +57,7 @@ export function BacalonLayout() {
 			headerLabel={
 				<div className="flex flex-wrap items-center gap-x-3 gap-y-1">
 					<p className="text-sm font-semibold text-muted-foreground">
-						Status Kelengkapan Berkas: {ringkasan.jumlahHadir}/10
+						Status Kelengkapan Berkas: {ringkasan.jumlahHadir}/{KELOMPOK_BERKAS.length}
 					</p>
 					<StatusBadge terbuka={ringkasan.lengkap}>{ringkasan.lengkap ? "Lengkap" : "Belum lengkap"}</StatusBadge>
 				</div>

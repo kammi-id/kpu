@@ -22,7 +22,6 @@ export type EkstraksiA1 = {
 	asalPd: string | null;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
-	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 };
@@ -56,7 +55,6 @@ const SKEMA_EKSTRAKSI = {
 		"asalPd",
 		"tahunLulusDm3",
 		"tempatLulusDm3",
-		"instruktur",
 		"capaianHafalan",
 		"bahasaAsing",
 	],
@@ -68,7 +66,6 @@ const SKEMA_EKSTRAKSI = {
 		asalPd: { type: ["string", "null"], description: "Nama Pengurus Daerah (PD) KAMMI asal, apa adanya di formulir." },
 		tahunLulusDm3: { type: ["integer", "null"] },
 		tempatLulusDm3: { type: ["string", "null"] },
-		instruktur: { type: ["boolean", "null"], description: "true bila formulir menyatakan berstatus instruktur KAMMI." },
 		capaianHafalan: { type: ["string", "null"] },
 		bahasaAsing: { type: ["string", "null"] },
 	},
@@ -92,7 +89,6 @@ function validasi(mentah: Record<string, unknown>, sekarang: Date): EkstraksiA1 
 		asalPd: teksAtauNull(mentah.asalPd),
 		tahunLulusDm3: tahunLulusDm3 !== null && tahunLulusDm3Valid(tahunLulusDm3, sekarang) ? tahunLulusDm3 : null,
 		tempatLulusDm3: teksAtauNull(mentah.tempatLulusDm3),
-		instruktur: typeof mentah.instruktur === "boolean" ? mentah.instruktur : null,
 		capaianHafalan: teksAtauNull(mentah.capaianHafalan),
 		bahasaAsing: teksAtauNull(mentah.bahasaAsing),
 	};
@@ -131,7 +127,7 @@ export async function ekstraksiA1(
 						content: [
 							{
 								type: "text",
-								text: "Ekstrak dari Formulir A.1 terlampir: nama panggilan, tempat lahir, tanggal lahir, asal PW, asal PD, tahun lulus AB 3, tempat lulus AB 3, status instruktur, capaian hafalan, bahasa asing.",
+								text: "Ekstrak dari Formulir A.1 terlampir: nama panggilan, tempat lahir, tanggal lahir, asal PW, asal PD, tahun lulus AB 3, tempat lulus AB 3, capaian hafalan, bahasa asing.",
 							},
 							bagianBerkas,
 						],

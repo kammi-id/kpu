@@ -1,0 +1,12 @@
+# Menghapus berkas dan status instruktur, lalu menomori ulang Kelompok Berkas menjadi sembilan
+
+Revisi PKPU 8 September 2026 menghapus syarat "telah menjadi Instruktur KAMMI", tetapi naskahnya masih mendefinisikan Instruktur KAMMI (Pasal 1 angka 11) dan mewajibkan sertifikat/SK Instruktur KAMMI sebagai berkas (Pasal 13 huruf d). Formulir A.1 dan A.2 juga masih memintanya. KPU memutuskan berkas instruktur tidak wajib dan tidak perlu diserahkan. Karena itu kami menghapus semua jejak instruktur dari aplikasi dan dari Berkas Publik, di tengah Masa Pendaftaran dan sebelum Snapshot Pemeriksaan 27 September 2026.
+
+Pilihan yang diambil, beserta alternatif yang ditolak:
+
+- **Kelompok Berkas dinomori ulang 1–9**, tidak dibiarkan berlompat (1–3, 5–10). Nomor mengikuti checklist Formulir A.2 yang juga dinomori ulang, sehingga tabel `berkas` dibangun ulang dengan batasan baru (rekomendasi = kelompok 6, PDF saja = kelompok 5). `berkas` hanya tabel anak, jadi aman menurut [ADR 0002](0002-membangun-ulang-tabel-induk-di-d1.md). URL `/bacalon/berkas/:no` yang pernah dibuka Bacalon kini menunjuk kelompok lain.
+- **Berkas kelompok 4 dihapus permanen**, tidak disimpan tersembunyi, karena menyimpan data tanpa tujuan pemrosesan bertentangan dengan minimisasi data. Saat keputusan ini diambil, production belum memiliki satu pun berkas kelompok 4.
+- **Kolom `profil.instruktur` dihapus**, tidak sekadar dikosongkan. Empat profil production kehilangan nilai itu.
+- **Naskah PKPU diedit di tempat**, dengan nomor 01/PKPU/MUKTAMAR-XIV/2026 dan tanggal penetapan 8 September 2026 tetap. Pasal 1 angka 11 dan Pasal 13 huruf d dihapus, lalu angka dan huruf sesudahnya dinomori ulang. Tidak diterbitkan PKPU perubahan. PDF-nya sudah bertanda tangan dan berstempel. Atas persetujuan Ketua dan Sekretaris KPU, PDF itu diedit langsung dengan mempertahankan tanda tangan dan stempel aslinya, bukan ditandatangani ulang. Formulir A.1 dan A.2 diedit dengan cara yang sama. A.2 kini bernomor 1–10, bukan 1–9, karena A.3 dan A.4 tetap dua baris terpisah di formulir itu.
+- **`persetujuan-v1.md` diedit di tempat**, tanpa v2. Bacalon yang tercatat `persetujuan-v1` sebelum perubahan ini menyetujui teks yang masih menyebut "status instruktur". Karena perubahannya hanya mengurangi data yang dikumpulkan, persetujuan ulang tidak diminta.
+- **Formulir A.1 Bacalon yang sudah diunggah tetap diterima**, meski masih memuat baris status instruktur.

@@ -4,7 +4,7 @@ import { KELOMPOK_BERKAS } from "~/lib/kelompok";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { ambilKelengkapanBerkas, type KelengkapanBerkas } from "~/react-app/lib/akunBerkas";
 
-/** Sepuluh baris `k1..k10` dari `vKelengkapan`, diindeks per nomor kelompok. */
+/** Sembilan baris `k1..k9` dari `vKelengkapan`, diindeks per nomor kelompok. */
 function kelompokHadir(data: KelengkapanBerkas): Record<number, number> {
 	return {
 		1: data.k1,
@@ -16,7 +16,6 @@ function kelompokHadir(data: KelengkapanBerkas): Record<number, number> {
 		7: data.k7,
 		8: data.k8,
 		9: data.k9,
-		10: data.k10,
 	};
 }
 

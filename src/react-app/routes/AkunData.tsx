@@ -27,7 +27,6 @@ type AkunDataApi = {
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
 	tempatLulusDm3Id: string | null;
-	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 };
@@ -40,7 +39,6 @@ type EkstraksiApi = {
 	asalPd: NilaiStrukturApi;
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: NilaiStrukturApi;
-	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 };
@@ -54,11 +52,6 @@ type FormState = {
 	asalPd: NilaiComboboxSearchable;
 	tahunLulusDm3: string;
 	tempatLulusDm3: NilaiComboboxSearchable;
-	instruktur: boolean;
-	// Tiket 23: extraksi tidak pernah menimpa nilai yang sudah pernah tersimpan
-	// (manual maupun hasil isi-otomatis sebelumnya) — dibedakan dari default
-	// checkbox `false` lewat penanda ini, bukan dari nilai boolean itu sendiri.
-	instrukturDiisi: boolean;
 	capaianHafalan: string;
 	bahasaAsing: string;
 };
@@ -72,8 +65,6 @@ const FORM_KOSONG: FormState = {
 	asalPd: "",
 	tahunLulusDm3: "",
 	tempatLulusDm3: "",
-	instruktur: false,
-	instrukturDiisi: false,
 	capaianHafalan: "",
 	bahasaAsing: "",
 };
@@ -112,8 +103,6 @@ function formDari(data: AkunDataApi): FormState {
 		asalPd: nilaiStruktur(data.asalPd, data.asalPdId),
 		tahunLulusDm3: data.tahunLulusDm3 === null ? "" : String(data.tahunLulusDm3),
 		tempatLulusDm3: nilaiStruktur(data.tempatLulusDm3, data.tempatLulusDm3Id),
-		instruktur: data.instruktur === true,
-		instrukturDiisi: data.instruktur !== null,
 		capaianHafalan: data.capaianHafalan ?? "",
 		bahasaAsing: data.bahasaAsing ?? "",
 	};
@@ -242,8 +231,6 @@ export function AkunData() {
 					strukturKosong(sebelumnya.tempatLulusDm3) && hasil.tempatLulusDm3
 						? { id: hasil.tempatLulusDm3.id, label: hasil.tempatLulusDm3.label }
 						: sebelumnya.tempatLulusDm3,
-				instruktur: !sebelumnya.instrukturDiisi && hasil.instruktur !== null ? hasil.instruktur : sebelumnya.instruktur,
-				instrukturDiisi: sebelumnya.instrukturDiisi || hasil.instruktur !== null,
 				capaianHafalan: sebelumnya.capaianHafalan === "" && hasil.capaianHafalan ? hasil.capaianHafalan : sebelumnya.capaianHafalan,
 				bahasaAsing: sebelumnya.bahasaAsing === "" && hasil.bahasaAsing ? hasil.bahasaAsing : sebelumnya.bahasaAsing,
 			}));
@@ -314,7 +301,6 @@ export function AkunData() {
 			tahunLulusDm3: form.tahunLulusDm3.trim() === "" ? null : Number(form.tahunLulusDm3),
 			tempatLulusDm3: kosongkeNull(tempatLulusDm3.teks),
 			tempatLulusDm3Id: tempatLulusDm3.id,
-			instruktur: form.instrukturDiisi ? form.instruktur : null,
 			capaianHafalan: kosongkeNull(form.capaianHafalan),
 			bahasaAsing: kosongkeNull(form.bahasaAsing),
 		};
@@ -482,15 +468,6 @@ export function AkunData() {
 									<Input id="bahasaAsing" value={form.bahasaAsing} onChange={(event) => ubah("bahasaAsing", event.target.value)} />
 								</div>
 							</div>
-							<label className="flex items-center gap-2 text-sm font-semibold text-navy">
-								<input
-									type="checkbox"
-									className="size-4"
-									checked={form.instruktur}
-									onChange={(event) => setForm((sebelumnya) => ({ ...sebelumnya, instruktur: event.target.checked, instrukturDiisi: true }))}
-								/>
-								Berstatus instruktur
-							</label>
 						</CardContent>
 					</Card>
 

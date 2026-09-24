@@ -117,7 +117,6 @@ function payloadLengkap(overrides: Record<string, unknown> = {}) {
 		asalPd: "PD KAMMI Jakarta Selatan",
 		tahunLulusDm3: 2020,
 		tempatLulusDm3: "Jakarta",
-		instruktur: true,
 		capaianHafalan: "Juz 30",
 		bahasaAsing: "Inggris",
 		...overrides,
@@ -154,7 +153,6 @@ function ekstraksiSukses(data: Partial<EkstraksiA1>): HasilEkstraksiA1 {
 			asalPd: null,
 			tahunLulusDm3: null,
 			tempatLulusDm3: null,
-			instruktur: null,
 			capaianHafalan: null,
 			bahasaAsing: null,
 			...data,
@@ -211,7 +209,6 @@ describe("GET /api/akun/data (seam Worker)", () => {
 			namaPanggilan: null,
 			tanggalLahir: null,
 			tahunLulusDm3: null,
-			instruktur: null,
 		});
 	});
 
@@ -372,7 +369,6 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 				asalPd: null,
 				tahunLulusDm3: null,
 				tempatLulusDm3: null,
-				instruktur: null,
 				capaianHafalan: null,
 				bahasaAsing: null,
 			}),
@@ -384,7 +380,6 @@ describe("PUT /api/akun/data — simpan (seam Worker)", () => {
 			tempatLahir: null,
 			tanggalLahir: null,
 			tahunLulusDm3: null,
-			instruktur: null,
 		});
 	});
 
@@ -566,10 +561,10 @@ describe("POST /api/akun/data/isi-otomatis (tiket 23, seam Worker)", () => {
 		await taruhBerkasA1(userId);
 		const response = await kirimIsiOtomatis(
 			cookie,
-			() => Promise.resolve(ekstraksiSukses({ namaPanggilan: "Budi", capaianHafalan: "Juz 30", instruktur: true })),
+			() => Promise.resolve(ekstraksiSukses({ namaPanggilan: "Budi", capaianHafalan: "Juz 30" })),
 		);
 		expect(response.status).toBe(200);
-		expect(await response.json()).toMatchObject({ namaPanggilan: "Budi", capaianHafalan: "Juz 30", instruktur: true, asalPw: null, asalPd: null });
+		expect(await response.json()).toMatchObject({ namaPanggilan: "Budi", capaianHafalan: "Juz 30", asalPw: null, asalPd: null });
 	});
 
 	it("mencocokkan Asal PW dan Tempat Lulus AB 3 ke daftar struktur (jenis=pw)", async () => {

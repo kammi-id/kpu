@@ -4,6 +4,8 @@ Status: ready-for-agent
 Tenggat: seluruh fitur operasional pada 17 September 2026 pukul 00.00 WIB (16 September 2026 17.00 UTC)
 Sumber keputusan: [peta](map.md), tiket [02](issues/02-model-operasi-dan-kebijakan-pendaftaran.md), [03](issues/03-identitas-keamanan-dan-siklus-data.md), [04](issues/04-blueprint-tiga-peran.md), [05](issues/05-skema-data-dan-kontrak-penyimpanan.md), [06](issues/06-batas-operasional-peluncuran-dan-penghentian.md). Bila tiket 02–05 bertentangan dengan tiket 06, **tiket 06 yang berlaku**. Istilah mengikuti `CONTEXT.md`.
 
+> **Diubah 24 September 2026 ([ADR 0003](../../docs/adr/0003-menghapus-berkas-dan-status-instruktur.md)):** berkas dan status instruktur dihapus. Kelompok Berkas kini sembilan (`x/9`): kelompok 5 lama dan seterusnya turun satu nomor, sehingga karya tulis ilmiah (PDF saja) menjadi kelompok 5 dan rekomendasi A.3/A.4 menjadi kelompok 6. Penyebutan sepuluh kelompok, `x/10`, kelompok 6/7, dan status instruktur di bawah mengikuti keadaan sebelum perubahan ini.
+
 Spesifikasi ini merangkum dan menyatukan keputusan yang sudah ada. Ia tidak membuka ulang ruang lingkup. DDL persis, checklist peluncuran, runbook, dan langkah penghentian tetap berada di tiket 05 dan 06; spesifikasi ini merujuknya.
 
 ## Problem Statement

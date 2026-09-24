@@ -13,11 +13,11 @@ Anggota Biasa III KAMMI yang telah membuat akun aplikasi KPU tetapi belum dinyat
 _Avoid_: kandidat, calon tetap
 
 **Status Kelengkapan Berkas**:
-Penanda otomatis berupa status tiap kelompok, jumlah kelompok terpenuhi, dan hasil keseluruhan bahwa sepuluh kelompok berkas yang diwajibkan telah berada di sistem. Formulir A.3 dan A.4 berada dalam satu kelompok rekomendasi yang terpenuhi melalui salah satu Jalur Rekomendasi; status ini tidak menyatakan keabsahan isi atau kelulusan verifikasi KPU.
+Penanda otomatis berupa status tiap kelompok, jumlah kelompok terpenuhi, dan hasil keseluruhan bahwa sembilan kelompok berkas yang diwajibkan telah berada di sistem. Formulir A.3 dan A.4 berada dalam satu kelompok rekomendasi yang terpenuhi melalui salah satu Jalur Rekomendasi; status ini tidak menyatakan keabsahan isi atau kelulusan verifikasi KPU.
 _Avoid_: status verifikasi, berkas sah, lulus administrasi
 
 **Kelompok Berkas**:
-Salah satu dari sepuluh kategori berkas wajib yang diunggah Bakal Calon Ketua Umum agar Status Kelengkapan Berkas menyatakan lengkap. Kelompok 1 adalah Formulir A.1 Bacalon.
+Salah satu dari sembilan kategori berkas wajib yang diunggah Bakal Calon Ketua Umum agar Status Kelengkapan Berkas menyatakan lengkap. Kelompok 1 adalah Formulir A.1 Bacalon.
 _Avoid_: jenis berkas, kategori unggahan
 
 **Masa Pendaftaran**:
@@ -121,7 +121,7 @@ Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKP
 _Avoid_: berkas Bakal Calon, lampiran pendaftaran
 
 **Formulir A.1 Bacalon**:
-Salinan Formulir A.1 yang telah diisi dan ditandatangani oleh seorang Bakal Calon Ketua Umum, diunggah sebagai Kelompok Berkas pertama dari sepuluh yang diwajibkan. Berbeda dari Formulir A.1 kosong di bawah Berkas Publik, yang menjadi templat unduhan dan tidak pernah memuat data Bakal Calon.
+Salinan Formulir A.1 yang telah diisi dan ditandatangani oleh seorang Bakal Calon Ketua Umum, diunggah sebagai Kelompok Berkas pertama dari sembilan yang diwajibkan. Berbeda dari Formulir A.1 kosong di bawah Berkas Publik, yang menjadi templat unduhan dan tidak pernah memuat data Bakal Calon.
 _Avoid_: Formulir A.1 (tanpa konteks), berkas A.1
 
 **Onboarding Admin**:

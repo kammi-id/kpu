@@ -35,7 +35,6 @@ type BarisDetail = {
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
 	tempatLulusDm3Manual: number | null;
-	instruktur: number | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 	jumlahHadir: number;
@@ -142,7 +141,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", p."namaPanggilan", p."tempatLahir", p."tanggalLahir",
 			        p."asalPw", p."asalPwManual", p."asalPd", p."asalPdManual",
 			        p."tahunLulusDm3", p."tempatLulusDm3", p."tempatLulusDm3Manual",
-			        p."instruktur", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
+			        p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap", ${KOLOM_MINTA_DITUTUP}
 			 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
 			 WHERE u."id" = ? AND u."role" = 'bacalon'`,
 		)
@@ -160,7 +159,6 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			asalPwManual: Boolean(detail.asalPwManual),
 			asalPdManual: Boolean(detail.asalPdManual),
 			tempatLulusDm3Manual: Boolean(detail.tempatLulusDm3Manual),
-			instruktur: detail.instruktur === null ? null : Boolean(detail.instruktur),
 			lengkap: Boolean(detail.lengkap),
 			mintaDitutup: Boolean(detail.mintaDitutup),
 			berkas: berkas.results.map(({ r2Key: _r2Key, userId: _userId, ...item }) => item),

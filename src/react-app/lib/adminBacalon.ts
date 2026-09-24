@@ -23,7 +23,6 @@ export type DetailBacalonAdmin = RingkasanBacalonAdmin & {
 	tahunLulusDm3: number | null;
 	tempatLulusDm3: string | null;
 	tempatLulusDm3Manual?: boolean;
-	instruktur: boolean | null;
 	capaianHafalan: string | null;
 	bahasaAsing: string | null;
 	berkas: Array<{
