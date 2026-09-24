@@ -17,7 +17,7 @@
       "source": "cloudflare/skills",
       "sourceType": "github",
       "skillPath": "skills/cloudflare/SKILL.md",
-      "computedHash": "c9b25ff6c3be26e74162e7df183990f8ee76ad6d1ee37d9ca50b4dd23cb06ad1"
+      "computedHash": "163d684e39202f0073a15b84181d6bc1c825092d66947193daefd153102e2839"
     },
     "create-auth": {
       "source": "better-auth/skills",
@@ -41,7 +41,7 @@
       "source": "GoogleChrome/modern-web-guidance",
       "sourceType": "github",
       "skillPath": "skills/modern-web-guidance/SKILL.md",
-      "computedHash": "da9b9c833351f0575ca7482f3c8decc8e24b02b76dea71f138738283c701b4c5"
+      "computedHash": "6ac08f66a37cadf7a60310aa0d03c8d4be0908d8050265de5f36db872a0c5214"
     },
     "organization-best-practices": {
       "source": "better-auth/skills",
@@ -107,7 +107,7 @@
       "source": "cloudflare/skills",
       "sourceType": "github",
       "skillPath": "skills/wrangler/SKILL.md",
-      "computedHash": "4d247a243fec7e23f1247976e0e491520cb0feb397c5477022551e7b4f5cdd93"
+      "computedHash": "f0147a3ee20d56a89c735d6c9efd45d61a21e2fc5f2ebb53ca1250006b79c8ad"
     }
   }
 }
