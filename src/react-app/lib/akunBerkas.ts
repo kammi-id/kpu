@@ -46,6 +46,10 @@ export function urlUnduhBerkas(nomor: number, id: string) {
 	return `/api/akun/berkas/${nomor}/${encodeURIComponent(id)}/unduh`;
 }
 
+export function urlPratinjauBerkas(nomor: number, id: string) {
+	return `/api/akun/berkas/${nomor}/${encodeURIComponent(id)}/pratinjau`;
+}
+
 /** MIME dari ekstensi nama berkas — dipakai klien sebelum unggah (server tervalidasi ulang di lib/unggahBerkas.ts). */
 export function mimeDariNamaBerkas(namaAsli: string): string | null {
 	const ekstensi = namaAsli.toLowerCase().split(".").pop();

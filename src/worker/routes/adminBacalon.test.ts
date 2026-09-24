@@ -293,6 +293,24 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/berkas/${berkas.id}/unduh`, { headers: { cookie: bacalon } })).status).toBe(401);
 	});
 
+	it("mengalirkan pratinjau Admin inline dengan aturan akses yang sama dengan unduh", async () => {
+		const admin = await sesiAdmin();
+		const bacalon = await sesiBacalon("pratinjau@example.test", "Pratinjau Putri");
+		const pemilik = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("pratinjau@example.test").first<{ id: string }>();
+		const berkas = await simpanBerkas(pemilik?.id as string, 1, "identitas.pdf");
+		const url = `/api/admin/${pemilik?.id}/berkas/${berkas.id}/pratinjau`;
+
+		const pratinjau = await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: admin } });
+		expect(pratinjau.status).toBe(200);
+		expect(pratinjau.headers.get("content-disposition")).toMatch(/^inline;/);
+		expect(pratinjau.headers.get("x-content-type-options")).toBe("nosniff");
+		expect(pratinjau.headers.get("cache-control")).toBe("private, no-store");
+		expect(new Uint8Array(await pratinjau.arrayBuffer())).toEqual(berkas.bytes);
+
+		expect((await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: bacalon } })).status).toBe(401);
+		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${crypto.randomUUID()}/berkas/${berkas.id}/pratinjau`, { headers: { cookie: admin } })).status).toBe(404);
+	});
+
 	it("menampilkan nia pada detail Bakal Calon (tiket 05, data uji disisipkan langsung)", async () => {
 		const admin = await sesiAdmin();
 		const userId = await buatBacalonLangsung("Nabila Putri", "nabila-nia@example.test", MASA_PENDAFTARAN);
@@ -358,12 +376,12 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 	});
 });
 
-describe("Hapus data akun (tiket 17, acceptance 30)", () => {
+describe("Hapus data akun (tiket 17, acceptance 30; berlaku untuk semua Bakal Calon)", () => {
 	async function jadikanMintaDitutup(userId: string) {
 		await env.DB.prepare(`UPDATE "user" SET "banned" = 1, "banReason" = 'penutupan_akun' WHERE "id" = ?`).bind(userId).run();
 	}
 
-	it("menolak untuk akun tanpa penanda Minta ditutup", async () => {
+	it("menghapus Bakal Calon aktif tanpa penanda Minta ditutup", async () => {
 		const admin = await sesiAdmin();
 		await sesiBacalon("tanpa-penanda@example.test", "Tanpa Penanda");
 		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("tanpa-penanda@example.test").first<{ id: string }>();
@@ -372,8 +390,20 @@ describe("Hapus data akun (tiket 17, acceptance 30)", () => {
 			...json({ password: "kata-sandi-admin" }),
 			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
 		});
+		expect(response.status).toBe(200);
+		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(nabila?.id).first()).toBeNull();
+	});
+
+	it("menolak menghapus akun Admin", async () => {
+		const admin = await sesiAdmin();
+		const akunAdmin = await env.DB.prepare(`SELECT "id" FROM "user" WHERE "role" = 'admin'`).first<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${akunAdmin?.id}/hapus-data`, {
+			...json({ password: "kata-sandi-admin" }),
+			headers: { "content-type": "application/json", origin: "https://kpu.kammi.id", cookie: admin },
+		});
 		expect(response.status).toBe(404);
-		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(nabila?.id).first()).not.toBeNull();
+		expect(await env.DB.prepare('SELECT 1 FROM "user" WHERE "id" = ?').bind(akunAdmin?.id).first()).not.toBeNull();
 	});
 
 	it("menolak sesi Bakal Calon", async () => {

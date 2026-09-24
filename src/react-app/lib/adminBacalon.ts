@@ -56,6 +56,10 @@ export function urlUnduhAdmin(userId: string, berkasId: string) {
 	return `/api/admin/${encodeURIComponent(userId)}/berkas/${encodeURIComponent(berkasId)}/unduh`;
 }
 
+export function urlPratinjauAdmin(userId: string, berkasId: string) {
+	return `/api/admin/${encodeURIComponent(userId)}/berkas/${encodeURIComponent(berkasId)}/pratinjau`;
+}
+
 export type KategoriEkspor = "terkini" | "pemeriksaan";
 
 export function urlEksporCsv(kategori: KategoriEkspor) {

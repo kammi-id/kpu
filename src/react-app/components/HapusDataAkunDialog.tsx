@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "~/components/ui/input";
 import { hapusDataAkunAdmin } from "~/react-app/lib/adminBacalon";
 
-export function HapusDataAkunDialog({ userId, nama }: { userId: string; nama: string }) {
+export function HapusDataAkunDialog({ userId, nama, mintaDitutup }: { userId: string; nama: string; mintaDitutup: boolean }) {
 	const navigate = useNavigate();
 	const [terbuka, setTerbuka] = useState(false);
 	const [mengirim, setMengirim] = useState(false);
@@ -38,6 +38,12 @@ export function HapusDataAkunDialog({ userId, nama }: { userId: string; nama: st
 							kedua CSV akan dihapus. Masukkan kata sandi Admin Anda untuk mengonfirmasi.
 						</DialogDescription>
 					</DialogHeader>
+					{mintaDitutup ? null : (
+						<p className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+							Bakal Calon ini tidak meminta penutupan akun. Setelah Masa Pendaftaran berakhir, orang ini
+							tidak dapat membuat akun baru. Penghapusan ini bukan keputusan atas status pencalonan.
+						</p>
+					)}
 					<fieldset className="mt-5 flex flex-col gap-2">
 						<label htmlFor="password-hapus-data" className="font-semibold">Kata sandi Admin</label>
 						<Input id="password-hapus-data" name="password" type="password" autoComplete="current-password" required autoFocus />

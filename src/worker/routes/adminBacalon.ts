@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { adminAtauTolak } from "../lib/aksesAdmin";
 import { catatAudit, pernyataanAudit } from "../lib/audit";
-import { headerUnduh } from "./akunBerkas";
+import { headerUnduh, responsBerkas } from "./akunBerkas";
 import { buatAuth, type EnvDenganRahasia } from "../lib/auth";
 import { hapusBarisCsvBacalon, KOLOM_MINTA_DITUTUP, kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
 import { konfirmasiKataSandiAdmin, payloadKataSandi } from "../lib/konfirmasiAdmin";
@@ -218,15 +218,15 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		return c.json({ password });
 	});
 
-	// Hapus data akun (tiket 17): hanya untuk akun berpenanda Minta ditutup, dengan
-	// konfirmasi kata sandi Admin yang sama (dan penghitung kegagalan yang sama)
-	// dengan Reset Password di atas.
+	// Hapus data akun (tiket 17): untuk Bakal Calon mana pun, berpenanda Minta ditutup
+	// atau tidak, dengan konfirmasi kata sandi Admin yang sama (dan penghitung
+	// kegagalan yang sama) dengan Reset Password di atas.
 	route.post("/:id/hapus-data", async (c) => {
 		const akses = await adminAtauTolak(c, sekarang);
 		if ("response" in akses) return akses.response;
 		const sasaranUserId = c.req.param("id");
 		const sasaran = await c.env.DB.prepare(
-			`SELECT "id" FROM "user" WHERE "id" = ? AND "role" = 'bacalon' AND "banned" = 1 AND "banReason" = 'penutupan_akun'`,
+			`SELECT "id" FROM "user" WHERE "id" = ? AND "role" = 'bacalon'`,
 		)
 			.bind(sasaranUserId)
 			.first<{ id: string }>();
@@ -294,7 +294,8 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		});
 	});
 
-	route.get("/:userId/berkas/:id/unduh", async (c) => {
+	// Unduh dan pratinjau berbagi aturan akses yang sama; hanya Content-Disposition yang berbeda.
+	for (const mode of ["unduh", "pratinjau"] as const) route.get(`/:userId/berkas/:id/${mode}`, async (c) => {
 		const akses = await adminAtauTolak(c, sekarang);
 		if ("response" in akses) return akses.response;
 		const baris = await c.env.DB.prepare(
@@ -307,13 +308,7 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		if (!baris) return c.json({ error: "tidak_ditemukan" }, 404);
 		const objek = await c.env.BERKAS.get(baris.r2Key);
 		if (!objek) return c.json({ error: "tidak_ditemukan" }, 404);
-		return new Response(objek.body, {
-			headers: {
-				"content-type": baris.mime,
-				"content-disposition": headerUnduh(baris.namaAsli),
-				"x-content-type-options": "nosniff",
-			},
-		});
+		return responsBerkas(objek, baris, mode);
 	});
 
 	return route;

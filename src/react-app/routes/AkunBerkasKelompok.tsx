@@ -4,8 +4,9 @@ import { useParams } from "react-router-dom";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { kelompokBerkas, kelompokValid, type NomorKelompok } from "~/lib/kelompok";
-import { ambilBerkasKelompok, mimeDariNamaBerkas, unggahBerkasKelompok, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
+import { ambilBerkasKelompok, mimeDariNamaBerkas, unggahBerkasKelompok, urlPratinjauBerkas, urlUnduhBerkas, type BerkasItem, type JenisRekomendasi } from "~/react-app/lib/akunBerkas";
 import { ambilUnduhan, urlUnduhBerkasPublik, type BerkasPublik } from "~/react-app/lib/berkasPublik";
+import { PratinjauBerkasSheet } from "~/react-app/components/PratinjauBerkasSheet";
 import { PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
 
@@ -28,6 +29,7 @@ export function AkunBerkasKelompok() {
 	const [pesan, setPesan] = useState("");
 	const [menyimpan, setMenyimpan] = useState(false);
 	const [templat, setTemplat] = useState<BerkasPublik[] | null>(null);
+	const [pratinjauId, setPratinjauId] = useState<string | null>(null);
 
 	const kelompok = kelompokValid(nomorMentah) ? kelompokBerkas(nomorMentah as NomorKelompok) : null;
 
@@ -217,13 +219,16 @@ export function AkunBerkasKelompok() {
 						{daftar.map((item) => (
 							<li key={item.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
 								<span>
-									<span className="block font-medium">{item.namaAsli}</span>
+									<button type="button" onClick={() => setPratinjauId(item.id)} className="block text-left font-medium underline-offset-4 hover:underline">{item.namaAsli}</button>
 									<span className="block text-sm text-muted-foreground">
 										{ukuranTerformat(item.ukuranByte)}
 										{item.jenisRekomendasi ? ` · ${LABEL_JENIS_REKOMENDASI[item.jenisRekomendasi]}` : ""}
 									</span>
 								</span>
 								<span className="flex gap-2">
+									<Button type="button" variant="outline" size="sm" onClick={() => setPratinjauId(item.id)}>
+										Pratinjau
+									</Button>
 									<Button render={<a href={urlUnduhBerkas(kelompok.nomor, item.id)} />} type="button" variant="outline" size="sm">
 										Unduh
 									</Button>
@@ -236,6 +241,21 @@ export function AkunBerkasKelompok() {
 					</ul>
 				)}
 			</section>
+			{daftar ? (
+				<PratinjauBerkasSheet
+					berkas={daftar.map((item) => ({
+						id: item.id,
+						kelompok: kelompok.nomor,
+						namaAsli: item.namaAsli,
+						mime: item.mime,
+						keterangan: item.jenisRekomendasi ? LABEL_JENIS_REKOMENDASI[item.jenisRekomendasi] : undefined,
+						urlPratinjau: urlPratinjauBerkas(kelompok.nomor, item.id),
+						urlUnduh: urlUnduhBerkas(kelompok.nomor, item.id),
+					}))}
+					aktifId={pratinjauId}
+					onAktifChange={setPratinjauId}
+				/>
+			) : null}
 		</div>
 	);
 }

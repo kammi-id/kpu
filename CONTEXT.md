@@ -88,6 +88,10 @@ _Avoid_: syarat dan ketentuan, persetujuan implisit
 Permintaan Bakal Calon Ketua Umum untuk menghentikan pemrosesan datanya. Akun langsung dikunci dan Admin memproses penghentian atau penghapusan paling lambat 3×24 jam. Permintaan ini tidak menetapkan status hukum pencalonan apa pun.
 _Avoid_: mengundurkan diri, gugur, hapus akun instan
 
+**Penghapusan Data Akun**:
+Tindakan Admin yang menghapus permanen akun seorang Bakal Calon Ketua Umum beserta seluruh data dan berkasnya, termasuk dari Ekspor Harian dan Snapshot Pemeriksaan, setelah Admin mengonfirmasi kata sandinya. Tindakan ini dapat dilakukan kapan saja sebelum Penghapusan Akhir, baik untuk memproses Permintaan Penutupan Akun dan Penarikan Persetujuan maupun untuk akun ganda, akun uji, atau permintaan penutupan yang disampaikan di luar aplikasi. Penghapusan ini bukan keputusan atas status pencalonan. Satu-satunya jejak yang tersisa adalah catatan audit bahwa penghapusan terjadi.
+_Avoid_: menggugurkan bacalon, diskualifikasi, hapus bacalon
+
 **Masa Retensi**:
 Jangka 90 hari sejak penutupan resmi proses penjaringan pada 30 Oktober 2026, ketika data masih disimpan dan dapat diekspor. Masa ini berakhir dengan Penghapusan Akhir pada 28 Januari 2027.
 _Avoid_: arsip permanen, backup jangka panjang
@@ -105,7 +109,7 @@ Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pu
 _Avoid_: backup, arsip serah-terima terenkripsi
 
 **Snapshot Pemeriksaan**:
-Salinan Ekspor Harian 27 September 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi.
+Salinan Ekspor Harian 27 September 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi. Satu-satunya pengurangan isinya adalah data Bakal Calon yang terkena Penghapusan Data Akun.
 _Avoid_: hasil verifikasi, berkas sah
 
 **Peraturan**:

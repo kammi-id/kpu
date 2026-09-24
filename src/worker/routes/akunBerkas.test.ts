@@ -409,6 +409,40 @@ describe("unduh dan hapus: kepemilikan (acceptance 22)", () => {
 	});
 });
 
+describe("pratinjau berkas: inline, aturan akses sama dengan unduh", () => {
+	it("pratinjau sendiri memakai inline + nosniff + no-store dan Content-Type dari D1", async () => {
+		const cookie = await daftarBacalon("pratinjau@example.test");
+		const bytes = bytesValid("application/pdf");
+		const unggahan = await unggah(cookie, 1, { namaAsli: "a.pdf" }, bytes);
+		const { id } = await unggahan.json<{ id: string }>();
+
+		const response = await kirim(MASA_PENDAFTARAN, `/api/akun/berkas/1/${id}/pratinjau`, { headers: { cookie } });
+		expect(response.status).toBe(200);
+		expect(response.headers.get("content-disposition")).toMatch(/^inline;/);
+		expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+		expect(response.headers.get("cache-control")).toBe("private, no-store");
+		expect(response.headers.get("content-type")).toBe("application/pdf");
+		expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes);
+	});
+
+	it("tanpa sesi 401, Bakal Calon lain 404, Admin 200, dan 403 setelah layanan selesai", async () => {
+		const pemilik = await daftarBacalon("pratinjau-pemilik@example.test");
+		const lain = await daftarBacalon("pratinjau-lain@example.test");
+		const unggahan = await unggah(pemilik, 1, { namaAsli: "a.pdf" });
+		const { id } = await unggahan.json<{ id: string }>();
+		const admin = await sesiAdmin();
+		const url = `/api/akun/berkas/1/${id}/pratinjau`;
+
+		expect((await kirim(MASA_PENDAFTARAN, url)).status).toBe(401);
+		expect((await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: lain } })).status).toBe(404);
+		expect((await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: admin } })).status).toBe(200);
+
+		const selesai = new Date("2027-01-29T00:00:00.000Z");
+		await pindahWaktuSesi("pratinjau-pemilik@example.test", selesai);
+		expect((await kirim(selesai, url, { headers: { cookie: pemilik } })).status).toBe(403);
+	});
+});
+
 describe("Audit unggah_berkas tanpa nama berkas", () => {
 	it("mencatat berhasil dan ditolak tanpa menyimpan nama berkas di audit", async () => {
 		const cookie = await daftarBacalon("audit-unggah@example.test");
