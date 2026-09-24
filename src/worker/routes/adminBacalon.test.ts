@@ -293,6 +293,24 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${nabila?.id}/berkas/${berkas.id}/unduh`, { headers: { cookie: bacalon } })).status).toBe(401);
 	});
 
+	it("mengalirkan pratinjau Admin inline dengan aturan akses yang sama dengan unduh", async () => {
+		const admin = await sesiAdmin();
+		const bacalon = await sesiBacalon("pratinjau@example.test", "Pratinjau Putri");
+		const pemilik = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("pratinjau@example.test").first<{ id: string }>();
+		const berkas = await simpanBerkas(pemilik?.id as string, 1, "identitas.pdf");
+		const url = `/api/admin/${pemilik?.id}/berkas/${berkas.id}/pratinjau`;
+
+		const pratinjau = await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: admin } });
+		expect(pratinjau.status).toBe(200);
+		expect(pratinjau.headers.get("content-disposition")).toMatch(/^inline;/);
+		expect(pratinjau.headers.get("x-content-type-options")).toBe("nosniff");
+		expect(pratinjau.headers.get("cache-control")).toBe("private, no-store");
+		expect(new Uint8Array(await pratinjau.arrayBuffer())).toEqual(berkas.bytes);
+
+		expect((await kirim(MASA_PENDAFTARAN, url, { headers: { cookie: bacalon } })).status).toBe(401);
+		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${crypto.randomUUID()}/berkas/${berkas.id}/pratinjau`, { headers: { cookie: admin } })).status).toBe(404);
+	});
+
 	it("menampilkan nia pada detail Bakal Calon (tiket 05, data uji disisipkan langsung)", async () => {
 		const admin = await sesiAdmin();
 		const userId = await buatBacalonLangsung("Nabila Putri", "nabila-nia@example.test", MASA_PENDAFTARAN);

@@ -27,9 +27,28 @@ type BarisDaftar = {
 };
 
 /** `Content-Disposition: attachment` aman untuk nama berkas non-ASCII (RFC 5987/6266). */
-export function headerUnduh(namaAsli: string): string {
+export function headerUnduh(namaAsli: string, jenis: "attachment" | "inline" = "attachment"): string {
 	const fallback = namaAsli.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
-	return `attachment; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(namaAsli)}`;
+	return `${jenis}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(namaAsli)}`;
+}
+
+export type ModeBerkas = "unduh" | "pratinjau";
+
+/**
+ * Respons berkas Bakal Calon: "unduh" memaksa attachment, "pratinjau" (tiket
+ * pratinjau berkas) menampilkan inline di Sheet. MIME sudah dijamin PDF/JPEG/PNG
+ * oleh pemeriksaan signature saat unggah; nosniff mencegah browser menebak lain.
+ * CSP `sandbox` sengaja tidak dipasang karena Chrome menolak merender PDF di bawahnya.
+ */
+export function responsBerkas(objek: R2ObjectBody, baris: { mime: string; namaAsli: string }, mode: ModeBerkas): Response {
+	return new Response(objek.body, {
+		headers: {
+			"content-type": baris.mime,
+			"content-disposition": headerUnduh(baris.namaAsli, mode === "pratinjau" ? "inline" : "attachment"),
+			"x-content-type-options": "nosniff",
+			"cache-control": "private, no-store",
+		},
+	});
 }
 
 function kelompokDariParam(nilai: string): NomorKelompok | null {
@@ -213,7 +232,8 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 		return c.json({ status: "terhapus" });
 	});
 
-	route.get("/:kelompok/:id/unduh", async (c) => {
+	// Unduh dan pratinjau berbagi aturan akses yang sama; hanya Content-Disposition yang berbeda.
+	for (const mode of ["unduh", "pratinjau"] as const) route.get(`/:kelompok/:id/${mode}`, async (c) => {
 		if (!rahasiaTersedia(c.env)) return c.json({ error: "layanan_tidak_tersedia" }, 503);
 		const sesi = await ambilSesi(buatAuth(c.env), c.env, c.req.raw.headers, sekarang());
 		if (!sesi || (sesi.user.role !== "bacalon" && sesi.user.role !== "admin")) return c.json({ error: "tidak_berwenang" }, 401);
@@ -237,13 +257,7 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 		const objek = await c.env.BERKAS.get(baris.r2Key);
 		if (!objek) return c.json({ error: "tidak_ditemukan" }, 404);
 
-		return new Response(objek.body, {
-			headers: {
-				"content-type": baris.mime,
-				"content-disposition": headerUnduh(baris.namaAsli),
-				"x-content-type-options": "nosniff",
-			},
-		});
+		return responsBerkas(objek, baris, mode);
 	});
 
 	return route;
