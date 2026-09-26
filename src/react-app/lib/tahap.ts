@@ -38,13 +38,18 @@ export const LABEL_TAHAP: Record<Tahap, string> = {
 export const PENJELASAN_TAHAP: Record<Tahap, string> = {
 	BelumDibuka:
 		"Pendaftaran belum dibuka. Masa Pendaftaran mulai 17 September 2026 pukul 00.00 WIB.",
-	MasaPendaftaran: "Pendaftaran dibuka sampai 26 September 2026 pukul 23.59 WIB.",
+	MasaPendaftaran: "Pendaftaran diperpanjang sampai 30 September 2026 pukul 23.59 WIB.",
 	Pemeriksaan:
-		"KPU sedang memeriksa berkas. Data dan berkas hanya-baca sampai 29 September 2026 pukul 23.59 WIB.",
-	MasaPerbaikan: "Lengkapi kekurangan sampai 3 Oktober 2026 pukul 23.59 WIB.",
+		"KPU sedang memeriksa berkas. Data dan berkas hanya-baca sampai 2 Oktober 2026 pukul 23.59 WIB.",
+	MasaPerbaikan: "Lengkapi kekurangan sampai 5 Oktober 2026 pukul 23.59 WIB.",
 	Terkunci: "Pendaftaran dan perubahan data telah ditutup untuk siklus ini.",
 	Selesai: "Proses penjaringan telah selesai dan data telah dihapus.",
 };
+
+/** Tanda pembaruan berhenti saat Masa Pendaftaran yang diperpanjang berakhir. */
+export function tampilkanBadgePembaruan(sekarang?: string): boolean {
+	return Boolean(sekarang && new Date(sekarang).getTime() < Date.UTC(2026, 8, 30, 17));
+}
 
 /** Alasan tampil saat pendaftaran ditutup: Penutupan Pendaftaran Manual mengalahkan penjelasan tahap. */
 export function alasanPendaftaranTertutup(data: TahapApi): string {

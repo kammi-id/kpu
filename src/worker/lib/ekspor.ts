@@ -6,14 +6,21 @@ const encoder = new TextEncoder();
 
 /** Dua varian ekspor yang tersedia untuk diunduh (tiket 16): satu berjalan tiap hari, satu snapshot sekali. */
 export type KategoriEkspor = "terkini" | "pemeriksaan";
+type KategoriEksporTersimpan = KategoriEkspor | "pemeriksaanLama";
 
-/** Kunci R2 bersama antara penulis (buatEksporHarian) dan pembaca (rute unduhan Admin), satu sumber kebenaran. */
-export function kunciCsvBacalon(kategori: KategoriEkspor) {
-	return `ekspor/${kategori}/bacalon.csv`;
+function prefiksEkspor(kategori: KategoriEksporTersimpan) {
+	if (kategori === "pemeriksaan") return "ekspor/pemeriksaan-2026-10-01/";
+	if (kategori === "pemeriksaanLama") return "ekspor/pemeriksaan/";
+	return "ekspor/terkini/";
 }
 
-export function kunciZipAkun(kategori: KategoriEkspor, userId: string) {
-	return `ekspor/${kategori}/${userId}.zip`;
+/** Kunci R2 bersama antara penulis (buatEksporHarian) dan pembaca (rute unduhan Admin), satu sumber kebenaran. */
+export function kunciCsvBacalon(kategori: KategoriEksporTersimpan) {
+	return `${prefiksEkspor(kategori)}bacalon.csv`;
+}
+
+export function kunciZipAkun(kategori: KategoriEksporTersimpan, userId: string) {
+	return `${prefiksEkspor(kategori)}${userId}.zip`;
 }
 
 type BacalonEkspor = {
@@ -279,7 +286,7 @@ async function tulisZip(bucket: R2Bucket, bacalon: BacalonEkspor, berkas: Berkas
  * tak bisa dibangun ulang dari D1 terkini. Aman memakai kecocokan prefix baris
  * karena kolom pertama selalu UUID `id`, yang tidak pernah butuh dikutip oleh `csv()`.
  */
-export async function hapusBarisCsvBacalon(bucket: R2Bucket, kategori: KategoriEkspor, userId: string) {
+export async function hapusBarisCsvBacalon(bucket: R2Bucket, kategori: KategoriEksporTersimpan, userId: string) {
 	const kunci = kunciCsvBacalon(kategori);
 	const objek = await bucket.get(kunci);
 	if (!objek) return;
@@ -305,10 +312,11 @@ function tanggalWib(waktu: Date) {
 }
 
 async function salinSnapshot(bucket: R2Bucket, kunci: string) {
-	if (await bucket.head(kunci.replace("ekspor/terkini/", "ekspor/pemeriksaan/"))) return;
+	const tujuan = kunci.replace("ekspor/terkini/", prefiksEkspor("pemeriksaan"));
+	if (await bucket.head(tujuan)) return;
 	const asal = await bucket.get(kunci);
 	if (!asal) throw new Error(`Ekspor terkini tidak ditemukan: ${kunci}`);
-	await bucket.put(kunci.replace("ekspor/terkini/", "ekspor/pemeriksaan/"), asal.body, { httpMetadata: asal.httpMetadata });
+	await bucket.put(tujuan, asal.body, { httpMetadata: asal.httpMetadata });
 }
 
 /** Membuat ulang Ekspor Harian; waktu selalu diberikan controller.scheduledTime. */
@@ -326,7 +334,9 @@ export async function buatEksporHarian(env: Env, waktu: Date) {
 			dipertahankan.add(kunciZipAkun("terkini", bacalon.id));
 		}
 		await hapusTerkiniUsang(env.BERKAS, dipertahankan);
-		if (tanggalWib(waktu) === "2026-09-27" && !(await env.BERKAS.head(kunciCsvBacalon("pemeriksaan")))) {
+		// Snapshot lama di ekspor/pemeriksaan/ tetap tersimpan bila cron 27 September
+		// sempat berjalan sebelum jadwal diperbarui. Snapshot baru punya kunci sendiri.
+		if (tanggalWib(waktu) === "2026-10-01") {
 			for (const kunci of dipertahankan) await salinSnapshot(env.BERKAS, kunci);
 		}
 		await catatAudit(env.DB, { aktor: "Sistem", tindakan: "ekspor_harian", hasil: "berhasil" }, waktu);

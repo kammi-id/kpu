@@ -1,0 +1,5 @@
+# Jadwal perpanjangan pendaftaran dan Snapshot Pemeriksaan baru
+
+Pengumuman KPU September 2026 memperpanjang Masa Pendaftaran sampai 30 September, memindahkan verifikasi ke 1–2 Oktober dan Masa Perbaikan ke 3–5 Oktober, serta mengubah tahapan berikutnya. Situs memakai jadwal ini untuk tampilan dan gerbang akun, dengan batas harian pukul 00.00–23.59 WIB. Naskah Peraturan dan Berkas Publik "Jadwal Resmi" tetap seperti semula sampai dokumen resmi pengganti diberikan; karena itu keduanya untuk sementara dapat berbeda dari jadwal terbaru di situs.
+
+Snapshot Pemeriksaan baru diambil dari Ekspor Harian 1 Oktober 2026 dan disimpan di `ekspor/pemeriksaan-2026-10-01/`. Jika cron lama sempat membuat snapshot 27 September di `ekspor/pemeriksaan/`, objek itu dipertahankan sebagai riwayat dan tidak ditimpa. Admin mengunduh snapshot 1 Oktober melalui kategori Pemeriksaan. Penghapusan Data Akun wajib menghapus data orang tersebut dari kedua lokasi, dan Penghapusan Akhir tetap menghapus seluruh `ekspor/`. Pemisahan ini dipilih agar keadaan awal verifikasi baru dapat dibuktikan tanpa menghapus catatan yang mungkin sudah terlanjur dibuat menurut jadwal sebelumnya.

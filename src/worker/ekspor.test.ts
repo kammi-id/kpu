@@ -7,10 +7,10 @@ const encoder = new TextEncoder();
 
 // MasaPendaftaran (bukan Selesai): Ekspor Harian berjalan normal.
 const WAKTU_EKSPOR = new Date("2026-09-20T17:00:00.000Z");
-// WIB 27 Sep 2026 00.00 — batas awal tahap Pemeriksaan dan pemicu Snapshot.
-const WAKTU_PEMERIKSAAN_27_SEP = new Date("2026-09-26T17:00:00.000Z");
-// WIB 28 Sep 2026 00.00 — sehari setelahnya; Snapshot tidak boleh ditimpa.
-const WAKTU_PEMERIKSAAN_28_SEP = new Date("2026-09-27T17:00:00.000Z");
+// WIB 1 Okt 2026 00.00 — batas awal tahap Pemeriksaan dan pemicu Snapshot baru.
+const WAKTU_PEMERIKSAAN_1_OKT = new Date("2026-09-30T17:00:00.000Z");
+// WIB 2 Okt 2026 00.00 — sehari setelahnya; Snapshot tidak boleh ditimpa.
+const WAKTU_PEMERIKSAAN_2_OKT = new Date("2026-10-01T17:00:00.000Z");
 // Batas tahap Selesai (inklusif), lihat lib/tahap.ts MULAI_SELESAI.
 const WAKTU_SELESAI = new Date("2027-01-27T17:00:00.000Z");
 
@@ -236,29 +236,33 @@ describe("Ekspor Harian (acceptance 24, 31)", () => {
 		expect(baris.results).toEqual([{ aktor: "Sistem", tindakan: "ekspor_harian", hasil: "gagal" }]);
 	});
 
-	it("run bertanggal WIB 27 September 2026 menyalin ke ekspor/pemeriksaan sekali, run 28 September tidak menimpanya", async () => {
-		const userId = await buatBacalon("Nabila Putri", "nabila@example.test", WAKTU_PEMERIKSAAN_27_SEP);
-		await buatBerkas(userId, WAKTU_PEMERIKSAAN_27_SEP, "identitas.pdf", encoder.encode("berkas identitas 5 okt"));
+	it("run 1 Oktober membuat snapshot baru sekali dan mempertahankan snapshot 27 September bila ada", async () => {
+		const userId = await buatBacalon("Nabila Putri", "nabila@example.test", WAKTU_PEMERIKSAAN_1_OKT);
+		await buatBerkas(userId, WAKTU_PEMERIKSAAN_1_OKT, "identitas.pdf", encoder.encode("berkas identitas 1 okt"));
+		await env.BERKAS.put("ekspor/pemeriksaan/bacalon.csv", "snapshot 27 September");
+		await env.BERKAS.put(`ekspor/pemeriksaan/${userId}.zip`, "zip lama");
 
-		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_27_SEP);
+		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_1_OKT);
 
-		const snapshotCsv = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
-		const snapshotZip = new Uint8Array(await (await env.BERKAS.get(`ekspor/pemeriksaan/${userId}.zip`))?.arrayBuffer() as ArrayBuffer);
+		const snapshotCsv = await (await env.BERKAS.get("ekspor/pemeriksaan-2026-10-01/bacalon.csv"))?.text();
+		const snapshotZip = new Uint8Array(await (await env.BERKAS.get(`ekspor/pemeriksaan-2026-10-01/${userId}.zip`))?.arrayBuffer() as ArrayBuffer);
 		expect(snapshotCsv).toContain("Nabila Putri");
+		expect(await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text()).toBe("snapshot 27 September");
+		expect(await (await env.BERKAS.get(`ekspor/pemeriksaan/${userId}.zip`))?.text()).toBe("zip lama");
 
 		// Roster berubah sebelum run berikutnya: akun baru masuk.
-		const userBaru = await buatBacalon("Siti Aminah", "siti@example.test", WAKTU_PEMERIKSAAN_28_SEP);
-		await buatBerkas(userBaru, WAKTU_PEMERIKSAAN_28_SEP, "identitas.pdf", encoder.encode("berkas identitas siti"));
+		const userBaru = await buatBacalon("Siti Aminah", "siti@example.test", WAKTU_PEMERIKSAAN_2_OKT);
+		await buatBerkas(userBaru, WAKTU_PEMERIKSAAN_2_OKT, "identitas.pdf", encoder.encode("berkas identitas siti"));
 
-		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_28_SEP);
+		await jalankanTerjadwal(WAKTU_PEMERIKSAAN_2_OKT);
 
 		// Snapshot Pemeriksaan tidak berubah sama sekali.
-		const snapshotCsvSetelah = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
-		const snapshotZipSetelah = new Uint8Array(await (await env.BERKAS.get(`ekspor/pemeriksaan/${userId}.zip`))?.arrayBuffer() as ArrayBuffer);
+		const snapshotCsvSetelah = await (await env.BERKAS.get("ekspor/pemeriksaan-2026-10-01/bacalon.csv"))?.text();
+		const snapshotZipSetelah = new Uint8Array(await (await env.BERKAS.get(`ekspor/pemeriksaan-2026-10-01/${userId}.zip`))?.arrayBuffer() as ArrayBuffer);
 		expect(snapshotCsvSetelah).toBe(snapshotCsv);
 		expect(snapshotCsvSetelah).not.toContain("Siti Aminah");
 		expect(snapshotZipSetelah).toEqual(snapshotZip);
-		expect(await env.BERKAS.head(`ekspor/pemeriksaan/${userBaru}.zip`)).toBeNull();
+		expect(await env.BERKAS.head(`ekspor/pemeriksaan-2026-10-01/${userBaru}.zip`)).toBeNull();
 
 		// Terkini sebaliknya sudah memuat akun baru.
 		const terkiniCsvSetelah = await (await env.BERKAS.get("ekspor/terkini/bacalon.csv"))?.text();

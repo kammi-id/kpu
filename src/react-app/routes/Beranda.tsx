@@ -1,21 +1,23 @@
 import { Link } from "react-router-dom";
 import { FileText, CalendarDays, Download, Lock } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { StatusBadge } from "~/react-app/components/StatusBadge";
 import { IlustrasiHero, KELAS_GRID_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
 import { useTahap } from "~/react-app/lib/useTahap";
-import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP } from "~/react-app/lib/tahap";
+import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP, tampilkanBadgePembaruan } from "~/react-app/lib/tahap";
 import { ketum } from "~/react-app/assets/generated";
 
 const PINTU = [
 	{ ke: "/peraturan", label: "Peraturan", ikon: FileText, deskripsi: "Ringkasan PKPU dan dokumen lengkap" },
-	{ ke: "/jadwal", label: "Jadwal", ikon: CalendarDays, deskripsi: "Sepuluh tahap resmi, seluruhnya WIB" },
+	{ ke: "/jadwal", label: "Jadwal", ikon: CalendarDays, deskripsi: "Jadwal tahapan terbaru, seluruhnya WIB" },
 	{ ke: "/unduhan", label: "Unduhan", ikon: Download, deskripsi: "Formulir A.1 sampai A.6" },
 ];
 
 export function Beranda() {
 	const { data, error } = useTahap();
+	const adaPembaruan = tampilkanBadgePembaruan(data?.sekarang);
 
 	return (
 		<>
@@ -56,9 +58,9 @@ export function Beranda() {
 									<SplitFlap teks={LABEL_TAHAP[data.tahap]} />
 									<span className="sr-only">{LABEL_TAHAP[data.tahap]}</span>
 								</div>
-								<p className="mt-3 max-w-[56ch] text-[0.9375rem] leading-relaxed">
-									{PENJELASAN_TAHAP[data.tahap]}
-								</p>
+										<p className="mt-3 max-w-[56ch] text-[0.9375rem] leading-relaxed">
+											{PENJELASAN_TAHAP[data.tahap]}
+										</p>
 								<div className="mt-5 flex flex-col gap-3 sm:flex-row">
 									{data.bolehRegistrasi ? (
 										<Button render={<Link to="/daftar" />} size="lg" className="w-full sm:w-auto">
@@ -119,7 +121,10 @@ export function Beranda() {
 					>
 						<pintu.ikon className="size-6 text-merah" aria-hidden />
 						<span>
-							<span className="block font-semibold">{pintu.label}</span>
+						<span className="flex flex-wrap items-center gap-2 font-semibold">
+							{pintu.label}
+							{adaPembaruan && pintu.ke === "/jadwal" ? <Badge className="bg-amber-300 text-marun">Diperbarui</Badge> : null}
+						</span>
 							<span className="block text-sm text-muted-foreground">{pintu.deskripsi}</span>
 						</span>
 					</Link>

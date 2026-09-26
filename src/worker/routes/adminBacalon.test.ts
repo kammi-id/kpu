@@ -361,9 +361,9 @@ describe("Admin: tabel, detail, dan unduh Bakal Calon (acceptance 1, 20, 21, 22)
 		const admin = await sesiAdmin();
 		for (const waktu of [
 			new Date("2026-09-16T16:59:59.999Z"), new Date("2026-09-16T17:00:00.000Z"),
-			new Date("2026-09-26T16:59:59.999Z"), new Date("2026-09-26T17:00:00.000Z"),
-			new Date("2026-09-29T16:59:59.999Z"), new Date("2026-09-29T17:00:00.000Z"),
-			new Date("2026-10-03T16:59:59.999Z"), new Date("2026-10-03T17:00:00.000Z"),
+			new Date("2026-09-30T16:59:59.999Z"), new Date("2026-09-30T17:00:00.000Z"),
+			new Date("2026-10-02T16:59:59.999Z"), new Date("2026-10-02T17:00:00.000Z"),
+			new Date("2026-10-05T16:59:59.999Z"), new Date("2026-10-05T17:00:00.000Z"),
 			new Date("2027-01-27T16:59:59.999Z"),
 		]) {
 			await pindahWaktuSesi("admin@example.test", waktu);
@@ -455,12 +455,14 @@ describe("Hapus data akun (tiket 17, acceptance 30; berlaku untuk semua Bakal Ca
 			{ httpMetadata: { contentType: "text/csv; charset=utf-8" } },
 		);
 		await env.BERKAS.put(
-			"ekspor/pemeriksaan/bacalon.csv",
+			"ekspor/pemeriksaan-2026-10-01/bacalon.csv",
 			`id,nama\r\n${targetId},Hapus Data\r\nid-lain,Bertahan\r\n`,
 			{ httpMetadata: { contentType: "text/csv; charset=utf-8" } },
 		);
+		await env.BERKAS.put("ekspor/pemeriksaan/bacalon.csv", `id,nama\r\n${targetId},Hapus Data\r\nid-lain,Bertahan\r\n`);
 		await env.BERKAS.put(`ekspor/terkini/${targetId}.zip`, new Uint8Array([1, 2, 3]));
-		await env.BERKAS.put(`ekspor/pemeriksaan/${targetId}.zip`, new Uint8Array([4, 5, 6]));
+		await env.BERKAS.put(`ekspor/pemeriksaan-2026-10-01/${targetId}.zip`, new Uint8Array([4, 5, 6]));
+		await env.BERKAS.put(`ekspor/pemeriksaan/${targetId}.zip`, new Uint8Array([7, 8, 9]));
 
 		const response = await kirim(MASA_PENDAFTARAN, `/api/admin/${targetId}/hapus-data`, {
 			...json({ password: "kata-sandi-admin" }),
@@ -476,13 +478,17 @@ describe("Hapus data akun (tiket 17, acceptance 30; berlaku untuk semua Bakal Ca
 		expect(await env.BERKAS.head(barisBerkas?.r2Key as string)).toBeNull();
 		expect(await env.BERKAS.head(`ekspor/terkini/${targetId}.zip`)).toBeNull();
 		expect(await env.BERKAS.head(`ekspor/pemeriksaan/${targetId}.zip`)).toBeNull();
+		expect(await env.BERKAS.head(`ekspor/pemeriksaan-2026-10-01/${targetId}.zip`)).toBeNull();
 
 		const terkiniCsv = await (await env.BERKAS.get("ekspor/terkini/bacalon.csv"))?.text();
 		expect(terkiniCsv).not.toContain(targetId);
 		expect(terkiniCsv).toContain("id-lain");
-		const pemeriksaanCsv = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
+		const pemeriksaanCsv = await (await env.BERKAS.get("ekspor/pemeriksaan-2026-10-01/bacalon.csv"))?.text();
 		expect(pemeriksaanCsv).not.toContain(targetId);
 		expect(pemeriksaanCsv).toContain("id-lain");
+		const pemeriksaanLamaCsv = await (await env.BERKAS.get("ekspor/pemeriksaan/bacalon.csv"))?.text();
+		expect(pemeriksaanLamaCsv).not.toContain(targetId);
+		expect(pemeriksaanLamaCsv).toContain("id-lain");
 
 		// Audit lama yang menyebut akun ini (mis. registrasi) hilang, kecuali satu hapus_data baru.
 		const audit = await env.DB.prepare(
@@ -501,7 +507,7 @@ describe("Ekspor: unduhan Terkini dan Pemeriksaan (tiket 16)", () => {
 		expect(await belumAda.json()).toEqual({ error: "belum_tersedia" });
 
 		await env.BERKAS.put("ekspor/terkini/bacalon.csv", "id,nama\r\n1,Terkini\r\n", { httpMetadata: { contentType: "text/csv; charset=utf-8" } });
-		await env.BERKAS.put("ekspor/pemeriksaan/bacalon.csv", "id,nama\r\n1,Pemeriksaan\r\n", { httpMetadata: { contentType: "text/csv; charset=utf-8" } });
+		await env.BERKAS.put("ekspor/pemeriksaan-2026-10-01/bacalon.csv", "id,nama\r\n1,Pemeriksaan\r\n", { httpMetadata: { contentType: "text/csv; charset=utf-8" } });
 
 		const terkini = await kirim(MASA_PENDAFTARAN, "/api/admin/ekspor/terkini", { headers: { cookie: admin } });
 		expect(terkini.status).toBe(200);
@@ -534,7 +540,7 @@ describe("Ekspor: unduhan Terkini dan Pemeriksaan (tiket 16)", () => {
 		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: bacalon } })).status).toBe(401);
 
 		await env.BERKAS.put(`ekspor/terkini/${id}.zip`, new Uint8Array([1, 2, 3]), { httpMetadata: { contentType: "application/zip" } });
-		await env.BERKAS.put(`ekspor/pemeriksaan/${id}.zip`, new Uint8Array([4, 5, 6, 7]), { httpMetadata: { contentType: "application/zip" } });
+		await env.BERKAS.put(`ekspor/pemeriksaan-2026-10-01/${id}.zip`, new Uint8Array([4, 5, 6, 7]), { httpMetadata: { contentType: "application/zip" } });
 
 		const terkini = await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: admin } });
 		expect(terkini.status).toBe(200);

@@ -195,7 +195,7 @@ describe("registrasi Bakal Calon Ketua Umum (seam Worker)", () => {
 		expect(auditDitolak).toEqual({ aktor: "Anonim", hasil: "ditolak" });
 
 		// Batas instan: BelumDibuka, Pemeriksaan, MasaPerbaikan, Terkunci, Selesai — tepat pada mulainya.
-		for (const waktu of ["2026-09-15T00:00:00.000Z", "2026-09-26T17:00:00.000Z", "2026-09-29T17:00:00.000Z", "2026-10-03T17:00:00.000Z", "2027-01-27T17:00:00.000Z"]) {
+		for (const waktu of ["2026-09-15T00:00:00.000Z", "2026-09-30T17:00:00.000Z", "2026-10-02T17:00:00.000Z", "2026-10-05T17:00:00.000Z", "2027-01-27T17:00:00.000Z"]) {
 			const response = await kirimPada(new Date(waktu), "/api/auth/sign-up/email", jsonDenganTurnstile({ name: "Bakal", email: `${waktu}@example.test`, whatsapp: "6281234567890", password: "kata-sandi-aman", persetujuan: "true", nia: niaBaru() }));
 			expect(response.status).toBe(403);
 			expect(await response.json()).toMatchObject({ error: "registrasi_tidak_diizinkan" });

@@ -271,9 +271,11 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 			...berkas.results.map((item) => item.r2Key),
 			kunciZipAkun("terkini", sasaranUserId),
 			kunciZipAkun("pemeriksaan", sasaranUserId),
+			kunciZipAkun("pemeriksaanLama", sasaranUserId),
 		]);
 		await hapusBarisCsvBacalon(c.env.BERKAS, "terkini", sasaranUserId);
 		await hapusBarisCsvBacalon(c.env.BERKAS, "pemeriksaan", sasaranUserId);
+		await hapusBarisCsvBacalon(c.env.BERKAS, "pemeriksaanLama", sasaranUserId);
 
 		return c.json({ status: "terhapus" });
 	});

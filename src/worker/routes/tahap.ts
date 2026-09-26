@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import {
-	JADWAL_SEPULUH,
+	JADWAL_TAHAPAN,
 	bolehRegistrasi,
 	bolehUbahBacalon,
 	layananAktif,
@@ -31,7 +31,7 @@ export function buatRuteTahap(sekarang: () => Date) {
 			pendaftaranDitutupManual: ditutupManual,
 			bolehUbahBacalon: bolehUbahBacalon(tahap),
 			layananAktif: layananAktif(tahap),
-			jadwal: JADWAL_SEPULUH.map((item) => ({
+			jadwal: JADWAL_TAHAPAN.map((item) => ({
 				nama: item.nama,
 				rentangWib: item.rentangWib,
 				keterangan: item.keterangan,

@@ -15,7 +15,7 @@ const LABEL_STATUS: Record<StatusJadwal, string> = {
 };
 
 /**
- * Jalur sepuluh tahap (DESIGN.md "Baris jadwal") sebagai garis waktu tegak:
+ * Jalur tahapan (DESIGN.md "Baris jadwal") sebagai garis waktu tegak:
  * segmen antar-tahap hijau bila tahap di atasnya sudah selesai, tahap
  * berjalan membesar dengan cincin berdenyut. Tahap yang telah selesai bisa
  * disembunyikan agar sepuluh baris tidak jadi tembok teks — bukan hiasan,

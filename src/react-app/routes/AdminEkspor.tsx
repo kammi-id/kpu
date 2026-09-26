@@ -12,7 +12,7 @@ export function AdminEkspor() {
 			</section>
 			<section aria-labelledby="ekspor-pemeriksaan" className="rounded-xl border border-border bg-white p-5">
 				<h3 id="ekspor-pemeriksaan" className="font-display text-xl text-navy">Pemeriksaan</h3>
-				<p className="mt-1 text-muted-foreground">Snapshot yang dibuat sekali dan tidak pernah ditimpa.</p>
+				<p className="mt-1 text-muted-foreground">Snapshot awal pemeriksaan 1 Oktober 2026, dibuat sekali dan tidak pernah ditimpa.</p>
 				<a href={urlEksporCsv("pemeriksaan")} className={`${buttonVariants({ variant: "outline" })} mt-3`}>Unduh CSV Pemeriksaan</a>
 			</section>
 		</div>

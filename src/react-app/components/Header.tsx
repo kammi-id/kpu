@@ -1,5 +1,7 @@
 import { Link, NavLink } from "react-router-dom";
 import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { tampilkanBadgePembaruan } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
 import muktamarLockupPutih from "~/react-app/assets/brand/muktamar-xiv-lockup-putih.webp";
 
@@ -16,6 +18,7 @@ export function Header() {
 	// tetap menolak bila salah. Disembunyikan (bukan dinonaktifkan) saat tertutup:
 	// header tidak punya ruang untuk alasan tertulis seperti hero Beranda.
 	const bolehRegistrasi = data?.bolehRegistrasi ?? true;
+	const adaPembaruan = tampilkanBadgePembaruan(data?.sekarang);
 
 	return (
 		<header className="bg-merah text-white">
@@ -44,12 +47,13 @@ export function Header() {
 									<NavLink
 										to={tautan.ke}
 										className={({ isActive }) =>
-											`inline-block px-3 py-2.5 whitespace-nowrap text-white ${
+											`inline-flex items-center gap-1.5 px-3 py-2.5 whitespace-nowrap text-white ${
 												isActive ? "underline decoration-2 underline-offset-[0.2em]" : ""
 											}`
 										}
 									>
 										{tautan.label}
+										{adaPembaruan && tautan.ke === "/jadwal" ? <Badge className="bg-amber-300 text-marun">Diperbarui</Badge> : null}
 									</NavLink>
 								</li>
 							))}
@@ -62,6 +66,7 @@ export function Header() {
 							className="w-full shrink-0 bg-white text-merah shadow-none hover:bg-white/90 lg:w-auto"
 						>
 							Daftar
+							{adaPembaruan ? <Badge className="bg-amber-300 text-marun">Diperbarui</Badge> : null}
 						</Button>
 					) : null}
 				</div>
