@@ -15,8 +15,8 @@ const RAHASIA_UJI = {
 type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
 
 const MASA_PENDAFTARAN = new Date("2026-09-20T00:00:00.000Z");
-const PEMERIKSAAN = new Date("2026-09-28T00:00:00.000Z");
-const MASA_PERBAIKAN = new Date("2026-10-01T00:00:00.000Z");
+const PEMERIKSAAN = new Date("2026-10-01T00:00:00.000Z");
+const MASA_PERBAIKAN = new Date("2026-10-03T00:00:00.000Z");
 const TERKUNCI = new Date("2026-10-12T00:00:00.000Z");
 const BELUM_DIBUKA = new Date("2026-09-01T00:00:00.000Z");
 

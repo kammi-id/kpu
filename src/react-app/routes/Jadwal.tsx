@@ -20,9 +20,13 @@ export function Jadwal() {
 
 	return (
 		<PublicPageHero
-			judul="Timeline Resmi KPU"
+			judul="Jadwal Tahapan Terbaru"
 			ilustrasi={{ gambar: bendum, alt: "Ilustrasi KPU Muktamar XIV KAMMI" }}
 		>
+			<div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-navy">
+				<p className="font-bold text-marun">Pendaftaran diperpanjang hingga 30 September 2026 pukul 23.59 WIB.</p>
+				<p className="mt-2 text-sm leading-relaxed">Biaya pendaftaran Rp3.000.000,00. Transfer ke Bank Mandiri rekening <strong className="tabular-nums">1240011178838</strong> atas nama Kesatuan Aksi Mahasiswa Muslim Indonesia. Selesaikan berkas dan pembayaran sesuai batas waktu.</p>
+			</div>
 			{error ? (
 				<p className="text-marun">Jadwal tidak dapat dimuat. Muat ulang halaman ini.</p>
 			) : !data ? (

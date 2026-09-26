@@ -11,7 +11,7 @@ type KontenMeta = { title: string; description: string; ogImage: string };
 const KONTEN_META_HALAMAN: Record<string, KontenMeta> = {
 	"/jadwal": {
 		title: "Jadwal — KPU Muktamar XIV KAMMI",
-		description: "Sepuluh tahap resmi penjaringan Bakal Calon Ketua Umum PP KAMMI, seluruhnya dalam WIB.",
+		description: "Jadwal tahapan terbaru penjaringan Bakal Calon Ketua Umum PP KAMMI, seluruhnya dalam WIB.",
 		ogImage: "https://kpu.kammi.id/og/jadwal.png",
 	},
 	"/tentang": {

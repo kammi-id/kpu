@@ -17,12 +17,12 @@ const RAHASIA_UJI = {
 type EnvUji = Env & Partial<typeof RAHASIA_UJI>;
 
 // Batas tahap (lib/tahap.ts): Masa Pendaftaran mulai 16 Sep 2026 17.00Z,
-// Pemeriksaan 26 Sep 17.00Z, Masa Perbaikan 29 Sep 17.00Z, Terkunci 3 Okt
+// Pemeriksaan 30 Sep 17.00Z, Masa Perbaikan 2 Okt 17.00Z, Terkunci 5 Okt
 // 17.00Z, Selesai 27 Jan 2027 17.00Z.
 const BELUM_DIBUKA = new Date("2026-09-10T00:00:00.000Z");
 const MASA_PENDAFTARAN = new Date("2026-09-20T00:00:00.000Z");
-const PEMERIKSAAN = new Date("2026-09-28T00:00:00.000Z");
-const MASA_PERBAIKAN = new Date("2026-10-01T00:00:00.000Z");
+const PEMERIKSAAN = new Date("2026-10-01T00:00:00.000Z");
+const MASA_PERBAIKAN = new Date("2026-10-03T00:00:00.000Z");
 const TERKUNCI = new Date("2026-10-12T00:00:00.000Z");
 const SELESAI = new Date("2027-01-28T00:00:00.000Z");
 

@@ -21,11 +21,11 @@ Salah satu dari sembilan kategori berkas wajib yang diunggah Bakal Calon Ketua U
 _Avoid_: jenis berkas, kategori unggahan
 
 **Masa Pendaftaran**:
-Periode 17 September 2026 pukul 00.00 WIB sampai 26 September 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya.
+Periode 17 September 2026 pukul 00.00 WIB sampai 30 September 2026 pukul 23.59 WIB ketika akun baru dapat dibuat dan Bakal Calon Ketua Umum dapat mengelola data serta berkasnya, sesuai pengumuman perpanjangan pendaftaran September 2026.
 _Avoid_: masa verifikasi, masa perbaikan
 
 **Masa Perbaikan**:
-Periode 30 September 2026 pukul 00.00 WIB sampai 3 Oktober 2026 pukul 23.59 WIB ketika akun baru tidak dapat dibuat, tetapi semua Bakal Calon Ketua Umum yang sudah memiliki akun dapat memperbaiki data dan berkas.
+Periode 3 Oktober 2026 pukul 00.00 WIB sampai 5 Oktober 2026 pukul 23.59 WIB ketika akun baru tidak dapat dibuat, tetapi semua Bakal Calon Ketua Umum yang sudah memiliki akun dapat memperbaiki data dan berkas.
 _Avoid_: perpanjangan pendaftaran, pendaftaran ulang
 
 **Calon Ketua Umum**:
@@ -109,7 +109,7 @@ Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pu
 _Avoid_: backup, arsip serah-terima terenkripsi
 
 **Snapshot Pemeriksaan**:
-Salinan Ekspor Harian 27 September 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi. Satu-satunya pengurangan isinya adalah data Bakal Calon yang terkena Penghapusan Data Akun.
+Salinan Ekspor Harian 1 Oktober 2026 pukul 00.00 WIB yang tidak pernah ditimpa, sebagai bukti keadaan berkas pada awal verifikasi administrasi menurut jadwal terbaru. Jika salinan 27 September sempat dibuat, salinan itu tetap tersimpan sebagai riwayat; Penghapusan Data Akun tetap mengurangi keduanya.
 _Avoid_: hasil verifikasi, berkas sah
 
 **Peraturan**:

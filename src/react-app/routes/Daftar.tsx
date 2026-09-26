@@ -120,7 +120,11 @@ export function Daftar() {
 					<CardDescription>Buat akun selama Masa Pendaftaran.</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{!bolehRegistrasi && tahap ? (
+				<div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-navy">
+					<p className="font-bold text-marun">Pendaftaran diperpanjang hingga 30 September 2026 pukul 23.59 WIB.</p>
+					<p className="mt-2">Biaya pendaftaran Rp3.000.000,00. Rekening Bank Mandiri <strong className="tabular-nums">1240011178838</strong> atas nama Kesatuan Aksi Mahasiswa Muslim Indonesia.</p>
+				</div>
+				{!bolehRegistrasi && tahap ? (
 						<p className="mb-5 rounded-xl bg-muted p-4 text-sm text-navy">{alasanPendaftaranTertutup(tahap)}</p>
 					) : null}
 					<form className="flex flex-col gap-5" onSubmit={kirim}>

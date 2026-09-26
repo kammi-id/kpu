@@ -35,14 +35,16 @@ describe("API tahap (seam Worker, jam disuntikkan)", () => {
 		expect(body.layananAktif).toBe(false);
 	});
 
-	it("menyertakan sepuluh tahap jadwal resmi dengan status", async () => {
+	it("menyertakan sembilan tahap jadwal terbaru dengan status", async () => {
 		const response = await ambilTahap(() => new Date("2026-09-20T00:00:00.000Z"));
 		const body = await response.json();
-		expect(body.jadwal).toHaveLength(10);
+		expect(body.jadwal).toHaveLength(9);
 		expect(body.jadwal[1]).toMatchObject({
-			nama: "Pengambilan dan pengembalian berkas",
+			nama: "Pengambilan & Pengembalian Berkas Pendaftaran",
+			rentangWib: "17–30 September 2026",
 			status: "berjalan",
 		});
+		expect(body.jadwal.find((item: { nama: string }) => item.nama === "Debat Kandidat")).toMatchObject({ rentangWib: "17 Oktober 2026" });
 	});
 
 	it("rute tidak dikenal menjawab 404 JSON, bukan index.html", async () => {
