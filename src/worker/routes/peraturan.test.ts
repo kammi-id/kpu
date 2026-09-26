@@ -175,6 +175,21 @@ function unggahBerkasPublik(
 }
 
 describe("Berkas Publik (seam Worker)", () => {
+	it("menyimpan beberapa berkas dalam satu slot dan menampilkan semuanya untuk diunduh", async () => {
+		const cookie = await sesiAdmin();
+		expect((await unggahBerkasPublik(cookie, { judul: "Jadwal Resmi", namaAsli: "jadwal-utama.pdf" })).status).toBe(201);
+		expect((await unggahBerkasPublik(cookie, { judul: "Jadwal Resmi", namaAsli: "jadwal-lampiran.pdf" })).status).toBe(201);
+
+		const response = await kirim(WAKTU_UJI, "/api/peraturan");
+		expect(response.status).toBe(200);
+		const body = await response.json<{ berkasPublik: Array<{ id: string; judul: string; namaAsli: string }> }>();
+		expect(body.berkasPublik.map((item) => item.namaAsli).sort()).toEqual(["jadwal-lampiran.pdf", "jadwal-utama.pdf"]);
+		expect(body.berkasPublik.every((item) => item.judul === "Jadwal Resmi")).toBe(true);
+		for (const item of body.berkasPublik) {
+			expect((await kirim(WAKTU_UJI, `/api/berkas-publik/${item.id}`)).status).toBe(200);
+		}
+	});
+
 	it("hanya menerima PDF/DOCX dengan Content-Length, ekstensi, MIME, dan signature yang cocok", async () => {
 		const cookie = await sesiAdmin();
 		expect((await unggahBerkasPublik(cookie, {}, new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]))).status).toBe(201);

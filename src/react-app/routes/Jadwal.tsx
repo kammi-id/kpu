@@ -16,7 +16,7 @@ export function Jadwal() {
 		return () => controller.abort();
 	}, []);
 
-	const dokumen = dataBerkas.find((item) => item.judul === "Jadwal Resmi");
+	const dokumen = dataBerkas.filter((item) => item.judul === "Jadwal Resmi");
 
 	return (
 		<PublicPageHero
