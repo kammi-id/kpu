@@ -66,7 +66,6 @@ export function Header() {
 							className="w-full shrink-0 bg-white text-merah shadow-none hover:bg-white/90 lg:w-auto"
 						>
 							Daftar
-							{adaPembaruan ? <Badge className="bg-amber-300 text-marun">Diperbarui</Badge> : null}
 						</Button>
 					) : null}
 				</div>
