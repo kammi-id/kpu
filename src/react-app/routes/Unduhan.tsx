@@ -33,21 +33,23 @@ const KELOMPOK_8_9: EntriFormulir[] = [
 	{ judul: "Formulir A.6", nomor: "A.6", deskripsi: "Pernyataan tidak sedang dijatuhi sanksi, kelompok berkas 9." },
 ];
 
-function KartuFormulir({ entri, berkas, besar }: { entri: EntriFormulir; berkas: BerkasPublik | undefined; besar?: boolean }) {
-	const info = berkas ? (
-		<div className="min-w-0">
-			<p className="truncate text-sm font-semibold text-navy">{berkas.namaAsli}</p>
-			<p className="text-xs text-muted-foreground tabular-nums">{ukuranTerformat(berkas.ukuranByte)}</p>
-		</div>
-	) : (
-		<p className="text-sm text-muted-foreground">Menyusul.</p>
-	);
-	const unduh = berkas ? (
-		<Button render={<a href={urlUnduhBerkasPublik(berkas.id)} />} size={besar ? "default" : "sm"}>
-			<Download className="size-4" aria-hidden />
-			Unduh
-		</Button>
-	) : null;
+function KartuFormulir({ entri, berkas, besar }: { entri: EntriFormulir; berkas: BerkasPublik[]; besar?: boolean }) {
+	const daftarUnduhan = berkas.length > 0 ? (
+		<ul className="grid min-w-0 gap-4">
+			{berkas.map((item) => (
+				<li key={item.id} className="grid min-w-0 gap-2">
+					<div className="min-w-0">
+						<p className="break-all text-sm font-semibold text-navy">{item.namaAsli}</p>
+						<p className="text-xs text-muted-foreground tabular-nums">{ukuranTerformat(item.ukuranByte)}</p>
+					</div>
+					<Button render={<a href={urlUnduhBerkasPublik(item.id)} aria-label={`Unduh ${item.namaAsli}`} />} size={besar ? "default" : "sm"}>
+						<Download className="size-4" aria-hidden />
+						Unduh
+					</Button>
+				</li>
+			))}
+		</ul>
+	) : <p className="text-sm text-muted-foreground">Menyusul.</p>;
 
 	if (besar) {
 		return (
@@ -56,9 +58,8 @@ function KartuFormulir({ entri, berkas, besar }: { entri: EntriFormulir; berkas:
 					<p className="font-display text-4xl leading-none text-navy sm:text-5xl">{entri.nomor}</p>
 					<p className="mt-2 max-w-[38ch] text-base text-muted-foreground">{entri.deskripsi}</p>
 				</div>
-				<div className="flex items-end justify-between gap-4 border-t border-border pt-5 sm:w-72 sm:shrink-0 sm:flex-col sm:items-stretch sm:justify-center sm:gap-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8">
-					{info}
-					{unduh}
+				<div className="border-t border-border pt-5 sm:w-72 sm:shrink-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8">
+					{daftarUnduhan}
 				</div>
 			</div>
 		);
@@ -68,9 +69,8 @@ function KartuFormulir({ entri, berkas, besar }: { entri: EntriFormulir; berkas:
 		<div className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 sm:p-6">
 			<p className="font-display text-2xl leading-none text-navy sm:text-3xl">{entri.nomor}</p>
 			<p className="mt-2 max-w-[26ch] text-sm text-muted-foreground">{entri.deskripsi}</p>
-			<div className="mt-4 flex flex-1 flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
-				{info}
-				{unduh}
+			<div className="mt-4 flex-1 border-t border-border pt-4">
+				{daftarUnduhan}
 			</div>
 		</div>
 	);
@@ -89,7 +89,7 @@ export function Unduhan() {
 	}, []);
 
 	function cari(judul: string) {
-		return berkas?.find((item) => item.judul === judul);
+		return berkas?.filter((item) => item.judul === judul) ?? [];
 	}
 
 	return (

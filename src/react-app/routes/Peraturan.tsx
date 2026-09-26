@@ -7,12 +7,12 @@ import { ambilDokumenResmi, type BerkasPublik } from "~/react-app/lib/berkasPubl
 import { sekjend } from "~/react-app/assets/generated";
 
 export function Peraturan() {
-	const [dokumen, setDokumen] = useState<BerkasPublik | undefined>();
+	const [dokumen, setDokumen] = useState<BerkasPublik[]>([]);
 
 	useEffect(() => {
 		const controller = new AbortController();
 		ambilDokumenResmi(controller.signal)
-			.then((berkas) => setDokumen(berkas.find((item) => item.judul === "Peraturan")))
+			.then((berkas) => setDokumen(berkas.filter((item) => item.judul === "Peraturan")))
 			.catch(() => undefined);
 		return () => controller.abort();
 	}, []);

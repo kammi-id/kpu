@@ -45,14 +45,14 @@ export function AdminUnggahBerkas() {
 						kategori="peraturan"
 						judul={JUDUL_SALINAN_PERATURAN}
 						urutan={1}
-						berkas={dokumen.find((item) => item.judul === JUDUL_SALINAN_PERATURAN)}
+						berkas={dokumen.filter((item) => item.judul === JUDUL_SALINAN_PERATURAN)}
 						onUbah={muatDokumen}
 					/>
 					<SlotBerkasPublik
 						kategori="peraturan"
 						judul={JUDUL_JADWAL_RESMI}
 						urutan={2}
-						berkas={dokumen.find((item) => item.judul === JUDUL_JADWAL_RESMI)}
+						berkas={dokumen.filter((item) => item.judul === JUDUL_JADWAL_RESMI)}
 						onUbah={muatDokumen}
 					/>
 				</div>
@@ -67,7 +67,7 @@ export function AdminUnggahBerkas() {
 							kategori="formulir"
 							judul={judul}
 							urutan={index + 1}
-							berkas={formulir.find((item) => item.judul === judul)}
+							berkas={formulir.filter((item) => item.judul === judul)}
 							onUbah={muatFormulir}
 						/>
 					))}
