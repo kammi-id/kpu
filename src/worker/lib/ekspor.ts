@@ -222,14 +222,15 @@ class ZipStore {
 // satu sumber supaya definisinya tidak diam-diam menyimpang antara CSV dan API Admin.
 export const KOLOM_MINTA_DITUTUP = `CASE WHEN u."banned" = 1 AND u."banReason" = 'penutupan_akun' THEN 1 ELSE 0 END AS "mintaDitutup"`;
 
-async function daftarBacalon(db: D1Database) {
-	return (await db.prepare(
+async function daftarBacalon(db: D1Database, userId?: string) {
+	const pernyataan = db.prepare(
 		`SELECT u."id", u."name", u."email", u."whatsapp", u."nia", u."createdAt" AS "dibuatPada", p."namaPanggilan", p."tempatLahir", p."tanggalLahir", p."asalPw", p."asalPd",
 		        p."tahunLulusDm3", p."tempatLulusDm3", p."capaianHafalan", p."bahasaAsing", v."jumlahHadir", v."lengkap",
 		        ${KOLOM_MINTA_DITUTUP}
 		 FROM "user" u JOIN "vKelengkapan" v ON v."userId" = u."id" LEFT JOIN "profil" p ON p."userId" = u."id"
-		 WHERE u."role" = 'bacalon' ORDER BY u."createdAt", u."id"`,
-	).all<BacalonEkspor>()).results;
+		 WHERE u."role" = 'bacalon' ${userId ? 'AND u."id" = ?' : ''} ORDER BY u."createdAt", u."id"`,
+	);
+	return (await (userId ? pernyataan.bind(userId) : pernyataan).all<BacalonEkspor>()).results;
 }
 
 const KOLOM_BACALON = ["id", "nama", "email", "whatsapp", "nia", "dibuatPada", "namaPanggilan", "tempatLahir", "tanggalLahir", "asalPw", "asalPd", "tahunLulusDm3", "tempatLulusDm3", "capaianHafalan", "bahasaAsing", "jumlahHadir", "lengkap", "Minta ditutup"] as const;
@@ -278,6 +279,16 @@ async function tulisZip(bucket: R2Bucket, bacalon: BacalonEkspor, berkas: Berkas
 		await multipart.batalkan().catch(() => undefined);
 		throw error;
 	}
+}
+
+/** Buat ZIP Terkini akun ini saat objeknya belum tersedia, tanpa mengubah Snapshot Pemeriksaan. */
+export async function buatZipAkunJikaBelumAda(env: Env, userId: string, waktu: Date) {
+	const kunci = kunciZipAkun("terkini", userId);
+	if (await env.BERKAS.head(kunci)) return true;
+	const bacalon = (await daftarBacalon(env.DB, userId))[0];
+	if (!bacalon) return false;
+	await tulisZip(env.BERKAS, bacalon, await berkasBacalon(env.DB, userId), waktu);
+	return true;
 }
 
 /**

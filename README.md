@@ -24,23 +24,25 @@ Aplikasi berjalan di [http://localhost:5173](http://localhost:5173). Akun Admin 
 
 ## Perintah
 
-| Perintah | Kegunaan |
-|----------|----------|
-| `npm run dev` | Menjalankan server pengembangan |
-| `npm test` | Menjalankan seluruh uji |
-| `npm run lint` | Memeriksa kode dengan ESLint |
-| `npm run build` | Membuat aset gambar lalu build aplikasi |
-| `npm run preview` | Build lalu menjalankan hasilnya secara lokal |
-| `npm run check` | Build dan uji coba deploy tanpa mengunggah |
+
+| Perintah             | Kegunaan                                                   |
+| ---------------------- | ------------------------------------------------------------ |
+| `npm run dev`        | Menjalankan server pengembangan                            |
+| `npm test`           | Menjalankan seluruh uji                                    |
+| `npm run lint`       | Memeriksa kode dengan ESLint                               |
+| `npm run build`      | Membuat aset gambar lalu build aplikasi                    |
+| `npm run preview`    | Build lalu menjalankan hasilnya secara lokal               |
+| `npm run check`      | Build dan uji coba deploy tanpa mengunggah                 |
 | `npm run cf-typegen` | Membuat ulang tipe binding setelah mengubah `wrangler.json` |
 
 Deploy berjalan otomatis lewat GitHub Actions.
 
 ## Dokumen lain
 
-| Dokumen | Isi |
-|---------|-----|
-| [CONTEXT.md](CONTEXT.md) | Glosarium istilah domain dan jadwal |
-| [PRODUCT.md](PRODUCT.md) | Pengguna, tujuan, dan konteks produk |
-| [DESIGN.md](DESIGN.md) | Sistem desain visual |
-| [AGENTS.md](AGENTS.md) | Panduan untuk agen AI dan aturan migrasi D1 |
+
+| Dokumen                  | Isi                                         |
+| -------------------------- | --------------------------------------------- |
+| [CONTEXT.md](CONTEXT.md) | Glosarium istilah domain dan jadwal         |
+| [PRODUCT.md](PRODUCT.md) | Pengguna, tujuan, dan konteks produk        |
+| [DESIGN.md](DESIGN.md)   | Sistem desain visual                        |
+| [AGENTS.md](AGENTS.md)   | Panduan untuk agen AI dan aturan migrasi D1 |

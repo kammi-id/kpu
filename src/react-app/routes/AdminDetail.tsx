@@ -81,8 +81,7 @@ export function AdminDetail() {
 			<section aria-labelledby="ekspor-akun">
 				<h3 id="ekspor-akun" className="font-display text-xl text-navy">Ekspor akun</h3>
 				<div className="mt-3 flex flex-wrap gap-3">
-					<a href={urlEksporZip(data.id, "terkini")} className={buttonVariants({ variant: "outline", size: "sm" })}>Unduh ZIP Terkini</a>
-					<a href={urlEksporZip(data.id, "pemeriksaan")} className={buttonVariants({ variant: "outline", size: "sm" })}>Unduh ZIP Pemeriksaan</a>
+					<a href={urlEksporZip(data.id, "terkini")} className={buttonVariants({ variant: "outline", size: "sm" })}>Unduh ZIP</a>
 				</div>
 			</section>
 			<section aria-labelledby="data-pribadi"><h3 id="data-pribadi" className="font-display text-xl text-navy">Data pribadi</h3><dl className="mt-3 grid gap-x-8 gap-y-3 rounded-xl border border-border bg-white p-5 sm:grid-cols-2">{dataPribadi.map(([label, isi, manual]) => <div key={label}><dt className="text-sm font-semibold text-muted-foreground">{label}</dt><dd className="mt-1">{nilai(isi, manual)}</dd></div>)}</dl></section>
