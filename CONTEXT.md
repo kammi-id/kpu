@@ -105,7 +105,7 @@ Keadaan aplikasi sejak Penghapusan Akhir, ketika situs hanya menyatakan bahwa pr
 _Avoid_: Terkunci, masa tenang
 
 **Ekspor Harian**:
-Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pukul 00.00 WIB dan menggantikan paket hari sebelumnya. Admin mengunduh paket terakhir; tidak ada pembuatan paket sesuai permintaan.
+Paket data dan berkas seluruh Bakal Calon Ketua Umum yang dibuat ulang setiap pukul 00.00 WIB dan menggantikan paket hari sebelumnya. Admin mengunduh paket terakhir. Jika ZIP seorang Bakal Calon belum tersedia, Admin dapat meminta paket akun itu dibuat dari data dan berkas saat ini; paket tersebut menjadi ZIP Terkini sampai diganti oleh pembuatan harian berikutnya.
 _Avoid_: backup, arsip serah-terima terenkripsi
 
 **Snapshot Pemeriksaan**:

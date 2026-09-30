@@ -528,13 +528,13 @@ describe("Ekspor: unduhan Terkini dan Pemeriksaan (tiket 16)", () => {
 		expect((await kirim(MASA_PENDAFTARAN, "/api/admin/ekspor/terkini")).status).toBe(401);
 	});
 
-	it("mengunduh ZIP akun Terkini dan Pemeriksaan dengan sasaranUserId pada audit, 'belum tersedia' bila belum ada, dan menolak non-Admin", async () => {
+	it("mengunduh ZIP akun Terkini dan Pemeriksaan dengan sasaranUserId pada audit, 404 bila akun tidak ada, dan menolak non-Admin", async () => {
 		const admin = await sesiAdmin();
 		const bacalon = await sesiBacalon("nabila@example.test", "Nabila Putri");
 		const nabila = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("nabila@example.test").first<{ id: string }>();
 		const id = nabila?.id as string;
 
-		const belumAda = await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: admin } });
+		const belumAda = await kirim(MASA_PENDAFTARAN, `/api/admin/${crypto.randomUUID()}/ekspor/terkini`, { headers: { cookie: admin } });
 		expect(belumAda.status).toBe(404);
 		expect(await belumAda.json()).toEqual({ error: "belum_tersedia" });
 		expect((await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: bacalon } })).status).toBe(401);
@@ -564,5 +564,29 @@ describe("Ekspor: unduhan Terkini dan Pemeriksaan (tiket 16)", () => {
 		const tertutup = await kirim(SELESAI, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: admin } });
 		expect(tertutup.status).toBe(403);
 		expect(await tertutup.json()).toEqual({ error: "tahap_tertutup", tahap: "Selesai" });
+	});
+
+	it("membuat ZIP Terkini saat belum ada, menyimpannya, lalu memakai paket yang sama", async () => {
+		const admin = await sesiAdmin();
+		await sesiBacalon("zip-baru@example.test", "Zip Baru");
+		const baris = await env.DB.prepare('SELECT "id" FROM "user" WHERE "email" = ?').bind("zip-baru@example.test").first<{ id: string }>();
+		const id = baris?.id as string;
+		const berkas = await simpanBerkas(id, 1, "dokumen.pdf");
+		const kunci = `ekspor/terkini/${id}.zip`;
+		expect(await env.BERKAS.head(kunci)).toBeNull();
+
+		const pertama = await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: admin } });
+		expect(pertama.status).toBe(200);
+		expect(pertama.headers.get("content-disposition")).toContain("attachment");
+		const isiPertama = new Uint8Array(await pertama.arrayBuffer());
+		expect(Array.from(isiPertama.slice(0, 4))).toEqual([0x50, 0x4b, 0x03, 0x04]);
+		expect(new TextDecoder().decode(isiPertama)).toContain(`berkas/${berkas.id}-dokumen.pdf`);
+		expect(new Uint8Array(await (await env.BERKAS.get(kunci))?.arrayBuffer() as ArrayBuffer)).toEqual(isiPertama);
+		expect(await env.BERKAS.head(`ekspor/pemeriksaan-2026-10-01/${id}.zip`)).toBeNull();
+
+		const kedua = await kirim(MASA_PENDAFTARAN, `/api/admin/${id}/ekspor/terkini`, { headers: { cookie: admin } });
+		expect(new Uint8Array(await kedua.arrayBuffer())).toEqual(isiPertama);
+		const audit = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "audit" WHERE "tindakan" = ? AND "sasaranUserId" = ?').bind("ekspor", id).first<{ jumlah: number }>();
+		expect(audit?.jumlah).toBe(2);
 	});
 });

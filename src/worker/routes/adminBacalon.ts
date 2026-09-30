@@ -3,7 +3,7 @@ import { adminAtauTolak } from "../lib/aksesAdmin";
 import { catatAudit, pernyataanAudit } from "../lib/audit";
 import { headerUnduh, responsBerkas } from "./akunBerkas";
 import { buatAuth, type EnvDenganRahasia } from "../lib/auth";
-import { hapusBarisCsvBacalon, KOLOM_MINTA_DITUTUP, kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
+import { buatZipAkunJikaBelumAda, hapusBarisCsvBacalon, KOLOM_MINTA_DITUTUP, kunciCsvBacalon, kunciZipAkun, type KategoriEkspor } from "../lib/ekspor";
 import { konfirmasiKataSandiAdmin, payloadKataSandi } from "../lib/konfirmasiAdmin";
 
 const ALFABET_KATA_SANDI_SEMENTARA = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
@@ -286,6 +286,13 @@ export function buatRuteAdminBacalon(sekarang: () => Date) {
 		const kategori = kategoriEkspor(c.req.param("kategori"));
 		if (!kategori) return c.notFound();
 		const id = c.req.param("id");
+		if (kategori === "terkini") {
+			try {
+				if (!await buatZipAkunJikaBelumAda(c.env, id, sekarang())) return c.json({ error: "belum_tersedia" }, 404);
+			} catch {
+				return c.json({ error: "ekspor_gagal" }, 503);
+			}
+		}
 		return unduhEkspor(c, akses.sesi, sekarang, {
 			kunci: kunciZipAkun(kategori, id),
 			namaBerkas: `${id}-${kategori}.zip`,
