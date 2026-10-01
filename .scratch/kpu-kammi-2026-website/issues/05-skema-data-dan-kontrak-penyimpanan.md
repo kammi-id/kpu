@@ -191,9 +191,9 @@ FROM (
 
 **Ditegakkan Worker**
 
-- **Maksimal lima berkas per kelompok** secara atomik dengan satu pernyataan: `INSERT INTO berkas (…) SELECT … WHERE (SELECT count(*) FROM berkas WHERE userId = ?1 AND kelompok = ?2) < 5`; nol baris tersisip berarti ditolak.
+- **Tanpa batas jumlah berkas per kelompok:** metadata disimpan dengan `INSERT INTO berkas (…) VALUES (…)`; kegagalan INSERT tetap menghapus objek R2 yang baru diunggah.
 - **Kelompok hadir**: kelompok 1–6 dan 8–10 bila ada ≥1 berkas; kelompok 7 bila ada ≥2 `A3_PW` atau ≥3 `A4_PD`. `lengkap` bila sepuluh kelompok hadir.
-- **Urutan unggah**: validasi ekstensi/MIME/signature → `R2.put` sambil menghitung SHA-256 → `INSERT` bersyarat di atas. Jika INSERT gagal atau nol baris, objek R2 langsung dihapus.
+- **Urutan unggah**: validasi ekstensi/MIME/signature → `R2.put` sambil menghitung SHA-256 → `INSERT` metadata. Jika INSERT gagal atau nol baris, objek R2 langsung dihapus.
 - **Urutan hapus berkas**: `DELETE` baris D1 → `R2.delete`. Kegagalan `R2.delete` meninggalkan objek yatim yang tidak dapat diakses dan terhapus pada pengosongan akhir Masa Retensi.
 - **Penutupan Akun**: satu `DB.batch` berisi `UPDATE user SET banned = 1, banReason = 'penutupan_akun'`, `DELETE FROM session WHERE userId = ?`, dan satu baris audit `penutupan_akun`. Better Auth menolak login akun ber-ban.
 - **Penghapusan data akun** (penutupan diproses atau akhir Masa Retensi): kumpulkan `r2Key` → satu `DB.batch` yang menghapus `user` (berantai), menghapus audit dengan `aktorUserId` atau `sasaranUserId` akun itu kecuali `hapus_data`, dan menyisipkan satu audit `hapus_data` → hapus objek R2.

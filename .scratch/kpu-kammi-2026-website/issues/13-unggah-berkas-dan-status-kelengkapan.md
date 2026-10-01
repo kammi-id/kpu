@@ -9,7 +9,7 @@ Aturan unggah:
 - body mentah dengan `Content-Length` wajib;
 - validasi ekstensi, MIME, dan signature byte awal terhadap kelompok;
 - stream ke `berkas/<UUIDv4>` sambil menghitung SHA-256;
-- INSERT bersyarat atomik dengan batas lima berkas per kelompok;
+- INSERT metadata tanpa batas jumlah berkas per kelompok;
 - objek R2 dihapus bila INSERT gagal.
 
 `vKelengkapan` adalah satu-satunya sumber status.
@@ -21,10 +21,10 @@ Rujukan: [spec](../spec.md) bagian Kelompok berkas dan unggahan, Skema D1 (`vKel
 **Status:** done
 
 - [ ] Kelompok 6 hanya menerima PDF. Sembilan kelompok lain menerima PDF, JPEG, dan PNG (acceptance 14).
-- [ ] Berkas > 20 MiB, berkas tanpa `Content-Length`, dan berkas keenam dalam satu kelompok ditolak dengan alasan jelas (acceptance 15).
+- [ ] Berkas > 20 MiB dan berkas tanpa `Content-Length` ditolak dengan alasan jelas; unggahan lebih dari lima berkas dalam satu kelompok diterima (acceptance 15).
 - [ ] Berkas dengan ekstensi atau MIME yang tidak cocok dengan signature ditolak, begitu pula DOCX, ZIP, dan executable.
 - [ ] `berkas.sha256` sama dengan SHA-256 isi objek R2. Kunci R2 tidak memuat identitas, kelompok, atau ekstensi.
-- [ ] Kegagalan INSERT, termasuk batas lima, tidak meninggalkan objek R2.
+- [ ] Kegagalan INSERT tidak meninggalkan objek R2 dan dilaporkan sebagai galat server.
 - [ ] Unggahan kelompok 7 tanpa `jenisRekomendasi` ditolak, dan `jenisRekomendasi` di kelompok lain ditolak.
 - [ ] Kelompok 7 hadir dengan 2 A.3 atau 3 A.4. Campuran 1 A.3 + 2 A.4 belum hadir (acceptance 13).
 - [ ] `x/10` dan label keseluruhan sama di sidebar, `/akun`, dan `/akun/berkas`, semuanya dari `vKelengkapan` (acceptance 12).

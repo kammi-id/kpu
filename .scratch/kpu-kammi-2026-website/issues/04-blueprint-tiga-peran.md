@@ -122,7 +122,7 @@ Bakal Calon Ketua Umum
     minimal tiga berkas A.4.
 14. Kelompok enam menolak berkas selain PDF; sembilan kelompok lain menerima
     PDF, JPEG, dan PNG.
-15. Berkas lebih dari 20 MiB atau berkas keenam dalam satu kelompok ditolak.
+15. Berkas lebih dari 20 MiB ditolak. Jumlah berkas dalam satu kelompok tidak dibatasi.
 16. Pada tahap Pemeriksaan dan Terkunci, seluruh simpan, unggah, dan hapus
     ditolak server dan antarmuka menampilkan alasannya.
 17. Pada Masa Perbaikan, pemilik akun lama dapat mengubah kembali seluruh data

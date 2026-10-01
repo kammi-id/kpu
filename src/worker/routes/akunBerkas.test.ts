@@ -216,15 +216,13 @@ describe("unggah berkas: format dan validasi (acceptance 14, 15)", () => {
 		expect((await unggah(cookie, 1, { namaAsli: "dokumen.pdf" }, new Uint8Array([0x4d, 0x5a, 0x90, 0x00]))).status).toBe(400);
 	});
 
-	it("berkas keenam dalam satu kelompok ditolak (batas lima)", async () => {
+	it("unggahan dalam satu kelompok tidak dibatasi lima berkas", async () => {
 		const cookie = await daftarBacalon("batas@example.test");
-		for (let index = 0; index < 5; index += 1) {
+		for (let index = 0; index < 7; index += 1) {
 			expect((await unggah(cookie, 2, { namaAsli: `b${index}.pdf` })).status).toBe(201);
 		}
-		const keenam = await unggah(cookie, 2, { namaAsli: "b5.pdf" });
-		expect(keenam.status).toBe(409);
 		const jumlah = await env.DB.prepare('SELECT COUNT(*) AS jumlah FROM "berkas" WHERE "kelompok" = 2').first<{ jumlah: number }>();
-		expect(jumlah?.jumlah).toBe(5);
+		expect(jumlah?.jumlah).toBe(7);
 	});
 });
 
@@ -250,23 +248,14 @@ describe("R2 dan integritas (acceptance terkait sha256/r2Key)", () => {
 		expect(isi).toEqual(bytes);
 	});
 
-	it("kegagalan INSERT, termasuk batas lima, tidak meninggalkan objek R2 yatim", async () => {
-		const cookie = await daftarBacalon("yatim@example.test");
-		for (let index = 0; index < 5; index += 1) await unggah(cookie, 4, { namaAsli: `p${index}.pdf` });
-
-		const sebelum = new Set((await env.BERKAS.list({ prefix: "berkas/" })).objects.map((object) => object.key));
-		const gagal = await unggah(cookie, 4, { namaAsli: "keenam.pdf" });
-		expect(gagal.status).toBe(409);
-		const sesudah = new Set((await env.BERKAS.list({ prefix: "berkas/" })).objects.map((object) => object.key));
-		expect(sesudah).toEqual(sebelum);
-	});
-
-	it("kegagalan INSERT karena galat D1 lain juga membersihkan objek R2", async () => {
+	it("kegagalan INSERT membersihkan objek R2 dan dilaporkan sebagai galat server", async () => {
 		const cookie = await daftarBacalon("trigger@example.test");
 		const sebelum = new Set((await env.BERKAS.list({ prefix: "berkas/" })).objects.map((object) => object.key));
 		await env.DB.exec(`CREATE TRIGGER "berkas_gagal" BEFORE INSERT ON "berkas" BEGIN SELECT RAISE(FAIL, 'uji'); END`);
 		try {
-			expect((await unggah(cookie, 1, { namaAsli: "gagal.pdf" })).status).toBe(409);
+			const gagal = await unggah(cookie, 1, { namaAsli: "gagal.pdf" });
+			expect(gagal.status).toBe(500);
+			expect(await gagal.json()).toEqual({ error: "simpan_berkas_gagal" });
 		} finally {
 			await env.DB.exec('DROP TRIGGER "berkas_gagal"');
 		}

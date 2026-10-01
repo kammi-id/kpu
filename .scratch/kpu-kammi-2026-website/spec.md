@@ -76,7 +76,7 @@ Satu Cloudflare Worker di `https://kpu.kammi.id` melayani SPA React dan API Hono
 35. Sebagai Bakal Calon Ketua Umum, saya ingin halaman tiap kelompok (`/akun/berkas/:no`) menampilkan ketentuan format, daftar berkas, tombol unggah, dan tombol hapus, agar saya mengelola satu kelompok dalam satu tempat.
 36. Sebagai Bakal Calon Ketua Umum, saya ingin kelompok 6 (karya tulis ilmiah) hanya menerima PDF, agar saya tidak mengunggah format yang pasti ditolak.
 37. Sebagai Bakal Calon Ketua Umum, saya ingin sembilan kelompok lain menerima PDF, JPEG, atau PNG, agar saya dapat mengunggah hasil pindai atau foto.
-38. Sebagai Bakal Calon Ketua Umum, saya ingin berkas lebih dari 20 MiB atau berkas keenam dalam satu kelompok ditolak dengan alasan jelas, agar saya tahu cara memperbaikinya.
+38. Sebagai Bakal Calon Ketua Umum, saya ingin berkas lebih dari 20 MiB ditolak dengan alasan jelas, tanpa batas jumlah berkas per kelompok, agar saya tahu cara memperbaikinya.
 39. Sebagai Bakal Calon Ketua Umum, saya ingin berkas yang ekstensi, MIME, atau signature-nya tidak cocok ditolak, agar berkas yang disamarkan tidak masuk ke sistem.
 40. Sebagai Bakal Calon Ketua Umum, saya ingin memilih jenis A.3 dari PW atau A.4 dari PD setiap kali mengunggah ke kelompok 7, agar sistem dapat menghitung Jalur Rekomendasi.
 41. Sebagai Bakal Calon Ketua Umum, saya ingin kelompok 7 dihitung hadir bila ada sedikitnya dua berkas A.3 atau sedikitnya tiga berkas A.4, agar saya tahu kapan salah satu Jalur Rekomendasi terpenuhi.
@@ -251,7 +251,7 @@ Asumsi tercatat: Permintaan Penutupan Akun tetap tersedia di luar jendela ubah. 
   1. tolak bila `bolehUbahBacalon` salah atau `Content-Length` tidak ada, 0, atau > 20 MiB;
   2. validasi ekstensi, MIME, dan signature byte awal (`%PDF-`, JPEG `FF D8 FF`, PNG `89 50 4E 47 0D 0A 1A 0A`) terhadap kelompok;
   3. `R2.put` ke `berkas/<UUIDv4>` dengan `contentType` tervalidasi sambil menghitung SHA-256 lewat digest stream;
-  4. `INSERT` bersyarat atomik "jumlah berkas kelompok < 5";
+  4. `INSERT` metadata berkas tanpa batas jumlah berkas per kelompok;
   5. bila nol baris tersisip atau INSERT gagal, hapus objek R2 dan tolak.
 
   Setiap percobaan dicatat `unggah_berkas`.
@@ -364,7 +364,7 @@ Klien React tidak diuji otomatis. Butir UI (spanduk, tombol nonaktif beserta ala
 - **Sesi:** batas tidak aktif dan absolut per peran; login keenam mencabut yang tertua; sesi Bakal Calon ditolak di API Admin (butir 20); tanpa sesi ditolak di API akun (butir 11).
 - **Unggah:**
   - kelompok 6 PDF saja (butir 14);
-  - > 20 MiB dan berkas keenam ditolak (butir 15);
+  - > 20 MiB ditolak, sedangkan unggahan lebih dari lima berkas per kelompok diterima (butir 15);
   - signature palsu ditolak;
   - SHA-256 tersimpan cocok;
   - kegagalan INSERT tidak meninggalkan objek R2;

@@ -62,7 +62,7 @@ melalui enam tahap.
   terlihat, dalam keadaan nonaktif, beserta alasannya.
 - Berkas yang dikelola: Formulir A.1–A.6, karya tulis ilmiah (PDF saja),
   rekomendasi A.3 dari PW atau A.4 dari PD, dan bukti transfer. Setiap kelompok
-  berisi paling banyak 5 berkas, masing-masing ≤ 20 MiB.
+  dapat berisi berkas tanpa batas jumlah, masing-masing ≤ 20 MiB.
 - Tidak ada email, notifikasi, maupun reset kata sandi mandiri. Pemulihan akses
   berlangsung lewat kanal resmi KPU (satu WhatsApp dan satu email), yang
   ditangani Admin.

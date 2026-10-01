@@ -98,7 +98,7 @@ export function AkunBerkasKelompok() {
 			await muat(kelompok.nomor);
 			setPesan("Berkas tersimpan.");
 		} catch {
-			setPesan("Berkas tidak dapat diunggah. Periksa format, ukuran (maksimum 20 MB), dan batas lima berkas per kelompok.");
+			setPesan("Berkas tidak dapat diunggah. Periksa format dan ukuran (maksimum 20 MB), lalu coba lagi.");
 		} finally {
 			setMenyimpan(false);
 		}
