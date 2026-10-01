@@ -6,9 +6,6 @@ import { ambilKelengkapan } from "../lib/kelengkapan";
 import { bolehUbahBacalon, layananAktif, tahapPada } from "../lib/tahap";
 import { unggahBerkas } from "../lib/unggahBerkas";
 
-/** Spec "Kelompok berkas dan unggahan": paling banyak lima berkas per kelompok. */
-const MAKS_BERKAS_PER_KELOMPOK = 5;
-
 type BarisBerkas = {
 	id: string;
 	userId: string;
@@ -127,8 +124,7 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 		try {
 			const insert = await c.env.DB.prepare(
 				`INSERT INTO "berkas" ("id", "userId", "kelompok", "jenisRekomendasi", "r2Key", "namaAsli", "mime", "ukuranByte", "sha256", "diunggahPada")
-				 SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-				 WHERE (SELECT COUNT(*) FROM "berkas" WHERE "userId" = ? AND "kelompok" = ?) < ${MAKS_BERKAS_PER_KELOMPOK}`,
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 			)
 				.bind(
 					id,
@@ -141,15 +137,9 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 					hasil.ukuranByte,
 					hasil.sha256,
 					waktu.toISOString(),
-					sesi.user.id,
-					kelompok,
 				)
 				.run();
-			// `meta.rows_written` counts low-level storage writes (index b-tree entries
-			// included), not logical rows — `meta.changes` (sqlite3_changes()) is the
-			// reliable "did exactly one row get inserted" signal for this conditional
-			// INSERT…SELECT…WHERE, confirmed empirically against @cloudflare/vitest-plugin's
-			// local D1 simulator.
+			// `meta.changes` counts logical rows, unlike storage writes in `rows_written`.
 			insertOk = insert.meta.changes === 1;
 		} catch {
 			insertOk = false;
@@ -162,7 +152,7 @@ export function buatRuteAkunBerkas(sekarang: () => Date) {
 				{ aktor: "Bakal Calon Ketua Umum", tindakan: "unggah_berkas", hasil: "gagal", sesiId: sesi.session.id, aktorUserId: sesi.user.id },
 				waktu,
 			);
-			return c.json({ error: "batas_berkas_tercapai" }, 409);
+			return c.json({ error: "simpan_berkas_gagal" }, 500);
 		}
 
 		await catatAudit(

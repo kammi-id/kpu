@@ -77,7 +77,7 @@ Model identitas memakai **Better Auth** di atas Hono dan binding D1 native, tanp
 ### Kebijakan berkas
 
 - Karya tulis ilmiah: PDF saja. Sembilan kelompok lain: PDF, JPEG, atau PNG.
-- Maksimal 20 MiB per file dan 5 file per kelompok unggahan.
+- Maksimal 20 MiB per file, tanpa batas jumlah file per kelompok unggahan.
 - Validasi berlapis di server: ekstensi, MIME, dan signature file. DOCX, ZIP, dan executable ditolak.
 - Tidak ada pemindaian antivirus pada versi minimum; keterbatasan ini diterima secara sadar.
 - Unggah melalui Worker aman di bawah batas request 100 MB.
