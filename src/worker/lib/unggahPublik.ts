@@ -19,7 +19,7 @@ const MIME_DIIZINKAN = {
 
 export type MimeBerkasPublik = keyof typeof MIME_DIIZINKAN;
 
-export type KategoriBerkasPublik = "peraturan" | "formulir";
+export type KategoriBerkasPublik = "peraturan" | "formulir" | "hasil-verifikasi";
 
 export type MetaBerkasPublik = {
 	judul: string;
@@ -45,8 +45,9 @@ function bacaMeta(url: URL, headers: Headers): MetaBerkasPublik | null {
 	const urutanMentah = url.searchParams.get("urutan");
 
 	if (!judul || !namaAsli) return null;
-	if (kategori !== "peraturan" && kategori !== "formulir") return null;
+	if (kategori !== "peraturan" && kategori !== "formulir" && kategori !== "hasil-verifikasi") return null;
 	if (!mimeValid(mime)) return null;
+	if (kategori === "hasil-verifikasi" && mime !== "application/pdf") return null;
 
 	const urutan = Number(urutanMentah);
 	if (!Number.isInteger(urutan) || urutan < 0) return null;

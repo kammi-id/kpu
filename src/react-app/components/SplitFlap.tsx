@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { useEffect, useState } from "react";
 
 const ALFABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -15,7 +16,7 @@ function acak(): string {
  * membuatnya langsung statis. `aria-hidden` karena nama tahap yang sama juga
  * ditulis sebagai teks biasa untuk pembaca layar.
  */
-export function SplitFlap({ teks }: { teks: string }) {
+export function SplitFlap({ teks, className }: { teks: string; className?: string }) {
 	const target = teks.toUpperCase().split("");
 	const [kurangGerak] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 	const [tampil, setTampil] = useState<string[]>(() => (kurangGerak ? target : target.map(() => acak())));
@@ -50,7 +51,7 @@ export function SplitFlap({ teks }: { teks: string }) {
 	});
 
 	return (
-		<div aria-hidden className="@container flex flex-wrap gap-x-3 gap-y-1">
+		<div aria-hidden className={cn("@container flex flex-wrap gap-x-3 gap-y-1", className)}>
 			{kataKeIndeks
 				.filter((kata) => kata.length > 0)
 				.map((kata) => (
@@ -58,7 +59,7 @@ export function SplitFlap({ teks }: { teks: string }) {
 						{kata.map((index) => (
 							<span
 								key={index}
-								className="relative flex h-[1.4em] w-[0.95em] shrink-0 items-center justify-center overflow-hidden rounded-[0.3rem] bg-marun font-display text-[clamp(1.5rem,7cqw,3.5rem)] leading-none text-white shadow-[inset_0_-0.2em_0_rgb(0_0_0_/_0.18)]"
+								className="relative flex h-[1.4em] w-[0.95em] shrink-0 items-center justify-center overflow-hidden rounded-[0.3rem] bg-marun font-display text-[clamp(var(--ukuran-minimum-huruf,1.5rem),7cqw,3.5rem)] leading-none text-white shadow-[inset_0_-0.2em_0_rgb(0_0_0_/_0.18)]"
 							>
 								{tampil[index]}
 								<span className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-black/25" />

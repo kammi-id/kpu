@@ -27,7 +27,7 @@ import { cangkangDenganPramuat } from "./lib/pramuatRute";
 import { buatRuteAkunBerkas } from "./routes/akunBerkas";
 import { buatRuteAdminBacalon } from "./routes/adminBacalon";
 import { buatRuteAkunData } from "./routes/akunData";
-import { buatRuteAdminBerkasPublik, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
+import { buatRuteAdminBerkasPublik, buatRutePengumuman, buatRuteUnduhBerkasPublik } from "./routes/berkasPublik";
 import { buatRuteNia } from "./routes/nia";
 import { buatRuteStruktur } from "./routes/struktur";
 import { buatRutePengaturanAdmin } from "./routes/pengaturanAdmin";
@@ -197,6 +197,7 @@ export function buatWorker(sekarang: () => Date = () => new Date(), ekstraksiA1:
 	app.route("/api/tahap", buatRuteTahap(sekarang));
 	app.route("/api/peraturan", buatRutePeraturanPublik(sekarang));
 	app.route("/api/unduhan", buatRuteUnduhan(sekarang));
+	app.route("/api/pengumuman", buatRutePengumuman(sekarang));
 	app.route("/api/berkas-publik", buatRuteUnduhBerkasPublik(sekarang));
 	app.route("/api/akun/data", buatRuteAkunData(sekarang, ekstraksiA1));
 	app.route("/api/admin/berkas-publik", buatRuteAdminBerkasPublik(sekarang));

@@ -116,8 +116,12 @@ _Avoid_: hasil verifikasi, berkas sah
 Satu dokumen ringkasan PKPU yang ditulis dan diperbarui Admin untuk halaman publik, beserta Berkas Publik kategori peraturan. Dokumen ini bukan kanal pengumuman resmi dan tidak mengubah jadwal resmi.
 _Avoid_: pengumuman, berita, jadwal
 
+**Pengumuman Hasil Verifikasi Berkas**:
+Surat resmi KPU yang menyatakan hasil pemeriksaan administrasi dan kualifikasi Bakal Calon Ketua Umum, termasuk kebutuhan perbaikan berkas. Hasil dalam surat ini berbeda dari Status Kelengkapan Berkas otomatis dan belum merupakan penetapan final Calon Ketua Umum.
+_Avoid_: status kelengkapan otomatis, daftar calon tetap
+
 **Berkas Publik**:
-Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKPU dan Formulir A.1 sampai A.6. Berkas ini tidak pernah memuat data Bakal Calon Ketua Umum.
+Berkas yang diunggah Admin untuk diunduh siapa pun tanpa akun, yaitu dokumen PKPU, Formulir A.1 sampai A.6, dan Pengumuman Hasil Verifikasi Berkas resmi KPU. Pengumuman dapat memuat hasil pemeriksaan bakal calon yang dipublikasikan KPU; lampiran pendaftaran pribadi tetap bukan Berkas Publik.
 _Avoid_: berkas Bakal Calon, lampiran pendaftaran
 
 **Formulir A.1 Bacalon**:

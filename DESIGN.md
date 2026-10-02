@@ -176,7 +176,7 @@ Teks kecil di atas merah, hijau, dan marun selalu putih penuh; putih transparan 
 ## Layout
 
 - Lebar isi maksimal `76rem`, gutter samping 16px di ponsel dan 32px di desktop.
-- **Beranda publik:** hero merah (logo, judul display, fakta Muktamar), lalu panel papan putih yang menumpang batas merah-putih. Kiri berisi tahap berjalan, kanan jadwal resmi, dan keduanya bertumpuk di ponsel. Di bawahnya tiga pintu Peraturan, Jadwal, dan Unduhan sebagai baris besar, catatan hijau privasi, dan footer marun.
+- **Beranda publik setelah pendaftaran ditutup:** hero merah dengan judul display dua blok: “Hasil Verifikasi Berkas” sebagai judul utama dan “Bakal Calon Ketua Umum PP KAMMI” lebih kecil, diikuti fakta Muktamar dan ilustrasi yang sudah ada. Panel papan putih menumpang batas merah-putih; hero beranda memakai tinggi sesuai konten agar unduhan lebih cepat ditemukan; kiri menyatukan pengumuman, petunjuk berdasarkan tahap berjalan, dan unduhan surat resmi dengan judul SplitFlap “Hasil Verifikasi” tanpa judul pengantar atau blok status terpisah, kanan jadwal berikutnya. Keduanya bertumpuk di ponsel. Unduhan tidak bergantung pada keberhasilan memuat tahap. Header publik memakai tautan Masuk. Tiga pintu Peraturan, Jadwal, dan Unduhan serta footer dipertahankan. Gambar OG beranda memakai hierarki judul yang sama.
 - **Rute akun Bakal Calon:** spanduk tahap (versi ringkas panel papan) di atas setiap halaman. Di desktop, sidebar kiri memuat `x/10` dan label kelengkapan; di ponsel sidebar menjadi strip ringkas di bawah spanduk. Area formulir dan berkas berada di atas putih.
 - **Rute Admin:** header putih bergaris merah tipis, tabel padat penuh lebar, dan detail satu kolom. Tanpa hero merah.
 - Spasi berirama 4px (skala Tailwind). Ruang di atas judul lebih besar daripada di bawahnya.
@@ -224,3 +224,7 @@ Kedalaman hanya satu: **panel enamel** yang terangkat dari bidang merah, dengan 
 - Jangan memakai Lilita One untuk paragraf atau teks di bawah 1.5rem, dan jangan memakai putih transparan untuk teks di atas merah.
 - Jangan menampilkan foto per anggota dengan nama atau jabatan karangan.
 - Jangan membuat tema gelap atau warna keempat.
+
+- **Unggah hasil verifikasi admin:** slot PDF di Unggah Berkas memakai pola unggahan publik yang ada. Daftar terbaru lebih dahulu; penanda “Aktif di beranda” menjelaskan berkas yang dipakai tombol unduh. Surat awal menjadi cadangan bila belum ada unggahan.
+
+- **Keadaan unggahan publik:** tiap daftar memiliki loading, galat dan retry sendiri. Daftar kosong hanya ditampilkan setelah berhasil dimuat; data lama saat galat diberi penjelasan dan tindakan perubahan dinonaktifkan. Status proses/berhasil diumumkan. Hapus berkas memerlukan konfirmasi; untuk PDF aktif, dialog menyebut surat pengganti. Kontrol minimal 44px. Heading kecil admin memakai Poppins semibold.

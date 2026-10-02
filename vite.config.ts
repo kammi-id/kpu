@@ -117,14 +117,14 @@ function petaPramuatRute(): Plugin {
  *   bersama sudah ada, ONBOARD_TOKEN kosong, atau layanan sudah selesai
  *   (src/worker/index.ts). Cangkang dari cache akan melewati gerbang itu dan
  *   menampilkan halaman onboarding kepada siapa pun.
- * - Empat rute publik di bawahnya ditimpa <title>, description, dan og:image
+ * - Beranda dan empat rute publik lainnya ditimpa metadata sosial
  *   per halaman lewat HTMLRewriter (routes/metaHalaman.ts). Cangkang dari
  *   cache mengembalikan judul generik index.html untuk pengunjung berulang.
  *
  * Daftar ini berpasangan dengan `run_worker_first` di wrangler.json — kalau
  * satu berubah, yang lain ikut.
  */
-const RUTE_HARUS_KE_WORKER = [/^\/api\//, /^\/og\//, /^\/onboard$/, /^\/(jadwal|tentang|peraturan|unduhan)$/];
+const RUTE_HARUS_KE_WORKER = [/^\/$/, /^\/api\//, /^\/og\//, /^\/onboard$/, /^\/(jadwal|tentang|peraturan|unduhan)$/];
 
 export default defineConfig({
 	plugins: [

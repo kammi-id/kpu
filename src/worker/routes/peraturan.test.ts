@@ -267,3 +267,47 @@ describe("Berkas Publik (seam Worker)", () => {
 		expect(sesudah).toEqual(sebelum);
 	});
 });
+
+describe("Pengumuman hasil verifikasi", () => {
+	it("menggunakan surat awal tanpa unggahan, tanpa menyimpan redirect di cache", async () => {
+		const response = await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi");
+		expect(response.status).toBe(302);
+		expect(response.headers.get("location")).toBe("/pengumuman/hasil-verifikasi-berkas-2026.pdf");
+		expect(response.headers.get("cache-control")).toBe("no-store");
+	});
+
+	it("admin mengunggah PDF, terbaru aktif dan penghapusan kembali ke surat sebelumnya", async () => {
+		const cookie = await sesiAdmin();
+		for (const namaAsli of ["awal.pdf", "revisi.pdf"]) {
+			expect((await unggahBerkasPublik(cookie, { kategori: "hasil-verifikasi", namaAsli })).status).toBe(201);
+		}
+		const daftar = await (await kirim(WAKTU_UJI, "/api/pengumuman")).json<{ berkasPublik: Array<{ id: string; namaAsli: string }> }>();
+		expect(daftar.berkasPublik.map((item) => item.namaAsli)).toEqual(["revisi.pdf", "awal.pdf"]);
+		const [revisi, awal] = daftar.berkasPublik;
+		expect((await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi")).headers.get("location")).toBe(`/api/berkas-publik/${revisi.id}`);
+		const unduh = await kirim(WAKTU_UJI, `/api/berkas-publik/${revisi.id}`);
+		expect(unduh.status).toBe(200);
+		expect(unduh.headers.get("content-type")).toBe("application/pdf");
+		expect(Array.from(new Uint8Array(await unduh.arrayBuffer()))).toEqual([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31]);
+		for (const path of ["/api/peraturan", "/api/unduhan"]) {
+			expect((await (await kirim(WAKTU_UJI, path)).json<{ berkasPublik: unknown[] }>()).berkasPublik).toEqual([]);
+		}
+		expect((await kirim(WAKTU_UJI, `/api/admin/berkas-publik/${revisi.id}`, { method: "DELETE", headers: { cookie } })).status).toBe(200);
+		expect((await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi")).headers.get("location")).toBe(`/api/berkas-publik/${awal.id}`);
+	});
+
+	it("menolak non-admin, DOCX, dan PDF palsu", async () => {
+		expect((await unggahBerkasPublik("", { kategori: "hasil-verifikasi" })).status).toBe(401);
+		const cookie = await sesiBacalon();
+		expect((await unggahBerkasPublik(cookie, { kategori: "hasil-verifikasi" })).status).toBe(401);
+		await env.DB.prepare("UPDATE user SET role = 'admin'").run();
+		expect((await unggahBerkasPublik(cookie, { kategori: "hasil-verifikasi", mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", namaAsli: "hasil.docx" }, new Uint8Array([0x50, 0x4b, 0x03, 0x04]))).status).toBe(400);
+		expect((await unggahBerkasPublik(cookie, { kategori: "hasil-verifikasi" }, new Uint8Array([1, 2, 3]))).status).toBe(400);
+	});
+
+	it("daftar dan redirect tertutup setelah penghapusan akhir", async () => {
+		for (const path of ["/api/pengumuman", "/api/pengumuman/hasil-verifikasi"]) {
+			expect((await kirim(new Date("2027-01-28T00:00:00Z"), path)).status).toBe(403);
+		}
+	});
+});
