@@ -60,7 +60,7 @@ Status: disetujui pengguna pada 2 Oktober 2026; diimplementasikan dan diverifika
 - Keputusan pengguna, 2 Oktober 2026: hasil verifikasi sudah diumumkan karena proses verifikasi berlangsung lebih cepat dari jadwal. Alasan ini hanya dicatat sebagai keputusan internal dan tidak ditampilkan di UI; jadwal tahapan yang disepakati tetap menjadi rujukan petunjuk.
 - Pengumuman dan petunjuk tahap disatukan; SplitFlap berjudul “Hasil Verifikasi” dipertahankan di dalam blok gabungan. Judul pengumuman dan paragraf “Baca surat…” dihapus.
 - Admin > Unggah Berkas menyediakan slot Hasil Verifikasi, PDF saja, batas 20 MiB dengan pemeriksaan MIME, ekstensi, dan signature.
-- Beranda mengunduh unggahan hasil verifikasi terbaru. Jika dihapus, unggahan sebelumnya aktif; bila tidak ada, surat awal terlampir digunakan.
+- Beranda mengunduh unggahan hasil verifikasi terbaru. Jika dihapus, unggahan sebelumnya aktif; bila tidak ada, tombol unduh dinonaktifkan (keputusan terbaru pengguna).
 - Kategori baru terpisah dari peraturan/formulir; alur autentikasi admin, audit, unduhan publik, dan penghapusan akhir tetap digunakan.
 - Migrasi 0007 menyalin seluruh berkas publik lama. Tabel ini tidak menjadi induk foreign key.
 - Perbaikan overflow hero beranda: ilustrasi diperkecil dan dibatasi lebar kolom, margin bawah negatif dihapus, serta hero memakai overflow clip agar tidak menjadi area scroll tersendiri.
@@ -80,3 +80,10 @@ Status: disetujui pengguna pada 2 Oktober 2026; diimplementasikan dan diverifika
 - Pemeriksaan render awal melalui React server rendering lulus: tiga daftar memiliki loading independen, tanpa “Belum ada” atau input unggahan sebelum status daftar diketahui. Harness sementara dihapus setelah pemeriksaan.
 - Verifikasi visual/klik pada browser VS Code belum selesai: kontrol native timeout dua kali, termasuk setelah reset dan koneksi ulang. Tidak mengklaim pengujian dialog, error/retry, unggahan, atau layout mobile melalui browser.
 - Snapshot critique tetap terbuka sampai konfirmasi visual/interaksi tersebut selesai; tidak menaikkan skor audit tanpa penilaian ulang.
+
+## Perubahan keputusan: surat aktif hanya dari unggahan admin
+
+- PDF hasil verifikasi terbaru menjadi surat aktif. Menghapus surat aktif memakai unggahan sebelumnya jika masih ada.
+- Tanpa unggahan admin, tombol unduh beranda disabled dan endpoint unduhan merespons 404 tanpa redirect. PDF lampiran awal tidak lagi menjadi cadangan otomatis.
+- Loading atau galat daftar surat tidak mengaktifkan unduhan; galat menyediakan Coba lagi. Petunjuk admin dan dialog hapus terakhir menyebut bahwa tombol unduh akan nonaktif.
+- Validasi perubahan: `npm run build:app` lulus, ESLint pada enam berkas kode yang berubah tanpa error/warning, dan 14 tes `peraturan.test.ts` lulus. Browser bawaan VS Code pada devserver pengguna menampilkan tombol disabled dan pesan “Surat hasil verifikasi belum tersedia.” Keadaan unggahan dan penghapusan terakhir diuji pada seam Worker, bukan melalui unggahan browser.

@@ -59,7 +59,7 @@ export function AdminUnggahBerkas() {
 			</div>
 			<section aria-labelledby="hasil-verifikasi">
 				<h3 id="hasil-verifikasi" className="text-xl font-semibold text-navy">Pengumuman Hasil Verifikasi</h3>
-				<p className="mt-1 text-sm text-muted-foreground">PDF terbaru digunakan oleh tombol unduh di beranda. Jika dihapus, berkas sebelumnya digunakan; jika belum ada unggahan, surat awal tetap tersedia.</p>
+				<p className="mt-1 text-sm text-muted-foreground">PDF terbaru digunakan oleh tombol unduh di beranda. Jika dihapus, berkas sebelumnya digunakan; jika tidak ada unggahan, tombol unduh di beranda dinonaktifkan.</p>
 				<DaftarBerkas daftar={hasilVerifikasi}>
 					<SlotBerkasPublik kategori="hasil-verifikasi" judul="Hasil Verifikasi" urutan={1} berkas={hasilVerifikasi.data ?? []} onUbah={hasilVerifikasi.muatUlang} />
 				</DaftarBerkas>

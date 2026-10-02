@@ -62,8 +62,8 @@ export async function hapusBerkasPublik(id: string): Promise<void> {
 	if (!response.ok) throw new Error("Berkas tidak dapat dihapus.");
 }
 
-export async function ambilHasilVerifikasi(): Promise<BerkasPublik[]> {
-	const response = await fetch("/api/pengumuman");
+export async function ambilHasilVerifikasi(signal?: AbortSignal): Promise<BerkasPublik[]> {
+	const response = await fetch("/api/pengumuman", { signal });
 	if (!response.ok) throw new Error("Hasil verifikasi tidak dapat dimuat");
 	return ((await response.json()) as { berkasPublik: BerkasPublik[] }).berkasPublik;
 }

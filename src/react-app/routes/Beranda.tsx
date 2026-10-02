@@ -1,10 +1,12 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "cn";
 import { FileText, CalendarDays, Download } from "lucide-react";
-import { buttonVariants } from "~/components/ui/button";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
 import { Badge } from "~/components/ui/badge";
 import { IlustrasiHero, KELAS_GRID_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
+import { ambilHasilVerifikasi, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { useTahap } from "~/react-app/lib/useTahap";
 import { tampilkanBadgePembaruan, type Tahap } from "~/react-app/lib/tahap";
 import { ketum } from "~/react-app/assets/generated";
@@ -27,6 +29,19 @@ const PINTU = [
 export function Beranda() {
 	const { data, error } = useTahap();
 	const adaPembaruan = tampilkanBadgePembaruan(data?.sekarang);
+	const [surat, setSurat] = useState<BerkasPublik[] | null>(null);
+	const [galatSurat, setGalatSurat] = useState(false);
+	const [percobaan, setPercobaan] = useState(0);
+	useEffect(() => {
+		const controller = new AbortController();
+		ambilHasilVerifikasi(controller.signal)
+			.then((hasil) => { if (!controller.signal.aborted) setSurat(hasil); })
+			.catch(() => { if (!controller.signal.aborted) setGalatSurat(true); });
+		return () => controller.abort();
+	}, [percobaan]);
+	const suratTersedia = !galatSurat && !!surat?.length;
+	const kelasUnduh = cn(buttonVariants({ size: "lg" }), "mt-5 h-auto min-h-12 w-full py-3 whitespace-normal sm:w-auto");
+	const isiUnduh = <><Download className="size-5 shrink-0" aria-hidden />Unduh Surat Hasil Verifikasi</>;
 
 	return (
 		<>
@@ -62,16 +77,15 @@ export function Beranda() {
 									<p className="max-w-[56ch] text-[0.9375rem] leading-relaxed">{PETUNJUK[data.tahap]}</p>
 								)}
 							</div>
-							<a
-								href="/api/pengumuman/hasil-verifikasi"
-								download
-								className={cn(buttonVariants({ size: "lg" }), "mt-5 h-auto min-h-12 w-full py-3 whitespace-normal sm:w-auto")}
-								aria-describedby="format-surat-verifikasi"
-							>
-								<Download className="size-5 shrink-0" aria-hidden />
-								Unduh Surat Hasil Verifikasi
-							</a>
-							<p id="format-surat-verifikasi" className="mt-2 text-sm text-muted-foreground">PDF</p>
+							{suratTersedia ? (
+								<a href="/api/pengumuman/hasil-verifikasi" download className={kelasUnduh} aria-describedby="format-surat-verifikasi">{isiUnduh}</a>
+							) : (
+								<button type="button" disabled className={kelasUnduh} aria-describedby="format-surat-verifikasi">{isiUnduh}</button>
+							)}
+							<p id="format-surat-verifikasi" role="status" aria-live="polite" className="mt-2 text-sm text-muted-foreground">
+								{galatSurat ? "Status surat tidak dapat dimuat." : surat === null ? "Memuat surat hasil verifikasi…" : suratTersedia ? "PDF" : "Surat hasil verifikasi belum tersedia."}
+							</p>
+							{galatSurat ? <Button type="button" variant="outline" className="mt-2 min-h-11" onClick={() => { setGalatSurat(false); setSurat(null); setPercobaan((nilai) => nilai + 1); }}>Coba lagi</Button> : null}
 
 						</div>
 						<div className="border-t border-border pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">

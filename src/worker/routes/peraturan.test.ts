@@ -269,10 +269,12 @@ describe("Berkas Publik (seam Worker)", () => {
 });
 
 describe("Pengumuman hasil verifikasi", () => {
-	it("menggunakan surat awal tanpa unggahan, tanpa menyimpan redirect di cache", async () => {
+	it("unduhan tidak tersedia tanpa unggahan dan respons tidak disimpan di cache", async () => {
 		const response = await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi");
-		expect(response.status).toBe(302);
-		expect(response.headers.get("location")).toBe("/pengumuman/hasil-verifikasi-berkas-2026.pdf");
+		expect(response.status).toBe(404);
+		expect(response.headers.get("location")).toBeNull();
+		expect(await response.json()).toEqual({ error: "hasil_verifikasi_belum_tersedia" });
+		expect((await (await kirim(WAKTU_UJI, "/api/pengumuman")).json<{ berkasPublik: unknown[] }>()).berkasPublik).toEqual([]);
 		expect(response.headers.get("cache-control")).toBe("no-store");
 	});
 
@@ -294,6 +296,10 @@ describe("Pengumuman hasil verifikasi", () => {
 		}
 		expect((await kirim(WAKTU_UJI, `/api/admin/berkas-publik/${revisi.id}`, { method: "DELETE", headers: { cookie } })).status).toBe(200);
 		expect((await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi")).headers.get("location")).toBe(`/api/berkas-publik/${awal.id}`);
+		expect((await kirim(WAKTU_UJI, `/api/admin/berkas-publik/${awal.id}`, { method: "DELETE", headers: { cookie } })).status).toBe(200);
+		const tanpaUnggahan = await kirim(WAKTU_UJI, "/api/pengumuman/hasil-verifikasi");
+		expect(tanpaUnggahan.status).toBe(404);
+		expect(tanpaUnggahan.headers.get("location")).toBeNull();
 	});
 
 	it("menolak non-admin, DOCX, dan PDF palsu", async () => {

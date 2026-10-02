@@ -225,6 +225,6 @@ Kedalaman hanya satu: **panel enamel** yang terangkat dari bidang merah, dengan 
 - Jangan menampilkan foto per anggota dengan nama atau jabatan karangan.
 - Jangan membuat tema gelap atau warna keempat.
 
-- **Unggah hasil verifikasi admin:** slot PDF di Unggah Berkas memakai pola unggahan publik yang ada. Daftar terbaru lebih dahulu; penanda “Aktif di beranda” menjelaskan berkas yang dipakai tombol unduh. Surat awal menjadi cadangan bila belum ada unggahan.
+- **Unggah hasil verifikasi admin:** slot PDF di Unggah Berkas memakai pola unggahan publik yang ada. Daftar terbaru lebih dahulu; penanda “Aktif di beranda” menjelaskan berkas yang dipakai tombol unduh. Tanpa unggahan, tombol unduh dinonaktifkan; selama loading atau galat, tombol juga nonaktif dan status dijelaskan.
 
 - **Keadaan unggahan publik:** tiap daftar memiliki loading, galat dan retry sendiri. Daftar kosong hanya ditampilkan setelah berhasil dimuat; data lama saat galat diberi penjelasan dan tindakan perubahan dinonaktifkan. Status proses/berhasil diumumkan. Hapus berkas memerlukan konfirmasi; untuk PDF aktif, dialog menyebut surat pengganti. Kontrol minimal 44px. Heading kecil admin memakai Poppins semibold.

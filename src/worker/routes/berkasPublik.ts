@@ -161,7 +161,7 @@ export function buatRuteAdminBerkasPublik(sekarang: () => Date) {
 	return route;
 }
 
-/** Surat terbaru dari admin; surat awal tetap tersedia sebelum unggahan pertama. */
+/** Surat aktif adalah unggahan admin terbaru; tanpa unggahan, unduhan tidak tersedia. */
 export function buatRutePengumuman(sekarang: () => Date) {
 	const route = new Hono<{ Bindings: Env }>();
 	route.use("*", async (c, next) => {
@@ -183,9 +183,8 @@ export function buatRutePengumuman(sekarang: () => Date) {
 			`SELECT "id" FROM "berkasPublik" WHERE "kategori" = 'hasil-verifikasi'
 			 ORDER BY "diunggahPada" DESC, rowid DESC LIMIT 1`,
 		).first<{ id: string }>();
-		return c.redirect(terbaru
-			? `/api/berkas-publik/${encodeURIComponent(terbaru.id)}`
-			: "/pengumuman/hasil-verifikasi-berkas-2026.pdf", 302);
+		if (!terbaru) return c.json({ error: "hasil_verifikasi_belum_tersedia" }, 404);
+		return c.redirect(`/api/berkas-publik/${encodeURIComponent(terbaru.id)}`, 302);
 	});
 	return route;
 }

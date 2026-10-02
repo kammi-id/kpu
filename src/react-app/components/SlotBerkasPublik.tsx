@@ -132,7 +132,7 @@ export function SlotBerkasPublik({ kategori, judul, urutan, berkas, onUbah }: Pr
 				<DialogTitle>Hapus berkas ini?</DialogTitle>
 				<DialogDescription className="break-words">
 					Berkas “{pilihanHapus?.namaAsli}” akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
-					{aktifDihapus ? pengganti ? ` Beranda akan menggunakan PDF “${pengganti.namaAsli}”.` : " Beranda akan kembali menggunakan surat awal Pengumuman Hasil Verifikasi KPU Muktamar KAMMI." : kategori === "hasil-verifikasi" ? " PDF yang aktif di beranda tetap digunakan." : " Berkas ini tidak lagi tersedia untuk diunduh."}
+					{aktifDihapus ? pengganti ? ` Beranda akan menggunakan PDF “${pengganti.namaAsli}”.` : " Tombol unduh di beranda akan dinonaktifkan karena tidak ada PDF hasil verifikasi." : kategori === "hasil-verifikasi" ? " PDF yang aktif di beranda tetap digunakan." : " Berkas ini tidak lagi tersedia untuk diunduh."}
 				</DialogDescription>
 			</DialogHeader>
 			<p role="status" aria-live="polite" className="text-sm text-marun">{pesanDialog}</p>
