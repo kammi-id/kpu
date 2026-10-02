@@ -1,4 +1,4 @@
-// Generate 5 gambar OpenGraph (1200x630) saat build — lihat plan gambar+OG.
+// Generate 6 gambar OpenGraph (1200x630) saat build — lihat plan gambar+OG.
 // Tidak di-commit (public/og/ ada di .gitignore): selalu dibangun ulang dari
 // template + ilustrasi di src/react-app/assets, jadi selalu sinkron dengan
 // judul halaman yang sebenarnya (lihat KONTEN_META_HALAMAN di
@@ -102,7 +102,7 @@ function ukuranKontain(lebarAsli, tinggiAsli, maksLebar, maksTinggi) {
 const TINGGI_MAKS_ILUSTRASI = Math.round(630 * 0.9);
 const LEBAR_MAKS_ILUSTRASI = 560;
 
-function kartuHero({ judul, subjudul, ilustrasi, ilustrasiW, ilustrasiH }) {
+function kartuHero({ judul, judulSekunder, subjudul, ilustrasi, ilustrasiW, ilustrasiH, ukuranJudul = 72 }) {
 	const { lebar, tinggi } = ukuranKontain(ilustrasiW, ilustrasiH, LEBAR_MAKS_ILUSTRASI, TINGGI_MAKS_ILUSTRASI);
 	const kolom = [
 		headerRow("putih"),
@@ -112,7 +112,7 @@ function kartuHero({ judul, subjudul, ilustrasi, ilustrasiW, ilustrasiH }) {
 				style: {
 					fontFamily: "Lilita One",
 					fontWeight: 400,
-					fontSize: "72px",
+					fontSize: `${ukuranJudul}px`,
 					lineHeight: 0.98,
 					textTransform: "uppercase",
 					color: "#ffffff",
@@ -123,6 +123,11 @@ function kartuHero({ judul, subjudul, ilustrasi, ilustrasiW, ilustrasiH }) {
 			judul,
 		),
 	];
+	if (judulSekunder) {
+		kolom.push(
+			h("div", { style: { fontFamily: "Lilita One", fontWeight: 400, fontSize: "44px", lineHeight: 1.05, textTransform: "uppercase", color: "#ffffff", textShadow: `2px 2px 0 ${MARUN}, 4px 4px 0 ${MARUN}`, marginTop: "20px" } }, judulSekunder),
+		);
+	}
 	if (subjudul) {
 		kolom.push(
 			h("div", { style: { fontFamily: "Poppins", fontWeight: 700, fontSize: "26px", color: "#ffffff", marginTop: "20px" } }, subjudul),
@@ -213,6 +218,7 @@ function kartuTentang({ judul, subjudul, ilustrasi }) {
 // Dimensi asli tiap ilustrasi (lihat sips -g pixelWidth -g pixelHeight) —
 // dipakai ukuranKontain() supaya kartuHero tahu rasio aslinya tanpa menebak.
 const HALAMAN = [
+	{ berkas: "hasil-verifikasi", template: kartuHero, judul: "Hasil Verifikasi Berkas", judulSekunder: "Bakal Calon Ketua Umum PP KAMMI", subjudul: "Muktamar KAMMI XIV Ambon", ilustrasi: "ketum.png", ilustrasiW: 1122, ilustrasiH: 1402 },
 	{ berkas: "default", template: kartuHero, judul: "Pendaftaran Bakal Calon Ketua Umum PP KAMMI", subjudul: "Muktamar KAMMI XIV Ambon", ilustrasi: "ketum.png", ilustrasiW: 1122, ilustrasiH: 1402 },
 	{ berkas: "jadwal", template: kartuHero, judul: "Timeline Resmi KPU", ilustrasi: "bendum.png", ilustrasiW: 1024, ilustrasiH: 1481 },
 	{ berkas: "tentang", template: kartuTentang, judul: "Komisi Penjaringan Umum", subjudul: "Muktamar KAMMI XIV 2026", ilustrasi: "kpu.png" },

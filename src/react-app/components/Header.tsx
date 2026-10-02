@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
-import { Button } from "~/components/ui/button";
+import { cn } from "cn";
+import { buttonVariants } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { tampilkanBadgePembaruan } from "~/react-app/lib/tahap";
 import { useTahap } from "~/react-app/lib/useTahap";
@@ -14,10 +15,6 @@ const TAUTAN_NAV = [
 
 export function Header() {
 	const { data } = useTahap();
-	// Optimistis tampil sebelum tahap termuat, sama seperti Daftar.tsx — server
-	// tetap menolak bila salah. Disembunyikan (bukan dinonaktifkan) saat tertutup:
-	// header tidak punya ruang untuk alasan tertulis seperti hero Beranda.
-	const bolehRegistrasi = data?.bolehRegistrasi ?? true;
 	const adaPembaruan = tampilkanBadgePembaruan(data?.sekarang);
 
 	return (
@@ -59,15 +56,12 @@ export function Header() {
 							))}
 						</ul>
 					</nav>
-					{bolehRegistrasi ? (
-						<Button
-							render={<Link to="/daftar" />}
-							size="sm"
-							className="w-full shrink-0 bg-white text-merah shadow-none hover:bg-white/90 lg:w-auto"
-						>
-							Daftar
-						</Button>
-					) : null}
+					<Link
+						to="/masuk"
+						className={cn(buttonVariants({ size: "sm" }), "min-h-11 w-full shrink-0 bg-white text-merah shadow-none hover:bg-white/90 lg:w-auto")}
+					>
+						Masuk
+					</Link>
 				</div>
 			</div>
 		</header>

@@ -59,7 +59,7 @@ export function IlustrasiHero({ gambar, alt, className }: { gambar: GambarRespon
 			loading="eager"
 			fetchPriority="high"
 			sizes={SIZES_ILUSTRASI_HERO}
-			className={cn(className, KELAS_ILUSTRASI_HERO)}
+			className={cn(KELAS_ILUSTRASI_HERO, className)}
 		/>
 	);
 }

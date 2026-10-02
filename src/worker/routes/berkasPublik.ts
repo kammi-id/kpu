@@ -160,3 +160,31 @@ export function buatRuteAdminBerkasPublik(sekarang: () => Date) {
 
 	return route;
 }
+
+/** Surat aktif adalah unggahan admin terbaru; tanpa unggahan, unduhan tidak tersedia. */
+export function buatRutePengumuman(sekarang: () => Date) {
+	const route = new Hono<{ Bindings: Env }>();
+	route.use("*", async (c, next) => {
+		const tahap = tahapPada(sekarang());
+		if (!layananAktif(tahap)) return c.json({ error: "tahap_tertutup", tahap }, 403);
+		c.header("cache-control", "no-store");
+		await next();
+	});
+	route.get("/", async (c) => {
+		const hasil = await c.env.DB.prepare(
+			`SELECT "id", "judul", "urutan", "namaAsli", "mime", "ukuranByte"
+			 FROM "berkasPublik" WHERE "kategori" = 'hasil-verifikasi'
+			 ORDER BY "diunggahPada" DESC, rowid DESC`,
+		).all();
+		return c.json({ berkasPublik: hasil.results });
+	});
+	route.get("/hasil-verifikasi", async (c) => {
+		const terbaru = await c.env.DB.prepare(
+			`SELECT "id" FROM "berkasPublik" WHERE "kategori" = 'hasil-verifikasi'
+			 ORDER BY "diunggahPada" DESC, rowid DESC LIMIT 1`,
+		).first<{ id: string }>();
+		if (!terbaru) return c.json({ error: "hasil_verifikasi_belum_tersedia" }, 404);
+		return c.redirect(`/api/berkas-publik/${encodeURIComponent(terbaru.id)}`, 302);
+	});
+	return route;
+}

@@ -34,12 +34,13 @@ export function mimeDariNamaBerkasPublik(namaAsli: string): string | null {
 }
 
 export async function unggahBerkasPublik(params: {
-	kategori: "peraturan" | "formulir";
+	kategori: "peraturan" | "formulir" | "hasil-verifikasi";
 	judul: string;
 	urutan: number;
 	file: File;
 }): Promise<void> {
 	const mime = mimeDariNamaBerkasPublik(params.file.name);
+	if (params.kategori === "hasil-verifikasi" && mime !== "application/pdf") throw new Error("Hasil verifikasi harus berupa PDF.");
 	if (!mime) throw new Error("Berkas harus berupa PDF atau DOCX.");
 	if (params.file.size > MAKS_UKURAN_BERKAS_PUBLIK) throw new Error("Berkas tidak boleh lebih dari 20 MiB.");
 	const query = new URLSearchParams({
@@ -59,4 +60,10 @@ export async function unggahBerkasPublik(params: {
 export async function hapusBerkasPublik(id: string): Promise<void> {
 	const response = await fetch(`/api/admin/berkas-publik/${encodeURIComponent(id)}`, { method: "DELETE" });
 	if (!response.ok) throw new Error("Berkas tidak dapat dihapus.");
+}
+
+export async function ambilHasilVerifikasi(signal?: AbortSignal): Promise<BerkasPublik[]> {
+	const response = await fetch("/api/pengumuman", { signal });
+	if (!response.ok) throw new Error("Hasil verifikasi tidak dapat dimuat");
+	return ((await response.json()) as { berkasPublik: BerkasPublik[] }).berkasPublik;
 }

@@ -2,13 +2,19 @@ import { Hono } from "hono";
 import { ambilCangkang } from "../lib/cangkang";
 import { hrefPramuat, PenyisipPramuat } from "../lib/pramuatRute";
 
-type KontenMeta = { title: string; description: string; ogImage: string };
+type KontenMeta = { title: string; socialTitle?: string; description: string; ogImage: string };
 
-// Beranda dan seluruh rute tertutup (masuk/daftar/onboard/admin/bacalon) + 404
+// Seluruh rute tertutup (masuk/daftar/onboard/admin/bacalon) + 404
 // memakai default di index.html apa adanya (og:image = /og/default.png) —
-// tak perlu didaftarkan di sini. Hanya 4 rute publik lain yang perlu OG
-// berbeda per halaman; lihat plan gambar+OG untuk alasan pembagian ini.
+// tak perlu didaftarkan di sini. Beranda memakai gambar hasil verifikasi
+// sendiri agar pratinjau halaman lain tetap seperti semula.
 const KONTEN_META_HALAMAN: Record<string, KontenMeta> = {
+	"/": {
+		title: "Penjaringan Calon Ketua Umum PP KAMMI — KPU Muktamar XIV",
+		socialTitle: "Hasil Verifikasi Berkas Bakal Calon Ketua Umum PP KAMMI",
+		description: "Unduh surat hasil verifikasi berkas Bakal Calon Ketua Umum PP KAMMI. Masa perbaikan 3–5 Oktober 2026; penetapan calon tetap dijadwalkan pada 6 Oktober 2026.",
+		ogImage: "https://kpu.kammi.id/og/hasil-verifikasi.png",
+	},
 	"/jadwal": {
 		title: "Jadwal — KPU Muktamar XIV KAMMI",
 		description: "Jadwal tahapan terbaru penjaringan Bakal Calon Ketua Umum PP KAMMI, seluruhnya dalam WIB.",
@@ -67,11 +73,11 @@ async function halamanDenganMeta(request: Request, assets: Fetcher, konten: Kont
 		.on("head", new PenyisipPramuat(hrefs))
 		.on("title", new GantiIsiTeks(konten.title))
 		.on('meta[name="description"]', new GantiAtribut("content", konten.description))
-		.on('meta[property="og:title"]', new GantiAtribut("content", konten.title))
+		.on('meta[property="og:title"]', new GantiAtribut("content", konten.socialTitle ?? konten.title))
 		.on('meta[property="og:description"]', new GantiAtribut("content", konten.description))
 		.on('meta[property="og:image"]', new GantiAtribut("content", konten.ogImage))
 		.on('meta[property="og:url"]', new GantiAtribut("content", url))
-		.on('meta[name="twitter:title"]', new GantiAtribut("content", konten.title))
+		.on('meta[name="twitter:title"]', new GantiAtribut("content", konten.socialTitle ?? konten.title))
 		.on('meta[name="twitter:description"]', new GantiAtribut("content", konten.description))
 		.on('meta[name="twitter:image"]', new GantiAtribut("content", konten.ogImage))
 		.transform(asli);

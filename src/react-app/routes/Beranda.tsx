@@ -1,13 +1,24 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FileText, CalendarDays, Download, Lock } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Badge } from "~/components/ui/badge";
+import { cn } from "cn";
+import { FileText, CalendarDays, Download } from "lucide-react";
+import { Button, buttonVariants } from "~/components/ui/button";
 import { SplitFlap } from "~/react-app/components/SplitFlap";
-import { StatusBadge } from "~/react-app/components/StatusBadge";
+import { Badge } from "~/components/ui/badge";
 import { IlustrasiHero, KELAS_GRID_HERO, KELAS_JUDUL_HERO, KELAS_SEKSI_HERO } from "~/react-app/components/PublicPageHero";
+import { ambilHasilVerifikasi, type BerkasPublik } from "~/react-app/lib/berkasPublik";
 import { useTahap } from "~/react-app/lib/useTahap";
-import { alasanPendaftaranTertutup, LABEL_TAHAP, PENJELASAN_TAHAP, tampilkanBadgePembaruan } from "~/react-app/lib/tahap";
+import { tampilkanBadgePembaruan, type Tahap } from "~/react-app/lib/tahap";
 import { ketum } from "~/react-app/assets/generated";
+
+const PETUNJUK: Record<Tahap, string> = {
+	BelumDibuka: "Unduh surat hasil verifikasi dan periksa status berkas Anda.",
+	MasaPendaftaran: "Unduh surat hasil verifikasi dan periksa status berkas Anda.",
+	Pemeriksaan: "Unduh surat hasil verifikasi dan periksa status berkas Anda. Bagi bakal calon yang perlu perbaikan, siapkan dokumen untuk diunggah melalui akun pada 3–5 Oktober 2026.",
+	MasaPerbaikan: "Bagi bakal calon yang perlu perbaikan, masuk ke akun dan lengkapi berkas paling lambat 5 Oktober 2026 pukul 23.59 WIB. Penetapan dan pengumuman Calon Ketua Umum Tetap dijadwalkan pada 6 Oktober 2026.",
+	Terkunci: "Masa perbaikan telah berakhir. Penetapan dan pengumuman Calon Ketua Umum Tetap dijadwalkan pada 6 Oktober 2026. Ikuti pengumuman resmi KPU untuk tahapan selanjutnya.",
+	Selesai: "Proses penjaringan telah selesai dan data telah dihapus.",
+};
 
 const PINTU = [
 	{ ke: "/peraturan", label: "Peraturan", ikon: FileText, deskripsi: "Ringkasan PKPU dan dokumen lengkap" },
@@ -18,84 +29,69 @@ const PINTU = [
 export function Beranda() {
 	const { data, error } = useTahap();
 	const adaPembaruan = tampilkanBadgePembaruan(data?.sekarang);
+	const [surat, setSurat] = useState<BerkasPublik[] | null>(null);
+	const [galatSurat, setGalatSurat] = useState(false);
+	const [percobaan, setPercobaan] = useState(0);
+	useEffect(() => {
+		const controller = new AbortController();
+		ambilHasilVerifikasi(controller.signal)
+			.then((hasil) => { if (!controller.signal.aborted) setSurat(hasil); })
+			.catch(() => { if (!controller.signal.aborted) setGalatSurat(true); });
+		return () => controller.abort();
+	}, [percobaan]);
+	const suratTersedia = !galatSurat && !!surat?.length;
+	const kelasUnduh = cn(buttonVariants({ size: "lg" }), "mt-5 h-auto min-h-12 w-full py-3 whitespace-normal sm:w-auto");
+	const isiUnduh = <><Download className="size-5 shrink-0" aria-hidden />Unduh Surat Hasil Verifikasi</>;
 
 	return (
 		<>
-			<section className={KELAS_SEKSI_HERO}>
-				<div className={KELAS_GRID_HERO}>
+			<section className={cn(KELAS_SEKSI_HERO, "min-h-0 overflow-x-clip overflow-y-clip lg:min-h-0")}>
+				<div className={cn(KELAS_GRID_HERO, "grid-rows-[auto_auto] gap-4 pt-6 sm:pt-8 lg:grid-rows-1 lg:pt-8")}>
 					<div>
-						<h1 className={KELAS_JUDUL_HERO}>Pendaftaran Bakal Calon Ketua Umum PP KAMMI</h1>
+						<h1 className={cn(KELAS_JUDUL_HERO, "text-[clamp(2.25rem,6vw,4rem)] leading-[0.95] text-balance")}>
+							<span className="block">Hasil Verifikasi Berkas</span>{" "}
+							<span className="mt-4 block text-[clamp(1.5rem,4vw,2.5rem)] leading-[1.05]">Bakal Calon Ketua Umum PP KAMMI</span>
+						</h1>
 						<p className="mt-4 text-lg font-semibold">Muktamar KAMMI XIV Ambon</p>
 					</div>
 					<IlustrasiHero
 						gambar={ketum}
 						alt="Ilustrasi Ketua KPU Muktamar XIV KAMMI"
-						className="relative z-0 -mb-8 sm:-mb-10 lg:-mb-12"
+						className="relative z-0 h-[clamp(12rem,30svh,20rem)] max-w-full lg:h-[clamp(18rem,48svh,30rem)] lg:max-w-full"
 					/>
 				</div>
 			</section>
 
-			<section className="relative z-10 mx-auto -mt-6 max-w-[76rem] px-4 sm:-mt-10 sm:px-8">
+			<section aria-labelledby="judul-pengumuman" className="relative z-10 mx-auto -mt-6 max-w-[76rem] px-4 sm:-mt-10 sm:px-8">
 				<div className="rounded-2xl bg-white p-5 text-navy shadow-[0_28px_60px_-28px_rgb(70_0_8_/_0.55),0_2px_8px_rgb(70_0_8_/_0.14)] sm:p-8">
-					{error ? (
-						<p className="text-marun">
-							Tahap saat ini tidak dapat dimuat. Muat ulang halaman ini.
-						</p>
-					) : !data ? (
-						<p className="text-muted-foreground">Memuat tahap berjalan…</p>
-					) : (
-						<div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-							<div>
-								<div className="flex items-center justify-between gap-3">
-									<p className="text-[0.8125rem] font-bold tracking-[0.08em] text-muted-foreground uppercase">
-										Tahap berjalan
-									</p>
-									<StatusBadge terbuka={data.bolehRegistrasi}>
-										{data.bolehRegistrasi ? "Pendaftaran dibuka" : "Pendaftaran ditutup"}
-									</StatusBadge>
-								</div>
-								<div className="mt-2">
-									<SplitFlap teks={LABEL_TAHAP[data.tahap]} />
-									<span className="sr-only">{LABEL_TAHAP[data.tahap]}</span>
-								</div>
-										<p className="mt-3 max-w-[56ch] text-[0.9375rem] leading-relaxed">
-											{PENJELASAN_TAHAP[data.tahap]}
-										</p>
-								<div className="mt-5 flex flex-col gap-3 sm:flex-row">
-									{data.bolehRegistrasi ? (
-										<Button render={<Link to="/daftar" />} size="lg" className="w-full sm:w-auto">
-											Daftar
-										</Button>
-									) : (
-										<div>
-											{/* Tombol ditutup tahap (DESIGN.md): tetap tampil dan dapat difokus
-											    (focusableWhenDisabled), arsiran diagonal, terhubung ke alasan
-											    tertulis di bawahnya. */}
-											<Button
-												disabled
-												focusableWhenDisabled
-												size="lg"
-												aria-describedby="alasan-daftar-tertutup"
-												className="w-full bg-[repeating-linear-gradient(135deg,var(--muted)_0_7px,var(--accent)_7px_14px)] text-marun/70 shadow-none hover:bg-[repeating-linear-gradient(135deg,var(--muted)_0_7px,var(--accent)_7px_14px)] sm:w-auto"
-											>
-												<Lock className="size-5" aria-hidden />
-												Daftar
-											</Button>
-											<p id="alasan-daftar-tertutup" className="mt-2 text-sm text-marun">
-												{alasanPendaftaranTertutup(data)}
-											</p>
-										</div>
-									)}
-									<Button render={<Link to="/masuk" />} variant="outline" size="lg" className="w-full sm:w-auto">
-										Masuk
-									</Button>
-								</div>
+					<div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+						<div>
+							<h2 id="judul-pengumuman" className="sr-only">Hasil Verifikasi</h2>
+							<SplitFlap teks="Hasil Verifikasi" className="[--ukuran-minimum-huruf:1.125rem]" />
+							<div className="mt-3" role="status" aria-live="polite" aria-atomic="true">
+								{error ? (
+									<p className="text-marun">Petunjuk tahap saat ini tidak dapat dimuat. Muat ulang halaman ini atau lihat <Link to="/jadwal" className="underline underline-offset-2">jadwal tahapan</Link>.</p>
+								) : !data ? (
+									<p className="text-muted-foreground">Memuat petunjuk tahap berjalan…</p>
+								) : (
+									<p className="max-w-[56ch] text-[0.9375rem] leading-relaxed">{PETUNJUK[data.tahap]}</p>
+								)}
 							</div>
-							<div className="border-t border-border pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
-								<p className="text-[0.8125rem] font-bold tracking-[0.08em] text-muted-foreground uppercase">
-									Jadwal berikutnya
-								</p>
-								<ul className="mt-2 space-y-2">
+							{suratTersedia ? (
+								<a href="/api/pengumuman/hasil-verifikasi" download className={kelasUnduh} aria-describedby="format-surat-verifikasi">{isiUnduh}</a>
+							) : (
+								<button type="button" disabled className={kelasUnduh} aria-describedby="format-surat-verifikasi">{isiUnduh}</button>
+							)}
+							<p id="format-surat-verifikasi" role="status" aria-live="polite" className="mt-2 text-sm text-muted-foreground">
+								{galatSurat ? "Status surat tidak dapat dimuat." : surat === null ? "Memuat surat hasil verifikasi…" : suratTersedia ? "PDF" : "Surat hasil verifikasi belum tersedia."}
+							</p>
+							{galatSurat ? <Button type="button" variant="outline" className="mt-2 min-h-11" onClick={() => { setGalatSurat(false); setSurat(null); setPercobaan((nilai) => nilai + 1); }}>Coba lagi</Button> : null}
+
+						</div>
+						<div className="border-t border-border pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
+							<h2 className="text-lg font-semibold">Tahapan saat ini dan berikutnya</h2>
+							{data ? (
+								<ul className="mt-3 space-y-3">
 									{data.jadwal
 										.filter((item) => item.status !== "selesai")
 										.slice(0, 3)
@@ -106,9 +102,11 @@ export function Beranda() {
 											</li>
 										))}
 								</ul>
-							</div>
+							) : (
+								<p className="mt-3 text-sm text-muted-foreground">{error ? "Jadwal tidak dapat dimuat." : "Memuat jadwal…"}</p>
+							)}
 						</div>
-					)}
+					</div>
 				</div>
 			</section>
 
